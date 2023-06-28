@@ -73,6 +73,40 @@ methods (Access=public)
         o.addCallback(label,labels,callback);
     end
 
+    function varargout=subsref(o,subs)
+        switch subs(1).type
+            case '()'
+                if length(o) > 1 || length(subs) > 1 || length(subs.subs) > 1
+                    error 'not supported indexing';
+                end                
+                varargout = {o.getElement(subs.subs{1})};
+            otherwise   
+              [varargout{1:nargout}]=builtin('subsref',o,subs);
+        end
+    end
+
+    function ret = getElement(o,label)
+        if ~isKey(o.figs,label)
+            error(['label ''' label ''' not found']);
+        end
+        h = o.figs(label);
+        if contains(class(h),'images.roi.')
+            switch h.Type(12:end)
+            case {'point','polygon','polyline','line','crosshair','rectangle','cuboid'}
+                ret = h.Position;
+            case 'circle'
+                ret = struct('Center',h.Center,'Radius',h.Radius);
+                case 'ellipse'
+                ret = struct('Center',h.Center,'SemiAxes',h.SemiAxes,...
+                          'RotationAngle',h.RotationAngle,'AspectRatio',h.AspectRatio);
+            otherwise
+                ret = h; % any other type
+            end
+        else
+            ret = h; % any other type
+        end
+    end
+
 end % public member functions
 
 methods (Access=protected)
@@ -135,26 +169,7 @@ methods (Access=protected)
     function [varargout] = callCallback(o,labels,callback)
         args = cell(1,length(labels));
         for i = 1:length(labels)
-            l = labels{i};
-            if ~o.figs.isKey(l)
-                error(['label ''' l ''' not found']);
-            end
-            h = o.figs(l);
-            if contains(class(h),'images.roi.')
-                switch h.Type(12:end)
-                case {'point','polygon','polyline','line','crosshair','rectangle','cuboid'}
-                    args{i} = h.Position;
-                case 'circle'
-                    args{i} = struct('Center',h.Center,'Radius',h.Radius);
-                    case 'ellipse'
-                    args{i} = struct('Center',h.Center,'SemiAxes',h.SemiAxes,...
-                              'RotationAngle',h.RotationAngle,'AspectRatio',h.AspectRatio);
-                otherwise
-                    args{i} = h; % any other type
-                end
-            else
-                args{i} = h; % any other type
-            end
+            args{i} = o.getElement(labels{i});
         end
         [varargout{1:nargout}] = callback(args{:});
     end

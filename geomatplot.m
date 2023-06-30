@@ -48,7 +48,7 @@ methods (Access=public)
     end
 
     function h = drawLine(o,varargin)
-        [label,labels,callback,args] = o.parseinputs2(varargin{:});
+        [label,labels,callback,args] = o.parseDrawInputs('line',varargin{:});
         o.deleteIfExists(label);
         outs = cell(1,abs(nargout(callback)));
         [outs{:}]= o.callCallback(labels,callback);
@@ -61,16 +61,17 @@ methods (Access=public)
     end
 
     function h = drawImage(o,varargin)
-        [label,labels,callback,args] = o.parseinputs2(varargin{:});
+        [label,labels,callback,args] = o.parseDrawInputs('image',varargin{:});
         o.deleteIfExists(label);
         outs = cell(1,abs(nargout(callback)));
         [outs{:}]= o.callCallback(labels,callback);
-        [xdata,ydata] = geomatplot.parselineoutputs(outs);
+        C = geomatplot.parseImageOutputs(outs);
         hold(o.ax,'on');
-        h = line(o.ax,xdata,ydata,args{:});
+        args
+        h = imagesc(o.ax,'CData',C,args{:});
         o.figs(label) = h;
         hold(o.ax,'off');
-        o.addCallback(label,labels,callback);
+        %o.addCallback(label,labels,callback);
     end
 
     function varargout=subsref(o,subs)
@@ -128,7 +129,6 @@ methods (Access=protected)
                 end
                 label = h.Tag;
             end
-            
             if o.figs.isKey(label) || o.data.isKey(label)
                warning(['label ''' label ''' exists already, deleting old entry']);
                delete(o.figs(label));
@@ -182,12 +182,19 @@ methods (Access=protected)
        end
     end
 
-    function [label,labels,callback,args] = parseinputs2(o,varargin)
+    function [label,labels,callback,args] = parseDrawInputs(o,option,varargin)
        p = inputParser;
        p.addRequired('Labels',@(x) iscell(x));
        p.addRequired('Callback',@(x) isa(x,'function_handle'));
        p.addParameter('Label',[],@ischar);
-       %p.addParameter('UserData',[]);
+       switch option
+       case {'image'}
+           islim = @(x) isnumeric(x) && length(x)==2 && x(1) <= x(2);
+           p.addOptional('XData',[0 1],islim);
+           p.addOptional('YData',[0 1],islim);
+       case {'line'}
+           % Do nothing
+       end
        p.KeepUnmatched = true;
        p.parse(varargin{:});
        label = p.Results.Label; labels = p.Results.Labels; callback = p.Results.Callback;
@@ -197,9 +204,15 @@ methods (Access=protected)
        end
        names = fieldnames(p.Unmatched); values = struct2cell(p.Unmatched);
        n = length(names)*2;
-       args(1:2:n) = names;
-       args(2:2:n) = values;
+       args(1:2:n) = names; args(2:2:n) = values;
+       switch option
+       case {'image'}
+           args = [{'XData',p.Results.XData,'YData',p.Results.XData},args(:)];
+       case {'line'}
+           % Do nothing
+       end
     end
+    
 
 end % protected member functions
 
@@ -247,12 +260,18 @@ methods (Static)
             xdata = args{1};
             ydata = args{2};
         else
-            error 'Callback has too many outputs'
+            error 'Callback has too many outputs.'
         end
     end
 
-    function [C,x,y] = parseimageoutputs(args)
-
+    function C = parseImageOutputs(args)
+        if length(args) == 1
+            C = args{1};
+        elseif length(args) ==3
+            C = cat(3,args{1},args{2},args{3}); %rgb
+        else
+            error 'Callback has the wrong number of outputs.'
+        end
     end
 
 end % static member functions

@@ -36,7 +36,7 @@ methods (Access=public)
             if o.data.isKey(k)
                 s = o.data(k);
                 s.Callback = func2str(s.Callback);
-                s.Runtime = [num2str(1000*s.Runtime,3) ' ms'];
+                s.Runtime = [int2str(s.Runtime) ' ms'];
             else
                 s = struct('Callback','','Runtime','');
             end
@@ -60,26 +60,26 @@ methods (Access=public)
         [label,labels,callback,args] = o.parseDrawInputs('line',varargin{:});
         o.deleteIfExists(label);
         outs = cell(1,abs(nargout(callback)));
-        o.addCallback(label,labels,callback);
         [outs{:}]= o.callCallback(label,labels,callback);
         [xdata,ydata] = geomatplot.parseLineOutputs(outs);
         hold(o.ax,'on');
         h = line(o.ax,xdata,ydata,args{:});
         o.figs(label) = h;
         hold(o.ax,'off');
+        o.addCallback(label,labels,callback);
     end
 
     function h = drawImage(o,varargin)
         [label,labels,callback,args] = o.parseDrawInputs('image',varargin{:});
         o.deleteIfExists(label);
         outs = cell(1,abs(nargout(callback)));
-        o.addCallback(label,labels,callback);
         [outs{:}]= o.callCallback(label,labels,callback);
         C = geomatplot.parseImageOutputs(outs);
         hold(o.ax,'on');
         h = imagesc(o.ax,'CData',C,args{:});
         o.figs(label) = h;
         hold(o.ax,'off');
+        o.addCallback(label,labels,callback);
     end
 
     function varargout = subsref(o,subs)
@@ -179,7 +179,7 @@ methods (Access=protected)
         o.data(label) = s;
     end
 
-    function [varargout] = callCallback(o,label,labels,callback)
+    function [varargout] = callCallback(o,labels,callback)
         args = cell(1,length(labels));
         for i = 1:length(labels)
             args{i} = o.getElement(labels{i});
@@ -187,9 +187,7 @@ methods (Access=protected)
         tic;
         [varargout{1:nargout}] = callback(args{:});
         t = toc;
-        s = o.data(label);
-        s.Runtime = 0.5*(s.Runtime + t);
-        o.data(label) = s;
+        
     end
     
     function o = deleteIfExists(o,label)

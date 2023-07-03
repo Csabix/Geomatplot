@@ -5,6 +5,7 @@ properties (Access=public)
    figs  %(1,1) containers.Map; % todo struct for 5 times speedup?
    data  %(1,1) containers.Map;
    unlabeled (1,1) int64 = 0;
+   updateMoveTimeCap (1,1) double = 1/60; % moving roi update cap
 end
 
 methods (Access=public)
@@ -145,8 +146,14 @@ methods (Access=protected)
         end
     end
 
-    function updateCallback(o,label,labels,callback)
+    function updateCallback(o,evt,label,labels,callback)
         % todo measure time to execute
+        if strcmp(evt.EventName,'MovingROI')
+            s = o.data(label);
+            if s.Runtime > o.updateMoveTimeCap
+                return;
+            end
+        end
         outs = cell(1,abs(nargout(callback)));
         [outs{:}]= o.callCallback(label,labels,callback);
         h = o.figs(label);
@@ -168,7 +175,7 @@ methods (Access=protected)
         for i=1:length(labels)
             l = labels{i};
             h = o.figs(l);
-            callfun = @(~,~) o.updateCallback(label,labels,callback);
+            callfun = @(~,evt) o.updateCallback(evt,label,labels,callback);
             addlistener(h,'ROIMoved',callfun);
             addlistener(h,'MovingROI',callfun);
             h.bringToFront;

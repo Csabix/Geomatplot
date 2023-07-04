@@ -25,6 +25,7 @@ methods (Access=public)
         o=buildMap(o);
         axis(o.ax,'equal');
         axis(o.ax,'manual');
+        o.ax.Interactions = [panInteraction zoomInteraction];%disableDefaultInteractivity(o.ax);
     end
     
     function disp(o)
@@ -81,6 +82,23 @@ methods (Access=public)
         h = imagesc(o.ax,'CData',C,args{:});
         o.figs(label) = h;
         hold(o.ax,'off');
+    end
+    
+    function h = segment(o,a,b,varargin)
+        h = o.drawLine({a,b},@(a,b) [a;b],varargin{:});
+    end
+
+    function h = line(o,a,b,varargin)
+        h = o.drawLine({a,b},@(a,b) a+(b-a).*[-1e8;-1e4;0;1;1e4;1e8],varargin{:});
+    end
+
+    function h = circle(o,c,p,varargin)
+        t = linspace(0,2*pi)'; % todo make queryable (?)
+        function v = fncircle(c,p)
+            d = p-c;
+            v = c+sqrt(d(1)*d(1)+d(2)*d(2))*[cos(t) sin(t)];
+        end
+        h = o.drawLine({c,p},@fncircle,varargin{:});
     end
 
     function varargout = subsref(o,subs)
@@ -147,7 +165,6 @@ methods (Access=protected)
     end
 
     function updateCallback(o,evt,label,labels,callback)
-        % todo measure time to execute
         if strcmp(evt.EventName,'MovingROI')
             s = o.data(label);
             if s.Runtime > o.updateMoveTimeCap

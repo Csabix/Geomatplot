@@ -15,3 +15,6 @@ bt = @(b0,b1,b2) b0.*(1-t).^2 + 2*b1.*(1-t).*t + b2.*t.^2;
 ggb.drawLine({'b0','b1','b2'},bt,'Color','k','LineWidth',2);
 ggb.drawLine({'b0','c1','c2'},bt,'Color','k','LineWidth',2);
 
+ggb.segment('b1','b0','Color','b','LineWidth',2)
+ggb.line('b2','b1','Color','g','LineWidth',2);
+ggb.circle('b1','c1','Color','r','LineWidth',2);

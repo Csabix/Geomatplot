@@ -15,13 +15,13 @@ methods
         o.addCallback(callfun);
     end
 
-    function ret = call(o)
+    function ret = call(o,varargin)
         tic; args = cell(1,length(o.labels));
         for i = 1:length(o.labels)
             args{i} = o.labels{i}.value;
         end
         outs = cell(1,abs(nargout(o.callback)));
-        [outs{:}] = o.callback(args{:});
+        [outs{:}] = o.callback(varargin{:},args{:});
         ret = o.parseOutputs(outs);
         o.runtime = 0.5*(toc+o.runtime);
     end

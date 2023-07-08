@@ -1,8 +1,8 @@
 classdef dlines < dependent
 methods
-    function o = dlines(parent,label,labels,callback,args)
+    function o = dlines(parent,label,labels,callback,args,varargin)
         o = o@dependent(parent,label,labels,callback);
-        ret = o.call;
+        ret = o.call(varargin{:});
         o.fig = line(o.parent.ax,ret{1},ret{2},args{:});
     end
     function v = value(o)

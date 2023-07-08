@@ -3,9 +3,9 @@ function [parent,label,labels,args] = parse_line_inputs(nargs,varargin)
 
     p.addOptional('Parent'     , [], @(x) isa(x,'Geomatplot') || isa(x,'matlab.graphics.axis.Axes') || isa(x,'matlab.ui.Figure'));
     p.addOptional('Label'      , [], @(x) isvarname(x));
-    p.addOptional('Labels'     , {}, @(x) iscellstr(x) && any(length(x)==nargs));
+    p.addRequired('Labels'     , @(x) iscellstr(x) && any(length(x)==nargs));
     p.addOptional('Color'      ,'k', @drawing.isColorName);
-    p.addParameter('LineWidth', 2 , ispositive);
+    p.addParameter('LineWidth' , 2 , ispositive);
 
     p.KeepUnmatched = true;
     p.parse(varargin{:});

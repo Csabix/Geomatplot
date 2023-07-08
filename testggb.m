@@ -1,5 +1,5 @@
 clf;
-ggb = geomatplot;
+ggb = geomatplotOld;
 ggb.addPoint('b0',[0 0],'g');
 ggb.addPoint('b1',[1 1],'b');
 ggb.addPoint('b2',[0 2],'b');

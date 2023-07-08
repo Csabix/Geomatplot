@@ -1,4 +1,4 @@
-classdef geomatplot < handle
+classdef geomatplotOld < handle
     
 properties (Access=public)
    ax    (1,1)  %matlab.ui.Axes;
@@ -10,7 +10,7 @@ end
 
 methods (Access=public)
         
-    function o = geomatplot(ax)
+    function o = geomatplotOld(ax)
         if nargin == 0
             o.ax = gca;
         elseif isa(ax,'matlab.ui.Figure')
@@ -47,7 +47,7 @@ methods (Access=public)
     end
     
     function o = addPoint(o,label,varargin)
-        args = geomatplot.parseinputs(label,varargin{:});
+        args = geomatplotOld.parseinputs(label,varargin{:});
         o.deleteIfExists(label);
         o.figs(label) = drawpoint(args{:});
     end
@@ -64,7 +64,7 @@ methods (Access=public)
         outs = cell(1,abs(nargout(callback)));
         o.addCallback(label,labels,callback);
         [outs{:}]= o.callCallback(label,labels,callback);
-        [xdata,ydata] = geomatplot.parseLineOutputs(outs);
+        [xdata,ydata] = geomatplotOld.parseLineOutputs(outs);
         hold(o.ax,'on');
         h = line(o.ax,xdata,ydata,args{:});
         o.figs(label) = h;
@@ -77,7 +77,7 @@ methods (Access=public)
         outs = cell(1,abs(nargout(callback)));
         o.addCallback(label,labels,callback);
         [outs{:}]= o.callCallback(label,labels,callback);
-        C = geomatplot.parseImageOutputs(outs);
+        C = geomatplotOld.parseImageOutputs(outs);
         hold(o.ax,'on');
         h = imagesc(o.ax,'CData',C,args{:});
         o.figs(label) = h;
@@ -190,8 +190,7 @@ methods (Access=protected)
             end
         end
         for i=1:length(labels)
-            l = labels{i};
-            h = o.figs(l);
+            l = labels{i}; h = o.figs(l);
             callfun = @(~,evt) o.updateCallback(evt,label,labels,callback);
             addlistener(h,'ROIMoved',callfun);
             addlistener(h,'MovingROI',callfun);
@@ -255,7 +254,6 @@ methods (Access=protected)
        end
     end
     
-
 end % protected member functions
 
 methods (Static)

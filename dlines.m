@@ -1,6 +1,6 @@
-classdef dcurve < dependent
+classdef dlines < dependent
 methods
-    function o = dcurve(parent,label,labels,callback,args)
+    function o = dlines(parent,label,labels,callback,args)
         o = o@dependent(parent,label,labels,callback);
         ret = o.call;
         o.fig = line(o.parent.ax,ret{1},ret{2},args{:});

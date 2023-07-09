@@ -46,6 +46,29 @@ methods (Access=public,Static)
             ischar(x) && (length(x)==1) && any(x==shorcolnames) || ...
             (isstring(x) || ischar(x)) && any(strcmp(x,longcolnames));
     end
+    
+    function b = isLabelList(x)
+        if iscellstr(x)
+            b = true;
+        elseif ~iscell(x)
+            b = false;
+        else
+            b = true;
+            for i = 1:length(x)
+                b = b && (isa(x{i},'drawing') || ischar(x) || isstring(x));
+            end
+        end
+    end
 
+    function labels = getHandlesOfLabels(parent,x)
+        labels = cell(1,length(x));
+        for i=1:length(x)
+            if isa(x{i},'drawing')
+                labels{i} = x{i};
+            else
+                labels{i} = parent.getHandle(x{i});
+            end
+        end
+    end
 end
 end

@@ -10,10 +10,8 @@ methods
         addlistener(o.fig,'MovingROI',@(~,evt) o.update(evt));
     end
     function addCallback(o,dep)
-        if ~isfield(o.deps,dep.label)
-            o.deps.(dep.label) = dep;
-            o.fig.bringToFront;
-        end
+        o.deps.(dep.label) = dep;
+        o.fig.bringToFront;
     end
     function update(o,evt)
         %labels = fieldnames(o.deps);

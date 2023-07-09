@@ -13,7 +13,6 @@ methods
 end
 methods (Abstract)
 	value(o) % current value: positions matrix or a struct
-    addCallback(o,callback)
 end
 methods (Access=public,Static)
 

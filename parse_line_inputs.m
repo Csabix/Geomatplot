@@ -12,7 +12,7 @@ function [parent,label,labels,args] = parse_line_inputs(nargs,varargin)
     res = p.Results;
 
     parent = drawing.findCurrentGeomatplot(res.Parent); res = rmfield(res,'Parent'); % creates or converts if necesseray
-    if isempty(res.Label); res.Label = parent.getNextCapitalLabel; end
+    if isempty(res.Label); res.Label = parent.getNextSmallLabel; end
     label = res.Label; res = rmfield(res,'Label');
     labels = drawing.getHandlesOfLabels(parent,res.Labels);
     res = rmfield(res,'Labels');

@@ -3,15 +3,30 @@ properties
 	labels (1,:) cell
 	callback
     runtime (1,1) double = 0
+    movs
 end
 methods
 
-    function o=dependent(parent,label,labels,callback)
+    function o = dependent(parent,label,labels,callback)
         o = o@drawing(parent,label,[]);
         o.labels = labels;
         o.callback = callback;
         o.parent.deps.(label)=o;
-        o.addCallback(o);
+        for i = 1:length(o.labels)
+            h = o.labels{i};
+            if isa(h,'moveable')
+                o.movs.(h.label) = h;
+            else
+                f = fieldnames(h.movs);
+                for j = 1:length(f)
+                    o.movs.(f{j}) = h.movs.(f{j});
+                end
+            end
+        end
+        values = struct2cell(o.movs);
+        for i = 1:length(values)
+            values{i}.addCallback(o);
+        end
     end
 
     function ret = call(o,varargin)
@@ -29,12 +44,6 @@ methods
         o.updatePlot(ret{:});
     end
 
-    function addCallback(o,dep)
-        for i=1:length(o.labels)
-            h = o.labels{i};
-            h.addCallback(dep);
-        end
-    end
 end
 methods (Abstract)
     updatePlot(o,varargin)

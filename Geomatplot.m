@@ -44,6 +44,18 @@ methods (Access = public)
         h = o.getHandle(label);
         v = h.value();
     end
+
+    function varargout = subsref(o,subs)
+        switch subs(1).type
+            case '()'
+                if length(o) > 1 || length(subs) > 1 || length(subs.subs) > 1 || ~ischar(subs.subs{1})
+                    error 'Not supported indexing';
+                end                
+                varargout = {o.getElement(subs.subs{1})};
+            otherwise   
+              [varargout{1:nargout}]=builtin('subsref',o,subs);
+        end
+    end
 end
 methods (Hidden)
     function l = getNextCapitalLabel(o)

@@ -21,8 +21,6 @@ function [parent,label,labels,xrange,yrange,args] = parseinputs(varargin)
     label = res.Label; xrange = res.XRange; yrange = res.YRange;
     labels = drawing.getHandlesOfLabels(parent,res.Labels);
     res = rmfield(res,{'Label','Labels','XRange','YRange'});
-    nams = [fieldnames(res) fieldnames(p.Unmatched)];
-    vals = [struct2cell(res) struct2cell(p.Unmatched)];
-    args(1:2:length(nams)*2) = nams(:);
-    args(2:2:length(vals)*2) = vals(:);
+    
+    args = [drawing.struct2arglist(res) drawing.struct2arglist(p.Unmatched)];
 end

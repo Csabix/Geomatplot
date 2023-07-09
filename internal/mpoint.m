@@ -1,4 +1,4 @@
-classdef mpoint < moveable
+classdef mpoint < moveable & point_base
 methods
     function o = mpoint(parent,label,args)
         h = drawpoint(args{:});

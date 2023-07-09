@@ -13,17 +13,21 @@ methods
         o.fig.UserData = o;
         uistack(o.fig,"bottom");
     end
+
     function v = value(o)
-        v = o.fig.CData;
+        v = [o.xrange(:) o.yrange(:)];
     end
+
     function update(o,detail_level)
         [x,y] = o.getMeshgrid(256*detail_level);
         ret = o.call(x,y);
         o.updatePlot(ret{:});
     end
+
     function updatePlot(o,C)
         o.fig.CData = C;
     end
+    
 end
 methods (Access=private)
     function [x,y] = getMeshgrid(o,res)

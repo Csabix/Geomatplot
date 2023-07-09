@@ -16,8 +16,6 @@ function [parent,label,labels,args] = parse_line_inputs(nargs,varargin)
     label = res.Label; res = rmfield(res,'Label');
     labels = drawing.getHandlesOfLabels(parent,res.Labels);
     res = rmfield(res,'Labels');
-    nams = [fieldnames(res) fieldnames(p.Unmatched)];
-    vals = [struct2cell(res) struct2cell(p.Unmatched)];
-    args(1:2:length(nams)*2) = nams(:);
-    args(2:2:length(vals)*2) = vals(:);
+    
+    args = [drawing.struct2arglist(res) drawing.struct2arglist(p.Unmatched)];
 end

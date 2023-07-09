@@ -39,6 +39,7 @@ methods
         ret = o.parseOutputs(outs);
         o.runtime = 0.5*(toc+o.runtime);
     end
+    
     function update(o,~)
         ret = o.call;
         o.updatePlot(ret{:});

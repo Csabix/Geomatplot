@@ -60,6 +60,12 @@ methods (Access=public,Static)
         end
     end
 
+    function args = struct2arglist(s)
+        ns = fieldnames(s);
+        args(1:2:2*length(ns)) = ns;
+        args(2:2:2*length(ns)) = struct2cell(s);
+    end
+
     function labels = getHandlesOfLabels(parent,x)
         labels = cell(1,length(x));
         for i=1:length(x)
@@ -71,17 +77,14 @@ methods (Access=public,Static)
         end
     end
 
-    function b = isLabelPatternMatching(labels,pattern,sortit)
+    function b = isLabelPatternMatching(labels,pattern)
         if length(labels) ~= length(pattern)
             b = false;
         else
-            if nargin < 3; sortit = true; end
-            list = cell(1,length(labels));
+            b = true;
             for i = 1:length(labels)
-                list{i}=class(labels{i});
-            end
-            if sortit; list=sort(list); pattern=sort(pattern); end
-            b = all(strcmp(list,pattern));
+                b = b && isa(labels{i},pattern{i});
+            end            
         end
     end
 end

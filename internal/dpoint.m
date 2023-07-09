@@ -1,4 +1,4 @@
-classdef dpoint < dependent
+classdef dpoint < dependent & point_base
 methods
     function o = dpoint(parent,label,labels,callback,args)
         o = o@dependent(parent,label,labels,callback);

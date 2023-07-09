@@ -12,8 +12,12 @@ methods
         o.labels = labels;
         o.callback = callback;
         o.parent.deps.(label)=o;
-        for i = 1:length(o.labels)
-            h = o.labels{i};
+        o.addCallbacks(labels);
+    end
+
+    function addCallbacks(o,labels)
+        for i = 1:length(labels)
+            h = labels{i};
             if isa(h,'moveable')
                 o.movs.(h.label) = h;
             else

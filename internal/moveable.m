@@ -7,6 +7,7 @@ methods
         o = o@drawing(parent,label,fig);
         o.parent.movs.(label) = o;
         o.fig.UserData = o;
+        o.deps = struct;
         addlistener(o.fig,'ROIMoved' ,@moveable.update); % todo @update ?
         addlistener(o.fig,'MovingROI',@moveable.update);
     end

@@ -17,7 +17,7 @@ methods
             if isa(h,'moveable')
                 o.movs.(h.label) = h;
             else
-                f = fieldnames(h.movs);
+                f = fieldnames(h.movs); % merge structs
                 for j = 1:length(f)
                     o.movs.(f{j}) = h.movs.(f{j});
                 end
@@ -39,7 +39,7 @@ methods
         ret = o.parseOutputs(outs);
         o.runtime = 0.5*(toc+o.runtime);
     end
-    function update(o,evt)
+    function update(o,~)
         ret = o.call;
         o.updatePlot(ret{:});
     end

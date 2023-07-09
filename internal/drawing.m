@@ -13,6 +13,7 @@ methods
 end
 methods (Abstract)
 	value(o) % current value: positions matrix or a struct
+    update(o,~)
 end
 methods (Access=public,Static)
 
@@ -67,6 +68,20 @@ methods (Access=public,Static)
             else
                 labels{i} = parent.getHandle(x{i});
             end
+        end
+    end
+
+    function b = isLabelPatternMatching(labels,pattern,sortit)
+        if length(labels) ~= length(pattern)
+            b = false;
+        else
+            if nargin < 3; sortit = true; end
+            list = cell(1,length(labels));
+            for i = 1:length(labels)
+                list{i}=class(labels{i});
+            end
+            if sortit; list=sort(list); pattern=sort(pattern); end
+            b = all(strcmp(list,pattern));
         end
     end
 end

@@ -12,6 +12,7 @@ methods (Access = public)
     
     function o = Geomatplot(ax)
         % todo xlim
+        addpath internal\
         if nargin == 0
             o.ax = gca;
         elseif isa(ax,'matlab.ui.Figure')

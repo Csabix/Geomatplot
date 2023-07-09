@@ -4,6 +4,7 @@ methods
         o = o@dependent(parent,label,labels,callback);
         ret = o.call;
         o.fig = drawpoint('InteractionsAllowed','none',args{:},'Position',ret{1});
+        o.fig.UserData = o;
     end
     function v = value(o)
         v = o.fig.Position;

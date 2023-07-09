@@ -4,6 +4,7 @@ methods
         o = o@dependent(parent,label,labels,callback);
         ret = o.call(varargin{:});
         o.fig = line(o.parent.ax,ret{1},ret{2},args{:});
+        o.fig.UserData = o;
     end
     function v = value(o)
         %v = struct('XData',o.fig.XData,'YData',o.fig.YData);
@@ -15,7 +16,7 @@ methods
     end
 end
 methods (Static)
-    function [outs] = parseOutputs(args)
+    function outs = parseOutputs(args)
         if length(args) == 1
             xy = args{1};
             if size(xy,2) == 2

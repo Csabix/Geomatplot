@@ -5,9 +5,10 @@ properties
 	fig		% plot handle to ROI or matlab plot
 end
 methods
-    function o = drawing(parent,label)
+    function o = drawing(parent,label,fig)
         o.parent = parent;
         o.label = label;
+        o.fig = fig;
     end
 end
 methods (Abstract)

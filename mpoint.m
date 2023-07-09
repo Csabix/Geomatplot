@@ -1,8 +1,8 @@
 classdef mpoint < moveable
 methods
     function o = mpoint(parent,label,args)
-        o = o@moveable(parent,label);
-        o.fig = drawpoint(args{:});
+        h = drawpoint(args{:});
+        o = o@moveable(parent,label,h);
     end
     function v = value(o)
         v = o.fig.Position;

@@ -7,12 +7,11 @@ end
 methods
 
     function o=dependent(parent,label,labels,callback)
-        o = o@drawing(parent,label);
+        o = o@drawing(parent,label,[]);
         o.labels = labels;
         o.callback = callback;
         o.parent.deps.(label)=o;
-        callfun = @(~,evt) o.update(evt);
-        o.addCallback(callfun);
+        o.addCallback(o);
     end
 
     function ret = call(o,varargin)
@@ -30,10 +29,10 @@ methods
         o.updatePlot(ret{:});
     end
 
-    function addCallback(o,callback)
+    function addCallback(o,dep)
         for i=1:length(o.labels)
             h = o.labels{i};
-            h.addCallback(callback);
+            h.addCallback(dep);
         end
     end
 end

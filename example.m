@@ -30,6 +30,16 @@ Curve(bt,{b0,b1,b2},'r'); % A red quadratic Bézier curve
 Image(@dist2bezier,{b0,b1,b2},c1,c2); colorbar;
 % where 'dist2bezier' is a (x,y,b0,b1,b2) -> real function
 
+%% Test
+clf; g = Geomatplot;
+A = Point([0  0]); 
+B = Point([1  1]); 
+C = Point([1 0]); 
+D = Point([0 1]);
+a = Segment({A,B});
+b = Segment({C,D});
+Intersect({a,b});
+
 function v = dist2bezier(x,y,b0,b1,b2)
     function v = gdot(a,b)
         v = dot(a,b,2);
@@ -54,6 +64,5 @@ function v = dist2bezier(x,y,b0,b1,b2)
         v(i,j) = min(sqrt(d));
     end; end
 end
-
 
 

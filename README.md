@@ -9,6 +9,10 @@ Geomatplot is a Matlab interactive plot library that is not unlike Geogebra.
 3. User defined callback functions for programming
 4. Easy to use
 
+## Requires
+1. Image Processing Toolbox
+2. Mapping Toolbox (for intersection)
+
 ## Geogebra-like example
 ```matlab
 clf; Geomatplot; ylim([-0.4 0.6])
@@ -47,7 +51,7 @@ Image(@dist2bezier,{b0,b1,b2},c1,c2); colorbar;
 
 ![Interactive Triangle Plot](examples/image.png "Interactive Triangle Plot")
 
-### Querry data
+### Query data
 
 ```
 >> disp(g)

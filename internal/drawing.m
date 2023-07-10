@@ -87,5 +87,36 @@ methods (Access=public,Static)
             end            
         end
     end
+    
+    function [b,ms] = matchLineSpec( spec )
+        ms = cell(1,3);
+        if strlength(spec) == 0
+            b = false;
+            return;
+        end
+        exs = cell(1,3);
+        exs{1} = '^(-[-.]?|:|\.-)';
+        exs{2} = '^([o+*.x_|^v><]|s(q(u(a(re?)?)?)?)?|d(i(a(m(o(nd?)?)?)?)?)?|p(e(n(t(a(g(r(am?)?)?)?)?)?)?)?|h(e(x(a(g(r(am?)?)?)?)?)?)?)';
+        exs{3} = '^(r(ed?)?|g(r(e(en?)?)?)?|b(l(ue?)?)?|c(y(an?)?)?|m(a(g(e(n(ta?)?)?)?)?)?|y(e(l(l(ow?)?)?)?)?|(blac)?k|bla|blac|w(h(i(te?)?)?)?)';
+
+        for k = 1:3
+            for i=1:3
+                if exs{i} == 0
+                    continue;
+                end
+                m = regexp(spec,exs{i},'match','once');
+                if size(m,1) == 1
+                    ms{i} = m;
+                    exs{i} = 0;
+                    spec = extractAfter(spec,strlength(m));
+                    break;
+                end
+            end
+            if strlength(spec) == 0
+                break;
+            end
+        end
+        b = strlength(spec) == 0;
+    end
 end
 end

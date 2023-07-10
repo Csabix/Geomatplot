@@ -1,6 +1,6 @@
 classdef (Abstract) moveable < drawing % with ROI
 properties
-    deps  % struct mapping label -> dependent class handles 
+    deps  % struct mapping label -> dependent class handles
 end
 methods
     function o = moveable(parent,label,fig)
@@ -25,8 +25,10 @@ methods (Static)
                 detail_level = 0.25;
         end
         values = struct2cell(fig.UserData.deps);
+        fig.UserData.runtime = 0;
         for i = 1:length(values)
             values{i}.update(detail_level);
+            fig.UserData.runtime = fig.UserData.runtime + values{i}.runtime;
         end
     end
 end

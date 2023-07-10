@@ -2,7 +2,6 @@ classdef (Abstract) dependent < drawing
 properties
 	labels (1,:) cell
 	callback
-    runtime (1,1) double = 0
     movs
 end
 methods

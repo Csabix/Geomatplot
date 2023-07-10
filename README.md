@@ -12,8 +12,8 @@ Geomatplot is a Matlab interactive plot library that is not unlike Geogebra.
 ## Geogebra-like example
 ```matlab
 clf; Geomatplot; ylim([-0.4 0.6])
-A = Point([0  0]); % draggable point
-B = Point([1  0]);
+A = Point([0  0]); % draggable point, automatically labelled A
+B = Point([1  0]); % automatic labels are applied if no label is given
 C = Point([.7 .5]);
 Segment({A,B},'b'); % a blue segment from A and B
 Segment({B,C},'b');

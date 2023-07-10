@@ -41,6 +41,7 @@ methods (Access=public,Static)
 
     function b = isColorName(x)
         shorcolnames = 'rgbcmykw';
+        if isstring(x) && strlength(x)==1; x=char(x); end
         longcolnames = ["red","green","blue","cyan","magenta","yellow","black","white"];
         b = isnumeric(x) && (length(x)==3) ||...
             ischar(x) && (length(x)==1) && any(x==shorcolnames) || ...
@@ -88,9 +89,9 @@ methods (Access=public,Static)
         end
     end
     
-    function [b,ms] = matchLineSpec( spec )
-        ms = cell(1,3);
-        if strlength(spec) == 0
+    function [b,varargout] = matchLineSpec( spec )
+        varargout = cell(1,3);
+        if (~ischar(spec) && ~isstring(spec)) || strlength(spec) == 0
             b = false;
             return;
         end
@@ -106,7 +107,7 @@ methods (Access=public,Static)
                 end
                 m = regexp(spec,exs{i},'match','once');
                 if size(m,1) == 1
-                    ms{i} = m;
+                    varargout{i} = m;
                     exs{i} = 0;
                     spec = extractAfter(spec,strlength(m));
                     break;

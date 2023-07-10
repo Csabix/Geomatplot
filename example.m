@@ -1,40 +1,36 @@
 % Examples
 
 %% Geogebra like triangle
-clf;
-g=Geomatplot; ylim([-0.4 0.6])
-A=Point([0  0]);
-B=Point([1  0]);
-C=Point([.7 .5]);
-Segment({A,B},'b');
+clf; Geomatplot; ylim([-0.4 0.6])
+A = Point([0  0]); % draggable point
+B = Point([1  0]);
+C = Point([.7 .5]);
+Segment({A,B},'b'); % a blue segment from A and B
 Segment({B,C},'b');
 Segment({C,A},'b');
-Midpoint('S',{A,B,C});
-Circle({A,B,C},'m--');
+Midpoint('S',{A,B,C}); % Barycenter of triangle labelled S
+Circle({A,B,C},'m--'); % Magenta dashed circumcircle of the triangle
 PerpendicularBisector({A,B},':');
 PerpendicularBisector({B,C},':');
 PerpendicularBisector({C,A},':');
 AngleBisector({A,B,C},':');
 AngleBisector({B,C,A},':');
 AngleBisector({C,A,B},':');
-disp(g);
 
 %% Image
-clf;
-g=Geomatplot;
-b0=Point('b0',[0.1 0.2],'r');
-b1=Point('b1',[0.7 0.9],'r');
-b2=Point('b2',[0.9 0.2],'r');
-c1=Point('c1',[-.5 0],'k','MarkerSize',5);
-c2=Point('c2',[1.5 1],'k');
-bt = @(t,b0,b1,b2) b0.*(1-t).^2 + 2*b1.*t.*(1-t) + b2.*t.^2;
-Curve(bt,{b0,b1,b2},'r');
-Image(@bezdist,{b0,b1,b2},c1,c2);
-colorbar;
-disp(g);
+clf; g = Geomatplot;
+b0 = Point('b0',[0.1 0.2],'r'); % draggable control points
+b1 = Point('b1',[0.7 0.9],'r'); % with given labels
+b2 = Point('b2',[0.9 0.2],'r');
+c1 = Point('c1',[-.5 0],'k','MarkerSize',5); % adjustable corner
+c2 = Point('c2',[1.5 1],'k','MarkerSize',5); %   for the image
+% parametric callback with t in [0,1] and dependent variables:
+bt = @(t,b0,b1,b2)  b0.*(1-t).^2 + 2*b1.*t.*(1-t) + b2.*t.^2;
+Curve(bt,{b0,b1,b2},'r'); % A red quadratic Bézier curve
+Image(@dist2bezier,{b0,b1,b2},c1,c2); colorbar;
+% where 'dist2bezier' is a (x,y,b0,b1,b2) -> real function
 
-
-function v = bezdist(x,y,b0,b1,b2)
+function v = dist2bezier(x,y,b0,b1,b2)
     function v = gdot(a,b)
         v = dot(a,b,2);
     end
@@ -52,7 +48,6 @@ function v = bezdist(x,y,b0,b1,b2)
         d = gdot(pb0,pb1-pb0);
         t = roots([a,b,c,d]);
         t = real(t(abs(imag(t))<1e-10));
-        %t = real(t(min(abs(imag(t)))==abs(imag(t))));
         t = [t(0<t & t<1); 0; 1];
         if isempty(t); t = 0; end
         d = gdot2(pb0.*(1-t).^2 + 2*pb1.*t.*(1-t) + pb2.*t.^2);

@@ -4,12 +4,17 @@ function h = Intersect(varargin)
     function v = intersect(a,b)
         [v(:,1), v(:,2)] = polyxpoly(a(:,1),a(:,2),b(:,1),b(:,2));
     end
-    h = dpointseq(parent,label,labels,@intersect,args);
-    % todo ...
+    g = dpointseq(parent,label,labels,@intersect,args);
+    num = 1; %todo
+    for i=1:num
+        ll = [label,num2str(i)];
+        newargs = {'Label',ll,'LabelAlpha',0,'LabelTextColor','k'};
+        h(i) = dpoint(parent,ll,{g},@(x)x(i,:),[newargs args]);
+    end
 end
 
 function [parent,label,labels,args] = parseinputs(varargin) % todo
-    p = betterInputParser; ispositive = @(x)isnumeric(x) && isscalar(x) && x>=0;
+    p = betterInputParser; % ispositive = @(x)isnumeric(x) && isscalar(x) && x>=0;
 
     p.addOptional('Parent'     , [], @(x) isa(x,'Geomatplot') || isa(x,'matlab.graphics.axis.Axes') || isa(x,'matlab.ui.Figure'));
     p.addOptional('Label'      , [], @(x) isvarname(x));

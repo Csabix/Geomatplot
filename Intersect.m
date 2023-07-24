@@ -31,31 +31,43 @@ function [h,g] = Intersect(varargin)
 %   See also GEOMATPLOT
 
 
-    [parent,label,labels,args] = parseinputs(varargin{:});
+    [parent,labels,inputs,args] = parse(varargin{:});
     function v = intersect(a,b)
         [v(:,1), v(:,2)] = polyxpoly(a(:,1),a(:,2),b(:,1),b(:,2));
     end
-    g = dpointseq(parent,label,labels,@intersect,args);
-    if isinteger(label)
-        for i=1:label
-            ll = parent.getNextCapitalLabel;
-            newargs = {'Label',ll,'LabelAlpha',0,'LabelTextColor','k'};
-            h(i) = dpoint(parent,ll,{g},@(x)x(i,:),[newargs args]);
-        end
-    elseif isvarname(label)
-        newargs = {'Label',label,'LabelAlpha',0,'LabelTextColor','k'};
-        h = dpoint(parent,label,{g},@(x) x(1,:),[newargs args]);
-    elseif iscellstr(label)
-        for i=1:length(label)
-            ll = label{i};
-            newargs = {'Label',ll,'LabelAlpha',0,'LabelTextColor','k'};
-            h(i) = dpoint(parent,ll,{g},@(x)x(i,:),[newargs args]);
-        end
+    l = parent.getNextLabel('small');
+    g_ = dpointseq(parent,l,inputs,@intersect,struct);
+    
+    for i = 1:length(labels)
+        args.Label = labels{i};
+        h_(i)=dpoint(parent,labels{i},{g_},@(x)x(i,:),args);
     end
-
+    
+    if nargout >= 1; h = h_; end
+    if nargout == 2; g = g_; end
 end
 
-function [parent,label,labels,args] = parseinputs(varargin) % todo
+function [parent,labels,inputs,args] = parse(varargin)
+    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);
+    [labels,varargin] = parent.extractMultipleLabels(varargin,'capital');
+    [parent,labels,inputs,args] = parse_(parent,labels,varargin{:});
+    inputs = parent.getHandlesOfLabels(inputs);
+end
+
+function [parent,labels,inputs,args] = parse_(parent,labels,inputs,color,args)
+    arguments
+        parent          (1,1) Geomatplot
+        labels          (1,:) cell      
+        inputs          (1,:) cell      {drawing.mustBeInputList(inputs,parent)}
+        color                           {drawing.mustBeColor}               = 'k'
+        args.MarkerSize (1,1) double    {mustBePositive}                    = 6
+        args.LabelAlpha (1,1) double    {mustBeInRange(args.LabelAlpha,0,1)}= 0
+    end
+    args.Color = color;
+    args.LabelTextColor = color;
+end
+
+function [parent,label,inputs,args] = parseinputs(varargin) % todo
     p = betterInputParser; % ispositive = @(x)isnumeric(x) && isscalar(x) && x>=0;
     
     p.addOptional('Parent'     , [], @(x) isa(x,'Geomatplot') || isa(x,'matlab.graphics.axis.Axes') || isa(x,'matlab.ui.Figure'));
@@ -71,7 +83,7 @@ function [parent,label,labels,args] = parseinputs(varargin) % todo
     parent = drawing.findCurrentGeomatplot(res.Parent); res = rmfield(res,'Parent'); % creates or converts if necesseray
     if isempty(res.Label); res.Label = parent.getNextCapitalLabel; end
     label = res.Label;
-    labels = drawing.getHandlesOfLabels(parent,res.Labels);
+    inputs = drawing.getHandlesOfLabels(parent,res.Labels);
     res = rmfield(res,{'Label','Labels'});
     
     args = [namedargs2cell(res) namedargs2cell(p.Unmatched)];

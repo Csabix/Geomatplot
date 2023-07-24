@@ -27,19 +27,14 @@ methods (Static)
         values = struct2cell(fig.UserData.deps);
         fig.UserData.runtime = 0;
         for i = 1:length(values)
-            v = values{i}; b = true;
-            for j = 1:length(v.labels)
-                b = b & v.labels{j}.defined;
+            v = values{i}; v.defined = true;
+            for j = 1:length(v.inputs)
+                v.defined = v.defined & v.inputs{j}.defined;
             end
-            v.defined = b;
-            if b
-                try
-                    v.update(detail_level);
+            if v.defined
+                v.update(detail_level);
+                if(v.defined)
                     fig.UserData.runtime = fig.UserData.runtime + v.runtime;
-                    v.fig.Visible='on';
-                catch
-                    v.defined = false;
-                    v.fig.Visible='off';
                 end
             end
         end

@@ -7,9 +7,7 @@ methods
     function o = dimage(parent,label,labels,callback,c0,c1,args)
         o = o@dependent(parent,label,labels,callback);
         o.c0 = c0;      o.c1 = c1;
-        [x,y] = o.getMeshgrid(256);
-        ret = o.call(x,y);
-        o.fig = imagesc('XData',o.getRange(1),'YData',o.getRange(2),'CData',ret{1},args{:});
+        o.fig = imagesc('XData',[0 1],'YData',[0 1],'CData',0,args{:});
         o.fig.UserData = o;
         uistack(o.fig,"bottom");
         if isa(o.c0,'point_base')
@@ -18,6 +16,7 @@ methods
         if isa(o.c1,'point_base')
             o.addCallbacks({c1});
         end
+        o.update(1);
     end
 
     function v = value(o)

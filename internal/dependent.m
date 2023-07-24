@@ -1,17 +1,17 @@
 classdef (Abstract) dependent < drawing
 properties
-	labels (1,:) cell
+	inputs (1,:) cell
 	callback
     movs
 end
 methods
 
-    function o = dependent(parent,label,labels,callback)
+    function o = dependent(parent,label,inputs,callback)
         o = o@drawing(parent,label,[]);
-        o.labels = labels;
+        o.inputs = inputs;
         o.callback = callback;
         o.parent.deps.(label)=o;
-        o.addCallbacks(labels);
+        o.addCallbacks(o.inputs);
     end
 
     function addCallbacks(o,labels)
@@ -33,19 +33,32 @@ methods
     end
 
     function ret = call(o,varargin)
-        tic; args = cell(1,length(o.labels));
-        for i = 1:length(o.labels)
-            args{i} = o.labels{i}.value;
+        tic; args = cell(1,length(o.inputs));
+        for i = 1:length(o.inputs)
+            args{i} = o.inputs{i}.value;
         end
-        outs = cell(1,abs(nargout(o.callback)));
-        [outs{:}] = o.callback(varargin{:},args{:});
-        ret = o.parseOutputs(outs);
-        o.runtime = 0.5*(toc+o.runtime);
+        o.defined = true;
+        try
+            outs = cell(1,abs(nargout(o.callback)));
+            [outs{:}] = o.callback(varargin{:},args{:});
+        catch
+            o.defined = false;
+        end
+        if o.defined
+            ret = o.parseOutputs(outs);
+            o.runtime = 0.5*(toc+o.runtime);
+            o.fig.Visible = 'on';
+        else
+            ret = []; [~] = toc;
+            o.fig.Visible = 'off';
+        end
     end
     
     function update(o,~)
         ret = o.call;
-        o.updatePlot(ret{:});
+        if o.defined
+            o.updatePlot(ret{:});
+        end
     end
 
 end

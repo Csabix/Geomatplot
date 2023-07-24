@@ -34,11 +34,13 @@ Image(@dist2bezier,{b0,b1,b2},c1,c2); colorbar;
 clf; g = Geomatplot;
 A = Point([0  0]); 
 B = Point([1  1]); 
-C = Point([1 0]); 
-D = Point([0 1]);
+C = Point([0 1]); 
+D = Point([1 0]);
 a = Segment({A,B});
-b = Segment({C,D});
-Intersect({a,b});
+b = Circle({C,D});
+hs = Intersect(2,{a,b});
+
+%% dist2bezier
 
 function v = dist2bezier(x,y,b0,b1,b2)
     function v = gdot(a,b)

@@ -1,13 +1,21 @@
+
 function h = Circle(varargin)
-    [parent,label,labels,args] = parse_line_inputs(2:3,varargin{:}); % todo any number of inputs
-    if drawing.isLabelPatternMatching(labels,{'point_base','point_base'})
+% TODO write help
+
+    [parent,label,inputs,linespec,args] = parse_line_inputs(varargin{:});
+
+    if drawing.isInputPatternMatching(inputs,{'point_base','point_base'})
         callback = @circ_center_and_point;
-    elseif drawing.isLabelPatternMatching(labels,{'point_base','point_base','point_base'})
+    elseif drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
         callback = @circ_3_points;
     else
         error 'Unsupported input label types or unknown overload.'
     end
-    h = dcurve(parent,label,labels,callback,args);
+
+    h_ = dcurve(parent,label,inputs,linespec,callback,args);
+
+    if nargout == 1; h = h_; end
+    
 end
 
 function v = circ_center_and_point(t,c,p)

@@ -2,9 +2,10 @@ classdef dpoint < dependent & point_base
 methods
     function o = dpoint(parent,label,labels,callback,args)
         o = o@dependent(parent,label,labels,callback);
-        ret = o.call;
-        o.fig = drawpoint('InteractionsAllowed','none',args{:},'Position',ret{1});
+        args = namedargs2cell(args);
+        o.fig = drawpoint('InteractionsAllowed','none',args{:},'Position',[0 0]);
         o.fig.UserData = o;
+        o.update(1);
     end
     function v = value(o)
         v = o.fig.Position;

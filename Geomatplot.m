@@ -8,6 +8,7 @@ properties (Hidden)
     nextCapitalLabel (1,1) int32 = 0; % 65 = 'A' = 'Z'-25
     nextSmallLabel (1,1) int32 = 0;   % 97 = 'a' = 'z'-25
 end
+
 methods (Access = public)
     
     function o = Geomatplot(ax)
@@ -46,6 +47,10 @@ methods (Access = public)
         v = h.value();
     end
 
+    function b = isLabel(o,l)
+        b = isfield(o.movs,l) || isfield(o.deps,l);
+    end
+
     function varargout = subsref(o,subs)
         switch subs(1).type
             case '()'
@@ -57,20 +62,75 @@ methods (Access = public)
               [varargout{1:nargout}]=builtin('subsref',o,subs);
         end
     end
-end
-methods (Hidden)
-    function l = getNextCapitalLabel(o)
-        l = Geomatplot.getNextLabel(o.nextCapitalLabel,65); % 'A'
-        o.nextCapitalLabel = o.nextCapitalLabel + 1;
-        if isfield(o.movs,l) || isfield(o.deps,l); l = o.getNextCapitalLabel; end
+end % public
+
+methods (Access = public, Hidden)
+
+    function handles = getHandlesOfLabels(o,x)
+        handles = cell(1,length(x));
+        for i=1:length(x)
+            if isa(x{i},'drawing')
+                handles{i} = x{i};
+            else
+                handles{i} = o.getHandle(x{i});
+            end
+        end
     end
 
-    function l = getNextSmallLabel(o)
-        l = Geomatplot.getNextLabel(o.nextSmallLabel,97); % 'a'
-        o.nextSmallLabel = o.nextSmallLabel + 1;
-        if isfield(o.movs,l) || isfield(o.deps,l); l = o.getNextSmallLabel; end
+    function [label,args] = extractLabel(o,args,flag)
+        if ~isempty(args) && (size(args{1},1)==1 && ischar(args{1}) || isStringScalar(args{1}) )
+            label = args{1};
+            if ~isvarname(label)
+                eidType = 'extractLabel:notVariableName';
+                msgType = ['Label ''' label ''' is not a valid variable name.'];
+                throwAsCaller(MException(eidType,msgType));
+            end
+            if o.isLabel(label)
+                eidType = 'extractLabel:labelAleadyExists';
+                msgType = ['Label ''' label ''' already exists.'];
+                throwAsCaller(MException(eidType,msgType));
+            end
+            args = args(2:end);
+        else
+            label = o.getNextLabel(flag);
+        end
     end
-end
+
+    function [labels,args] = extractMultipleLabels(o,args,flag)
+        if isempty(args) || (size(args{1},1)==1 && ischar(args{1})) || isStringScalar(args{1})
+            try
+                [labels{1},args] = o.extractLabel(args,flag);
+            catch ME
+                if strcmp(ME.identifier,'extractLabel:labelAleadyExists')
+                    labels{1} = o.getNextLabel(flag);
+                end
+            end
+        elseif isreal(args{1}) && isfinite(args{1}) && args{1}==floor(args{1}) && args{1} > 0
+            labels = cell(1,args{1});
+            for i=1:args{1}
+                labels{i} = o.getNextLabel(flag);
+            end
+            args = args(2:end);
+        elseif iscell(args{1})
+            ls = args{1}; b = true;
+            for i=1:length(ls)
+                if ~(((size(ls{i},1)==1 && ischar(ls{i})) || isStringScalar(ls{i})) && ~o.isLabel(ls{i}))
+                    b = false; break;
+                end
+            end
+            if b
+                labels = args{1};
+                args = args(2:end);
+            else
+                labels{1} = o.getNextLabel(flag);
+            end
+        else
+            labels{1} = o.getNextLabel(flag);
+        end
+    end
+
+end % public hidden
+
 methods (Access = protected)
     function head = getHeader(o,mnum,dnum)
         if nargin == 1
@@ -94,9 +154,9 @@ methods (Access = protected)
         labels = fieldnames(o.deps); values = struct2cell(o.deps);
         for i=1:dnum
             v = values{i};vv = v.value;
-            ls = cell(1,length(v.labels));
-            for j=1:length(v.labels)
-                ls{j} = v.labels{j}.label;
+            ls = cell(1,length(v.inputs));
+            for j=1:length(v.inputs)
+                ls{j} = v.inputs{j}.label;
             end
             str(i+1+mnum,:) = [''''+string(labels{i})+'''', string(class(v)), [num2str(v.runtime*1000,'%.2fms')], num2str(mean(vv,1),'[%.2f %.2f]'),...
                                 join(ls,','), func2str(v.callback)];
@@ -112,12 +172,60 @@ methods (Access = protected)
         str = o.getHeader(mnum,dnum) + str+'\n'+matlab.mixin.CustomDisplay.getDetailedFooter(o);
         fprintf(str);
     end
-end
-methods (Access = private, Static)
-    function l = getNextLabel(index,offset)
-        l = char(mod(index,26)+offset);
-        i = idivide(index,26);
-        if i~=0; l = [l int2str(i)]; end
+
+    function l = getNextLabel(o,flag)
+        function l = convert(index,offset)
+            l = char(mod(index,26)+offset);
+            i = idivide(index,26);
+            if i~=0; l = [l int2str(i)]; end
+        end
+        switch flag
+            case 'small'
+                l = convert(o.nextSmallLabel,97); % 'a'
+                o.nextSmallLabel = o.nextSmallLabel + 1;
+            case 'capital'
+                l = convert(o.nextCapitalLabel,65); % 'A'
+                o.nextCapitalLabel = o.nextCapitalLabel + 1;
+            otherwise
+                error 'Invalid flag'
+        end
+        if o.isLabel(l); l = o.getNextLabel(flag); end
     end
+
 end
+
+methods (Static, Access = public, Hidden)
+
+    function parent = findCurrentGeomatplot(parent)
+        if isempty(parent); parent = gca; end
+        if isa(parent,'matlab.ui.Figure')
+            if isempty(parent.Children)
+                parent = axes(parent);
+            else
+                parent = parent.Chilren(1);
+            end
+        end
+        if isa(parent,'matlab.graphics.axis.Axes')
+            parent = parent.UserData;
+        end
+        if isempty(parent); parent = Geomatplot; end
+    end
+
+    function [parent, args] = extractGeomatplot(args)
+        if ~isempty(args) && isscalar(args{1}) && (isa(args{1},'Geomatplot') || ishandle(args{1}))
+            parent = args{1};
+            args = args(2:end);
+        else
+            parent = [];
+        end
+        parent = Geomatplot.findCurrentGeomatplot(parent);
+        if ~isa(parent,'Geomatplot')
+            eidType = 'extractGeomatplot:noGeomatplot';
+            msgType = 'Geomatplot not found, probably wrong argument.';
+            throwAsCaller(MException(eidType,msgType));
+        end
+    end
+
+end % static public hidden
+
 end

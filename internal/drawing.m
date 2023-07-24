@@ -6,6 +6,7 @@ properties
     runtime (1,1) double = 0
     defined (1,1) logical = true;
 end
+
 methods
     function o = drawing(parent,label,fig)
         o.parent = parent;
@@ -13,31 +14,20 @@ methods
         o.fig = fig;
     end
 end
+
 methods (Abstract)
 	value(o) % current value: positions matrix or a struct
     update(o,~)
 end
+
 methods (Access=public,Static)
 
-    function x = findCurrentGeomatplot(x)
-        if isempty(x)
-            x = gca;
-        end
-        if isa(x,'matlab.ui.Figure')
-            if isempty(x.Children)
-                x = axes(x);
-            else
-                x = x.Chilren(1);
-            end
-        end
-        if isa(x,'matlab.graphics.axis.Axes')
-            x = x.UserData;
-        end
-        if isempty(x)
-            x = Geomatplot;
-        end
-        if ~isa(x,'Geomatplot')
-            error 'Geomatplot not found, wrong argument'
+    function [position,args] = extractPosition(args)
+        if ~isempty(args) && isnumeric(args{1}) && numel(args{1})==2
+            position = args{1};
+            args = args(2:end);
+        else
+            position = [];
         end
     end
 
@@ -49,38 +39,60 @@ methods (Access=public,Static)
             ischar(x) && (length(x)==1) && any(x==shorcolnames) || ...
             (isstring(x) || ischar(x)) && any(strcmp(x,longcolnames));
     end
-    
-    function b = isLabelList(x)
-        if iscellstr(x)
-            b = true;
-        elseif ~iscell(x)
-            b = false;
-        else
-            b = true;
-            for i = 1:length(x)
-                b = b && (isa(x{i},'drawing') || ischar(x) || isstring(x));
+
+    function mustBeColor(x)
+        if ~(drawing.isColorName(x) || isnumeric(x) && numel(x)==3)
+            eidType = 'mustBeColor:notColor';
+            msgType = 'Invalid color';
+            throwAsCaller(MException(eidType,msgType));            
+        end
+    end
+
+    function mustBeInputList(x,parent)
+        if ~iscell(x)
+            eidType = 'mustBeInputList:notCell';
+            msgType = 'The input list of dependent drawings be a cell array.';
+            throwAsCaller(MException(eidType,msgType));
+        end
+        for i = 1:length(x)
+            h = x{i};
+            if size(h,1)==1 && ischar(h) || isStringScalar(h)
+                if ~isvarname(h)
+                    eidType = 'mustBeInputList:notVariableName';
+                    msgType = ['The input label ''' h ''' is not a valid variable name.'];
+                    throwAsCaller(MException(eidType,msgType));
+                end
+                if ~parent.isLabel(h)
+                    eidType = 'mustBeInputList:labelNotFound';
+                    msgType = ['The input label ''' h ''' does not exist.'];
+                    throwAsCaller(MException(eidType,msgType));
+                end
+            elseif ~isa(h,'drawing')
+                eidType = 'mustBeInputList:invalidType';
+                msgType = 'The input label is of invalid type or size.';
+                throwAsCaller(MException(eidType,msgType));
             end
         end
     end
 
-    function labels = getHandlesOfLabels(parent,x)
+    function labels = getHandlesOfLabels(o,x)
         labels = cell(1,length(x));
         for i=1:length(x)
             if isa(x{i},'drawing')
                 labels{i} = x{i};
             else
-                labels{i} = parent.getHandle(x{i});
+                labels{i} = o.getHandle(x{i});
             end
         end
     end
 
-    function b = isLabelPatternMatching(labels,pattern)
-        if length(labels) ~= length(pattern)
+    function b = isInputPatternMatching(inputs,pattern)
+        if length(inputs) ~= length(pattern)
             b = false;
         else
             b = true;
-            for i = 1:length(labels)
-                b = b && isa(labels{i},pattern{i});
+            for i = 1:length(inputs)
+                b = b && isa(inputs{i},pattern{i});
             end            
         end
     end
@@ -114,6 +126,27 @@ methods (Access=public,Static)
             end
         end
         b = strlength(spec) == 0;
+    end
+
+    function mustBeLineSpec(spec)
+        if ~(size(spec,1)==1 && ischar(spec) || isStringScalar(spec))
+            eidType = 'mustBeLineSpec:notString';
+            msgType = 'Line style specification must be a string';
+            throwAsCaller(MException(eidType,msgType));
+        end
+        if ~drawing.matchLineSpec(spec)
+            eidType = 'mustBeLineSpec:notLineSpec';
+            msgType = ['Line style specification ''' spec ''' is invalid.'];
+            throwAsCaller(MException(eidType,msgType));
+        end
+    end
+
+    function mustBeOfLength(val,len)
+        if length(val)~=len
+            eidType = 'mustBeOfLength:wrongLength';
+            msgType = ['Length of input array is not ' int2str(len) '.'];
+            throwAsCaller(MException(eidType,msgType));        
+        end
     end
 end
 end

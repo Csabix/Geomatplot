@@ -8,7 +8,7 @@ function [parent,label,labels,corner0,corner1,args] = parseinputs(varargin)
     ispoint = @(x)(isnumeric(x) && length(x)==2 && x(2)>x(1)) || isa(x,'point_base');
 
     p.addOptional('Parent'     , []   , @(x) isa(x,'Geomatplot') || isa(x,'matlab.graphics.axis.Axes') || isa(x,'matlab.ui.Figure'));
-    p.addOptional('Label'      , []   , @(x) isvarname(x));
+    p.addOptional('Label'      , []   , @isvarname);
     p.addOptional('Labels'     , []   , @drawing.isLabelList);
     p.addOptional('Corner0'    , [0 0], ispoint);
     p.addOptional('Corner1'    , [1 1], ispoint);
@@ -23,5 +23,5 @@ function [parent,label,labels,corner0,corner1,args] = parseinputs(varargin)
     labels = drawing.getHandlesOfLabels(parent,res.Labels);
     res = rmfield(res,{'Label','Labels','Corner0','Corner1'});
     
-    args = [drawing.struct2arglist(res) drawing.struct2arglist(p.Unmatched)];
+    args = [namedargs2cell(res) namedargs2cell(p.Unmatched)];
 end

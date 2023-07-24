@@ -63,12 +63,6 @@ methods (Access=public,Static)
         end
     end
 
-    function args = struct2arglist(s)
-        ns = fieldnames(s);
-        args(1:2:2*length(ns)) = ns;
-        args(2:2:2*length(ns)) = struct2cell(s);
-    end
-
     function labels = getHandlesOfLabels(parent,x)
         labels = cell(1,length(x));
         for i=1:length(x)

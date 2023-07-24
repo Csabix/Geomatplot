@@ -10,7 +10,7 @@ function [parent,label,labels,args] = parseinputs(varargin)
     p = betterInputParser; ispositive = @(x)isnumeric(x) && isscalar(x) && x>=0;
 
     p.addOptional('Parent'     , [], @(x) isa(x,'Geomatplot') || isa(x,'matlab.graphics.axis.Axes') || isa(x,'matlab.ui.Figure'));
-    p.addOptional('Label'      , [], @(x) isvarname(x));
+    p.addOptional('Label'      , [], @isvarname);
     p.addOptional('Labels'     , [], @drawing.isLabelList);
     p.addOptional('Color'      ,'k', @drawing.isColorName);
     p.addParameter('MarkerSize', 6 , ispositive);
@@ -27,6 +27,6 @@ function [parent,label,labels,args] = parseinputs(varargin)
     res = rmfield(res,'Labels');
     res.LabelTextColor = res.Color;
     
-    args = [drawing.struct2arglist(res) drawing.struct2arglist(p.Unmatched)];
+    args = [namedargs2cell(res) namedargs2cell(p.Unmatched)];
 end
 

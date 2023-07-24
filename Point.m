@@ -9,7 +9,7 @@ function [parent,label,args] = parseinputs(varargin)
     p = betterInputParser; ispositive = @(x)isnumeric(x) && isscalar(x) && x>=0;
 
     p.addOptional('Parent'     , [], @(x) isa(x,'Geomatplot') || isa(x,'matlab.graphics.axis.Axes') || isa(x,'matlab.ui.Figure'));
-    p.addOptional('Label'      , [], @(x) isvarname(x));
+    p.addOptional('Label'      , [], @isvarname);
     p.addOptional('Position'   , [], @isnumeric);
     p.addOptional('Color'      ,'b', @drawing.isColorName);
     p.addParameter('MarkerSize', 8 , ispositive);

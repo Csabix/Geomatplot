@@ -23,5 +23,5 @@ function [parent,label,labels,args] = parse_line_inputs(nargs,varargin)
 
     res = rmfield(res,{'Labels','LineSpec'});
     
-    args = [drawing.struct2arglist(res) drawing.struct2arglist(p.Unmatched)];
+    args = [namedargs2cell(res) namedargs2cell(p.Unmatched)];
 end

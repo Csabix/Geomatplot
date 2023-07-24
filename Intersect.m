@@ -1,4 +1,4 @@
-function h = Intersect(varargin)
+function [h,g] = Intersect(varargin)
 % INTERSECT  intersects two Geomatplot curves
 %   INTERSECT({a,b})  intersects curve a and b producing a single intersection point.
 %       If there are more intersection points, only the first one found will be shown.
@@ -36,19 +36,30 @@ function h = Intersect(varargin)
         [v(:,1), v(:,2)] = polyxpoly(a(:,1),a(:,2),b(:,1),b(:,2));
     end
     g = dpointseq(parent,label,labels,@intersect,args);
-    num = 1; %todo
-    for i=1:num
-        ll = [label,num2str(i)];
-        newargs = {'Label',ll,'LabelAlpha',0,'LabelTextColor','k'};
-        h(i) = dpoint(parent,ll,{g},@(x)x(i,:),[newargs args]);
+    if isinteger(label)
+        for i=1:label
+            ll = parent.getNextCapitalLabel;
+            newargs = {'Label',ll,'LabelAlpha',0,'LabelTextColor','k'};
+            h(i) = dpoint(parent,ll,{g},@(x)x(i,:),[newargs args]);
+        end
+    elseif isvarname(label)
+        newargs = {'Label',label,'LabelAlpha',0,'LabelTextColor','k'};
+        h = dpoint(parent,label,{g},@(x) x(1,:),[newargs args]);
+    elseif iscellstr(label)
+        for i=1:length(label)
+            ll = label{i};
+            newargs = {'Label',ll,'LabelAlpha',0,'LabelTextColor','k'};
+            h(i) = dpoint(parent,ll,{g},@(x)x(i,:),[newargs args]);
+        end
     end
+
 end
 
 function [parent,label,labels,args] = parseinputs(varargin) % todo
     p = betterInputParser; % ispositive = @(x)isnumeric(x) && isscalar(x) && x>=0;
-
+    
     p.addOptional('Parent'     , [], @(x) isa(x,'Geomatplot') || isa(x,'matlab.graphics.axis.Axes') || isa(x,'matlab.ui.Figure'));
-    p.addOptional('Label'      , [], @(x) isvarname(x));
+    p.addOptional('Label'      , [], @(x) isvarname(x) || iscellstr(x)); %todo
     p.addOptional('Labels'     , [], @drawing.isLabelList);
     %o.addOptional('Max')
     p.addOptional('Color'      ,'k', @drawing.isColorName);
@@ -63,5 +74,5 @@ function [parent,label,labels,args] = parseinputs(varargin) % todo
     labels = drawing.getHandlesOfLabels(parent,res.Labels);
     res = rmfield(res,{'Label','Labels'});
     
-    args = [drawing.struct2arglist(res) drawing.struct2arglist(p.Unmatched)];
+    args = [namedargs2cell(res) namedargs2cell(p.Unmatched)];
 end

@@ -40,14 +40,10 @@ methods (Access = protected)
     end
 
     function call(o,varargin)
-        tic; args = cell(1,length(o.inputs));
-        for i = 1:length(o.inputs)
-            args{i} = o.inputs{i}.value;
-        end
-        o.defined = true;
+        tic; o.defined = true;
         try
             outs = cell(1,abs(nargout(o.callback)));
-            [outs{:}] = o.callback(varargin{:},args{:});
+            [outs{:}] = o.callback(varargin{:},o.inputs{:});
         catch
             o.defined = false;
         end

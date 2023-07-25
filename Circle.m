@@ -29,6 +29,7 @@ end
 
 function o = eqidistpoint(a,b,c)
     % https://math.stackexchange.com/questions/213658/get-the-equation-of-a-circle-when-given-3-points/1144546
+    a = a.value; b = b.value; c = c.value;
     a = complex(a(1),a(2));
     b = complex(b(1),b(2));
     c = complex(c(1),c(2));

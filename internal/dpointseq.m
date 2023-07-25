@@ -8,5 +8,12 @@ methods
         o.fig.UserData = o;
         o.update(1);
     end
+    function v = value(o,i)
+        if nargin == 2
+            v = [o.fig.XData(i) o.fig.YData(i)];
+        else
+            v = [o.fig.XData(:) o.fig.YData(:)];
+        end
+    end
 end
 end

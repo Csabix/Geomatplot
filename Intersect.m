@@ -33,8 +33,10 @@ function [h,g] = Intersect(varargin)
 
     [parent,labels,inputs,args,s] = parse(varargin{:});
     function v = intersect(a,b)
+        a = a.value; b = b.value;
         [v(:,1), v(:,2)] = polyxpoly(a(:,1),a(:,2),b(:,1),b(:,2));
     end
+    drawing.mustBeOfLength(inputs,2);
     if drawing.isInputPatternMatching(inputs,{'point_base','drawing'}) || drawing.isInputPatternMatching(inputs,{'drawing','point_base'})
         eidType = 'Intersect:intersectWithPoint';
         msgType = 'Cannot intersect with point.';
@@ -50,7 +52,7 @@ function [h,g] = Intersect(varargin)
     
     for i = 1:length(labels)
         args.Label = labels{i};
-        h_(i)=dpoint(parent,labels{i},{g_},@(x)x(i,:),args);
+        h_(i) = dpoint(parent,labels{i},{g_}, @(x) x.value(i), args);
     end
     
     if nargout >= 1

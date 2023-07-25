@@ -2,10 +2,9 @@ function h = Distance(varargin)
     
     [parent,label,inputs] = parse(varargin{:});
     
-    if drawing.isInputPatternMatching(inputs,{'point_base','point_base'})
-        callback = @(a,b) sqrt((a(1)-b(1)).^2 + (a(2)-b(2)).^2);
-    elseif drawing.isInputPatternMatching(inputs,{'point_base','dpointseq'})
-        callback = @(a,b) sqrt((a(1)-b(:,1)).^2 + (a(2)-b(:,2)).^2);
+    if drawing.isInputPatternMatching(inputs,{'point_base','point_base'}) || drawing.isInputPatternMatching(inputs,{'point_base','dpointseq'})
+        %callback = @(a,b) sqrt((a(1)-b(:,1)).^2 + (a(2)-b(:,2)).^2);
+        callback = @dist_point2pointseq;
 %    elseif drawing.isInputPatternMatching(inputs,{'point_base','dcircle'})
 %        callback = @(a,b)
     elseif drawing.isInputPatternMatching(inputs,{'point_base','dlines'})
@@ -19,6 +18,11 @@ function h = Distance(varargin)
     h_ = dscalar(parent,label,inputs,callback);
     
     if nargout == 1; h = h_; end
+end
+
+function v = dist_point2pointseq(a,b)
+    c = a.value-b.value;
+    v = sqrt(c(:,1).^2 + c(:,2).^2);
 end
 
 function [parent,label,inputs] = parse(varargin)
@@ -38,13 +42,11 @@ end
 
 function d = dist_point2polyline(p,polyline)
     %https://www.mathworks.com/matlabcentral/fileexchange/12744-distance-from-points-to-polyline-or-polygon
-    xv = polyline(:,1);
-    yv = polyline(:,2);
-    %x = p(1); y = p(2);
+    polyline = polyline.value; p = p.value;
+    xv = polyline(:,1); yv = polyline(:,2);
     
     % linear parameters of segments that connect the vertices
-    dx =  diff(xv);
-    dy = -diff(yv);
+    dx =  diff(xv);    dy = -diff(yv);
     C = yv(2:end).*xv(1:end-1) - xv(2:end).*yv(1:end-1);
 
     % find the projection of point (x,y) on each rib

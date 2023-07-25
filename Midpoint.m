@@ -1,7 +1,7 @@
 function h = Midpoint(varargin)
 
     [parent,label,inputs,args] = parse(varargin{:});
-    callback = @(varargin) mean(vertcat(varargin{:}));
+    %callback = @(varargin) mean(vertcat(varargin{:}));
     for i = 1:length(inputs)
         l = inputs{i};
         if isa(l,'dcurve') || isa(l,'dimage')
@@ -10,8 +10,20 @@ function h = Midpoint(varargin)
             throw(MException(eidType,msgType));
         end
     end
-    h = dpoint(parent,label,inputs,callback,args);
+    h = dpoint(parent,label,inputs,@callback,args);
     
+end
+
+function v = callback(varargin)
+    x = varargin{1}.value;
+    n = size(x,1);
+    v = mean(x,1);
+    for j=2:nargin
+        x = varargin{j}.value;
+        n1 = size(x,1);
+        v = v*n/(n+n1) + mean(x,1)*n1/(n+n1);
+        n = n + n1;
+    end
 end
 
 function [parent,label,inputs,args] = parse(varargin)

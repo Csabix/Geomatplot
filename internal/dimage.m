@@ -25,8 +25,7 @@ methods
 
     function update(o,detail_level)
         [x,y] = o.getMeshgrid(256*detail_level);
-        ret = o.call(x,y);
-        o.updatePlot(ret{:});
+        o.call(x,y);
     end
 
     function updatePlot(o,C)

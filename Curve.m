@@ -5,7 +5,7 @@ function h = Curve(callback,varargin)
     arguments (Repeating)
         varargin
     end
-    [parent,label,inputs,linespec,args] = parse_line_inputs(varargin{:});
+    [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin{:});
     if nargin(callback) ~= length(inputs)+1
         eidType = 'Curve:callbackWrongNumberOfArguments';
         msgType = ['Callback needs ' int2str(length(inputs)+1) ' number of arguments with the\n' ...

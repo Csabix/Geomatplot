@@ -2,7 +2,7 @@
 function h = Circle(varargin)
 % TODO write help
 
-    [parent,label,inputs,linespec,args] = parse_line_inputs(varargin{:});
+    [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin{:});
 
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base'})
         callback = @circ_center_and_point;

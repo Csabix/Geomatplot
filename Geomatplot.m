@@ -103,9 +103,11 @@ methods (Access = public, Hidden)
             catch ME
                 if strcmp(ME.identifier,'extractLabel:labelAleadyExists')
                     labels{1} = o.getNextLabel(flag);
+                else
+                    rethrow(ME);
                 end
             end
-        elseif isreal(args{1}) && isfinite(args{1}) && args{1}==floor(args{1}) && args{1} > 0
+        elseif isreal(args{1}) && isfinite(args{1}) && args{1}==floor(args{1}) && args{1} >= 0
             labels = cell(1,args{1});
             for i=1:args{1}
                 labels{i} = o.getNextLabel(flag);
@@ -212,7 +214,7 @@ methods (Static, Access = public, Hidden)
     end
 
     function [parent, args] = extractGeomatplot(args)
-        if ~isempty(args) && isscalar(args{1}) && (isa(args{1},'Geomatplot') || ishandle(args{1}))
+        if ~isempty(args) && isscalar(args{1}) && ~isnumeric(args{1}) && (isa(args{1},'Geomatplot') || ishandle(args{1}))
             parent = args{1};
             args = args(2:end);
         else

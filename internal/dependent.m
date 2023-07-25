@@ -32,7 +32,7 @@ methods
         end
     end
 
-    function ret = call(o,varargin)
+    function call(o,varargin)
         tic; args = cell(1,length(o.inputs));
         for i = 1:length(o.inputs)
             args{i} = o.inputs{i}.value;
@@ -46,6 +46,7 @@ methods
         end
         if o.defined
             ret = o.parseOutputs(outs);
+            o.updatePlot(ret{:});
             o.runtime = 0.5*(toc+o.runtime);
             o.fig.Visible = 'on';
         else
@@ -55,10 +56,7 @@ methods
     end
     
     function update(o,~)
-        ret = o.call;
-        if o.defined
-            o.updatePlot(ret{:});
-        end
+        o.call;
     end
 
 end

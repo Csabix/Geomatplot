@@ -31,60 +31,62 @@ function [h,g] = Intersect(varargin)
 %   See also GEOMATPLOT
 
 
-    [parent,labels,inputs,args] = parse(varargin{:});
+    [parent,labels,inputs,args,s] = parse(varargin{:});
     function v = intersect(a,b)
         [v(:,1), v(:,2)] = polyxpoly(a(:,1),a(:,2),b(:,1),b(:,2));
     end
+    if drawing.isInputPatternMatching(inputs,{'point_base','drawing'}) || drawing.isInputPatternMatching(inputs,{'drawing','point_base'})
+        eidType = 'Intersect:intersectWithPoint';
+        msgType = 'Cannot intersect with point.';
+        throw(MException(eidType,msgType));
+    elseif ~drawing.isInputPatternMatching(inputs,{'dlines','dlines'})
+        eidType = 'Intersect:invalidInput';
+        msgType = 'Can only intersect curves with each other.';
+        throw(MException(eidType,msgType));
+    end
+
     l = parent.getNextLabel('small');
-    g_ = dpointseq(parent,l,inputs,@intersect,struct);
+    g_ = dpointseq(parent,l,inputs,@intersect,s);
     
     for i = 1:length(labels)
         args.Label = labels{i};
         h_(i)=dpoint(parent,labels{i},{g_},@(x)x(i,:),args);
     end
     
-    if nargout >= 1; h = h_; end
+    if nargout >= 1
+        if isempty(labels)
+            h=[];
+        else
+            h = h_;
+        end
+    end
     if nargout == 2; g = g_; end
 end
 
-function [parent,labels,inputs,args] = parse(varargin)
+function [parent,labels,inputs,args,s] = parse(varargin)
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);
     [labels,varargin] = parent.extractMultipleLabels(varargin,'capital');
-    [parent,labels,inputs,args] = parse_(parent,labels,varargin{:});
+    [parent,labels,inputs,args,s] = parse_(parent,labels,varargin{:});
     inputs = parent.getHandlesOfLabels(inputs);
 end
 
-function [parent,labels,inputs,args] = parse_(parent,labels,inputs,color,args)
+function [parent,labels,inputs,args,s] = parse_(parent,labels,inputs,color,args,s)
     arguments
         parent          (1,1) Geomatplot
         labels          (1,:) cell      
         inputs          (1,:) cell      {drawing.mustBeInputList(inputs,parent)}
         color                           {drawing.mustBeColor}               = 'k'
-        args.MarkerSize (1,1) double    {mustBePositive}                    = 6
+        args.MarkerSize (1,1) double    {mustBePositive}                    = 7
         args.LabelAlpha (1,1) double    {mustBeInRange(args.LabelAlpha,0,1)}= 0
+        args.LabelTextColor             {drawing.mustBeColor}
+        args.LineWidth  (1,1) double    {mustBePositive}
+        s.SMarkerEdgeColor              {drawing.mustBeColor}               = [.7 .7 .7]
+        s.SMarkerFaceColor              {drawing.mustBeColor}               = [.4 .4 .4]
+        s.SLineWidth    (1,1) double    {mustBePositive}                    = 0.5
+        s.SMarkerSize   (1,1) double    {mustBePositive}                    = 18
+        s.SMarkerColor                  {drawing.mustBeColor}               = 'k'
+        s.SMarkerSymbol (1,:) char      {mustBeMember(s.SMarkerSymbol,{'o','+','*','x','_','|','^','v','>','<','square','diamond','pentagram','hexagram'})}='o'
     end
     args.Color = color;
-    args.LabelTextColor = color;
-end
-
-function [parent,label,inputs,args] = parseinputs(varargin) % todo
-    p = betterInputParser; % ispositive = @(x)isnumeric(x) && isscalar(x) && x>=0;
-    
-    p.addOptional('Parent'     , [], @(x) isa(x,'Geomatplot') || isa(x,'matlab.graphics.axis.Axes') || isa(x,'matlab.ui.Figure'));
-    p.addOptional('Label'      , [], @(x) isvarname(x) || iscellstr(x)); %todo
-    p.addOptional('Labels'     , [], @drawing.isLabelList);
-    %o.addOptional('Max')
-    p.addOptional('Color'      ,'k', @drawing.isColorName);
-
-    p.KeepUnmatched = true;
-    p.parse(varargin{:});
-    res = p.Results;
-
-    parent = drawing.findCurrentGeomatplot(res.Parent); res = rmfield(res,'Parent'); % creates or converts if necesseray
-    if isempty(res.Label); res.Label = parent.getNextCapitalLabel; end
-    label = res.Label;
-    inputs = drawing.getHandlesOfLabels(parent,res.Labels);
-    res = rmfield(res,{'Label','Labels'});
-    
-    args = [namedargs2cell(res) namedargs2cell(p.Unmatched)];
+    if ~isfield(args,'LabelTextColor'); args.LabelTextColor = color; end
 end

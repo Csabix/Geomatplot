@@ -6,8 +6,7 @@ classdef dcurve < dlines
         end
         function update(o,detail_level)
             t = linspace(0,1,256*detail_level)';
-            ret = o.call(t);
-            o.updatePlot(ret{:});
+            o.call(t);
         end
     end
 end

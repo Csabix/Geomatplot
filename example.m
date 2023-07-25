@@ -26,19 +26,34 @@ c1 = Point('c1',[-.5 0],'k','MarkerSize',5); % adjustable corner
 c2 = Point('c2',[1.5 1],'k','MarkerSize',5); %   for the image
 % parametric callback with t in [0,1] and dependent variables:
 bt = @(t,b0,b1,b2)  b0.*(1-t).^2 + 2*b1.*t.*(1-t) + b2.*t.^2;
-Curve(bt,{b0,b1,b2},'r'); % A red quadratic Bézier curve
+b = Curve(bt,{b0,b1,b2},'r'); % A red quadratic Bézier curve
 Image(@dist2bezier,{b0,b1,b2},c1,c2); colorbar;
 % where 'dist2bezier' is a (x,y,b0,b1,b2) -> real function
+P = Point('P',[0 0],'y');
+Circle({P,b},'y');
+
 
 %% Test
 clf; g = Geomatplot;
-A = Point([0  0]); 
-B = Point([1  1]); 
+A = Point([0 0]); 
+B = Point([1 1]); 
 C = Point([0 1]); 
 D = Point([1 0]);
 a = Segment({A,B});
 b = Circle({C,D});
-hs = Intersect(2,{a,b});
+Intersect(2,{'b','a'})
+%d = Distance({A,B});
+
+%% Dist
+clf; g = Geomatplot;
+b0 = Point('b0',[0.1 0.2],'r'); % draggable control points
+b1 = Point('b1',[0.7 0.9],'r'); % with given labels
+b2 = Point('b2',[0.9 0.2],'r');
+bt = @(t,b0,b1,b2)  b0.*(1-t).^2 + 2*b1.*t.*(1-t) + b2.*t.^2;
+b = Curve(bt,{b0,b1,b2},'r'); % A red quadratic Bézier curve
+
+A = Point([0 0]);
+Circle({A,b},'b');
 
 %% dist2bezier
 

@@ -8,7 +8,7 @@ properties (Hidden)
     nextCapitalLabel (1,1) int32 = 0; % 65 = 'A' = 'Z'-25
     nextSmallLabel (1,1) int32 = 0;   % 97 = 'a' = 'z'-25
 end
-
+    
 methods (Access = public)
     
     function o = Geomatplot(ax)
@@ -51,17 +51,17 @@ methods (Access = public)
         b = isfield(o.movs,l) || isfield(o.deps,l);
     end
 
-    function varargout = subsref(o,subs)
-        switch subs(1).type
-            case '()'
-                if length(o) > 1 || length(subs) > 1 || length(subs.subs) > 1 || ~ischar(subs.subs{1})
-                    error 'Not supported indexing';
-                end                
-                varargout = {o.getElement(subs.subs{1})};
-            otherwise   
-              [varargout{1:nargout}]=builtin('subsref',o,subs);
-        end
-    end
+%     function varargout = subsref(o,subs)
+%         switch subs(1).type
+%             case '()'
+%                 if length(o) > 1 || length(subs) > 1 || length(subs.subs) > 1 || ~ischar(subs.subs{1})
+%                     error 'Not supported indexing';
+%                 end                
+%                 varargout = {o.getElement(subs.subs{1})};
+%             otherwise   
+%               [varargout{1:nargout}]=builtin('subsref',o,subs);
+%         end
+%     end
 end % public
 
 methods (Access = public, Hidden)
@@ -131,6 +131,25 @@ methods (Access = public, Hidden)
         end
     end
 
+    function l = getNextLabel(o,flag)
+        function l = convert(index,offset)
+            l = char(mod(index,26)+offset);
+            i = idivide(index,26);
+            if i~=0; l = [l int2str(i)]; end
+        end
+        switch flag
+            case 'small'
+                l = convert(o.nextSmallLabel,97); % 'a'
+                o.nextSmallLabel = o.nextSmallLabel + 1;
+            case 'capital'
+                l = convert(o.nextCapitalLabel,65); % 'A'
+                o.nextCapitalLabel = o.nextCapitalLabel + 1;
+            otherwise
+                error 'Invalid flag'
+        end
+        if o.isLabel(l); l = o.getNextLabel(flag); end
+    end
+
 end % public hidden
 
 methods (Access = protected)
@@ -173,25 +192,6 @@ methods (Access = protected)
         str = join(str,"\n",1);
         str = o.getHeader(mnum,dnum) + str+'\n'+matlab.mixin.CustomDisplay.getDetailedFooter(o);
         fprintf(str);
-    end
-
-    function l = getNextLabel(o,flag)
-        function l = convert(index,offset)
-            l = char(mod(index,26)+offset);
-            i = idivide(index,26);
-            if i~=0; l = [l int2str(i)]; end
-        end
-        switch flag
-            case 'small'
-                l = convert(o.nextSmallLabel,97); % 'a'
-                o.nextSmallLabel = o.nextSmallLabel + 1;
-            case 'capital'
-                l = convert(o.nextCapitalLabel,65); % 'A'
-                o.nextCapitalLabel = o.nextCapitalLabel + 1;
-            otherwise
-                error 'Invalid flag'
-        end
-        if o.isLabel(l); l = o.getNextLabel(flag); end
     end
 
 end

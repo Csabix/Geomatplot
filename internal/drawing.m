@@ -20,7 +20,7 @@ methods (Abstract)
     update(o,~)
 end
 
-methods (Access=public,Static)
+methods (Access=public,Static,Hidden)
 
     function [position,args] = extractPosition(args)
         if ~isempty(args) && isnumeric(args{1}) && numel(args{1})==2

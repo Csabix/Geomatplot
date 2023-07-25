@@ -14,6 +14,13 @@ methods
         o.addCallbacks(o.inputs);
     end
 
+    function update(o,~)
+        o.call;
+    end
+end
+
+methods (Access = protected)
+
     function addCallbacks(o,labels)
         for i = 1:length(labels)
             h = labels{i};
@@ -50,16 +57,13 @@ methods
             o.runtime = 0.5*(toc+o.runtime);
             o.fig.Visible = 'on';
         else
-            ret = []; [~] = toc;
+            [~] = toc;
             o.fig.Visible = 'off';
         end
     end
     
-    function update(o,~)
-        o.call;
-    end
-
 end
+
 methods (Abstract)
     updatePlot(o,varargin)
 end

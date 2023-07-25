@@ -17,7 +17,7 @@ end
 methods (Static)
     function outs = parseOutputs(args)
         if length(args)==1
-            outs{1} = args{1};
+            outs{1} = args{1}(:)';
         elseif length(args)==2
             outs{1} = [args{1}(:) args{2}(:)];
         else

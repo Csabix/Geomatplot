@@ -41,9 +41,9 @@ function [h,g] = Intersect(varargin)
         eidType = 'Intersect:intersectWithPoint';
         msgType = 'Cannot intersect with point.';
         throw(MException(eidType,msgType));
-    elseif ~drawing.isInputPatternMatching(inputs,{'dlines','dlines'})
-        eidType = 'Intersect:invalidInput';
-        msgType = 'Can only intersect curves with each other.';
+    elseif drawing.isInputPatternMatching(inputs,{'dimage','drawing'}) || drawing.isInputPatternMatching(inputs,{'drawing','dimage'})
+        eidType = 'Intersect:intersectWithImage';
+        msgType = 'Cannot intersect with image.';
         throw(MException(eidType,msgType));
     end
 

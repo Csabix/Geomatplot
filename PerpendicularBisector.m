@@ -12,5 +12,5 @@ end
 
 function v = callback(a,b)
     a = a.value; b = b.value;
-    v = ((a-b).*(0.5-[-1e8;-1e4;0;1;1e4;1e8]))*[0 1; -1 0]+(a+b)*0.5;
+    v = ((a-b)*[0 1; -1 0].*(0.5-[-1e8;-1e4;0;1;1e4;1e8]))+(a+b)*0.5;
 end

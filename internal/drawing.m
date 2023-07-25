@@ -22,8 +22,10 @@ end
 
 methods (Access=public,Static,Hidden)
 
-    function [position,args] = extractPosition(args)
-        if ~isempty(args) && isnumeric(args{1}) && numel(args{1})==2
+    function [position,args] = extractPosition(args,maxpositions)
+        if nargin <2; maxpositions = 1; end
+        if ~isempty(args) && isnumeric(args{1}) && (maxpositions==1 && numel(args{1})==2 ||...
+                                      size(args{1},1)<=maxpositions && size(args{1},2)==2)
             position = args{1};
             args = args(2:end);
         else

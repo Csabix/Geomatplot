@@ -7,7 +7,7 @@ function h = Distance(varargin)
         callback = @dist_point2pointseq;
 %    elseif drawing.isInputPatternMatching(inputs,{'point_base','dcircle'})
 %        callback = @(a,b)
-    elseif drawing.isInputPatternMatching(inputs,{'point_base','dlines'})
+    elseif drawing.isInputPatternMatching(inputs,{'point_base','dlines'}) || drawing.isInputPatternMatching(inputs,{'point_base','mpolygon'})
         callback = @dist_point2polyline;
     else
         eidType = 'Distance:invalidInputPattern';

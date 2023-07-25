@@ -12,7 +12,9 @@ function [h,c,r] = Circle(varargin)
         c_ = inputs{1}; r_ = inputs{2};
     elseif drawing.isInputPatternMatching(inputs,{'dscalar','point_base'})
         c_ = inputs{2}; r_ = inputs{1};
-    elseif drawing.isInputPatternMatching(inputs,{'point_base','point_base'}) || drawing.isInputPatternMatching(inputs,{'point_base','dpointlineseq'})
+    elseif drawing.isInputPatternMatching(inputs,{'point_base','point_base'}) || ...
+           drawing.isInputPatternMatching(inputs,{'point_base','dpointlineseq'}) || ...
+           drawing.isInputPatternMatching(inputs,{'point_base','mpolygon'})
         c_ = inputs{1};
         r_ = Distance(parent,{c_,inputs{2}});
     else
@@ -28,19 +30,11 @@ function [h,c,r] = Circle(varargin)
 end
 
 function o = eqidistpoint(a,b,c)
-    % https://math.stackexchange.com/questions/213658/get-the-equation-of-a-circle-when-given-3-points/1144546
     a = a.value; b = b.value; c = c.value;
-    a = complex(a(1),a(2));
-    b = complex(b(1),b(2));
-    c = complex(c(1),c(2));
-    w = (c-a)/(b-a);
-    if abs(imag(w)) <= 1e-15
-        throw([]);
-    else
-        o = (b-a)*(w - w*w')/(2*1i*imag(w)) + a;
-        o = [real(o) imag(o)];
-    end
+    n = a-b; m = b-c;
+    o = 0.5*[(a+b)*n' (b+c)*m']/[n;m]';
 end
 
-% mpoint dsegment dpoint
-% dsegment mpoint 
+
+
+

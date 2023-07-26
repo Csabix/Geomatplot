@@ -29,14 +29,9 @@ function [h,g] = Intersect(varargin)
 %   [h,g] = INTERSECT(___)  also returns the intersection point sequence object. This
 %       allows more dynamic intersection number handling.
 %
-%   See also GEOMATPLOT
-
+%   See also GEOMATPLOT, SEGMENT, POLYGON, CURVE
 
     [parent,labels,inputs,args,s] = parse(varargin{:});
-    function v = intersect(a,b)
-        a = a.value; b = b.value;
-        [v(:,1), v(:,2)] = polyxpoly(a(:,1),a(:,2),b(:,1),b(:,2));
-    end
     drawing.mustBeOfLength(inputs,2);
     if drawing.isInputPatternMatching(inputs,{'point_base','drawing'}) || drawing.isInputPatternMatching(inputs,{'drawing','point_base'})
         eidType = 'Intersect:intersectWithPoint';
@@ -49,7 +44,8 @@ function [h,g] = Intersect(varargin)
     end
 
     l = parent.getNextLabel('small');
-    g_ = dpointseq(parent,l,inputs,@intersect,s);
+    g_ = dpointseq(parent,l,inputs,@intersect_poly2poly,s);
+    drawing.mustBeOfLength(inputs,2);
     
     for i = 1:length(labels)
         args.Label = labels{i};
@@ -58,12 +54,18 @@ function [h,g] = Intersect(varargin)
     
     if nargout >= 1
         if isempty(labels)
-            h=[];
+            h = [];
         else
             h = h_;
         end
     end
     if nargout == 2; g = g_; end
+end
+
+function v = intersect_poly2poly(a,b)
+% maybe try this? https://www.mathworks.com/matlabcentral/fileexchange/22444-minimum-distance-between-two-polygons
+    a = a.value; b = b.value; 
+    [v(:,1), v(:,2)] = polyxpoly(a(:,1),a(:,2),b(:,1),b(:,2));
 end
 
 function [parent,labels,inputs,args,s] = parse(varargin)

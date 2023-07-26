@@ -2,7 +2,7 @@ function h = Ray(varargin)
 % RAY  draws a ray or half-line between two Geomatplot points.
 %   RAY({A,B}) draws a ray between point A and point B extending past point B.
 %
-%   RAY(label,{A,B})  provides a label for the ray. The labe is not drawn.
+%   RAY(label,{A,B})  provides a label for the ray. The label is not drawn.
 %
 %   RAY(parent,___)  draws onto the given geomatplot, axes, or figure instead of
 %       the current one.
@@ -13,6 +13,8 @@ function h = Ray(varargin)
 %       Value pairs arguments.
 %
 %   h = RAY(___)  returns the created handle.
+%
+%   See also POINT, LINE, SEGMENT, PerpendicularBisector, AngleBisector, INTERSECT
 
     [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin{:});
     drawing.mustBeOfLength(inputs,2);

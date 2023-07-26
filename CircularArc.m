@@ -6,7 +6,7 @@ function [h,O,r,alpha,beta] = CircularArc(varargin)
 %   CircularArc({O,B,alpha}) draws a circluar arc around A starting from B with angle alpha in
 %       anticlockwise direction.
 %
-%   CircularArc(label,{___})  provides a label for the circle. The labe is not drawn.
+%   CircularArc(label,{___})  provides a label for the circle. The label is not drawn.
 %
 %   CircularArc(parent,___)  draws onto the given geomatplot, axes, or figure instead of
 %       the current one. Thus must preceed the label argument if that is given also.
@@ -16,7 +16,7 @@ function [h,O,r,alpha,beta] = CircularArc(varargin)
 %   CircularArc(___,Name,Value)  specifies additional properties using one or more Name,
 %       Value pairs arguments.
 %
-%   h = CircularArc(___)  returns the created handle for the circle.
+%   h = CircularArc(___)  returns the created handle for the arc.
 %
 %   [h,O] = CircularArc(___)  also returns the handle of the center point O.
 %
@@ -25,6 +25,8 @@ function [h,O,r,alpha,beta] = CircularArc(varargin)
 %   [h,O,r,alpha] = CircularArc(___)  returns the angle of the arc in radians.
 %
 %   [h,O,r,alpha,beta] = CircularArc(___)  returns the start angle compared to the x axis.
+%
+%   See also Circle, POINT, DISTANCE, SEGMENT, INTERSECT
 
     [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin{:});
 

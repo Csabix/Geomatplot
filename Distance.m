@@ -1,12 +1,26 @@
 function h = Distance(varargin)
-    
+% Distance  creates a dependent scalar holding the distance between two Geomaplot geometries.
+%
+%   Distance({A,B}) creates a dependent Geomatplot scalar with the distance between A and B points.
+%
+%   Distance({A,geom}) distance between a point and most geometries
+%
+%   Distance(label,___)  provides a label for the point.
+%
+%   Distance(parent,___)  draws onto the given geomatplot, axes, or figure instead of
+%       the current one. Thus must preceed the label argument if that is given also.
+%
+%   h = Distance(___)  returns the created handle.
+%
+%   See also CIRCLE
+
     [parent,label,inputs] = parse(varargin{:});
+    drawing.mustBeOfLength(inputs,2);
     
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base'}) || drawing.isInputPatternMatching(inputs,{'point_base','dpointseq'})
-        %callback = @(a,b) sqrt((a(1)-b(:,1)).^2 + (a(2)-b(:,2)).^2);
         callback = @dist_point2pointseq;
-%    elseif drawing.isInputPatternMatching(inputs,{'point_base','dcircle'})
-%        callback = @(a,b)
+    elseif drawing.isInputPatternMatching(inputs,{'point_base','dcircle'})
+        callback = @dist_point2circle; 
     elseif drawing.isInputPatternMatching(inputs,{'point_base','dlines'}) || drawing.isInputPatternMatching(inputs,{'point_base','mpolygon'})
         callback = @dist_point2polyline;
     else
@@ -18,6 +32,11 @@ function h = Distance(varargin)
     h_ = dscalar(parent,label,inputs,callback);
     
     if nargout == 1; h = h_; end
+end
+
+function v = dist_point2circle(p,c)
+    v = p.value - c.center.value;
+    v = abs(sqrt(v(1).^2 + v(2).^2) - c.radius.value);
 end
 
 function v = dist_point2pointseq(a,b)

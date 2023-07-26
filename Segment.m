@@ -2,7 +2,7 @@ function h = Segment(varargin)
 % SEGMENT  draws a straight segment between two Geomatplot points.
 %   SEGMENT({A,B}) draws a line segment between point A and point B.
 %
-%   SEGMENT(label,{A,B})  provides a label for the line. The labe is not drawn.
+%   SEGMENT(label,{A,B})  provides a label for the line. The label is not drawn.
 %
 %   SEGMENT(parent,___)  draws onto the given geomatplot, axes, or figure instead of
 %       the current one.
@@ -13,6 +13,8 @@ function h = Segment(varargin)
 %       Value pairs arguments.
 %
 %   h = SEGMENT(___)  returns the created handle.
+%
+%   See also POINT, LINE, RAY, PerpendicularBisector, AngleBisector, INTERSECT
 
     [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin{:});
     drawing.mustBeOfLength(inputs,2);

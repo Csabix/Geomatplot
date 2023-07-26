@@ -1,8 +1,8 @@
 function h = Point(varargin)
-% Point  places a moveable point on canvas
+% Point  places a moveable point on the canvas
 %   Point() awaits user to click on the current figure to draw the point onto. Afterwards, the
-%       execution resumes and the point remains a moveable. It will also update Geomatplot drawings
-%       that depend on it when moved.
+%       execution resumes and the point remains a moveable. It will also update any Geomatplot
+%       drawings that depend on it when moved.
 %
 %   Point([x y]) specifies starting position of the point, thus no user input is needed after the
 %       call.
@@ -10,7 +10,7 @@ function h = Point(varargin)
 %   Point(label,___)  provides a label for the point.
 %
 %   Point(parent,___)  draws onto the given geomatplot, axes, or figure instead of
-%       the current one. Thus must preceed the label argument if that is given also.
+%       the current one. This must preceed the label argument if that is given also.
 %
 %   Point(___,color)  specifies the color of the point and its label, the default is 'b'. This may
 %       be a colorname or a three element vector.
@@ -19,6 +19,8 @@ function h = Point(varargin)
 %       Value pairs arguments.
 %
 %   h = Point(___)  returns the created handle.
+%
+%   See also GEOMATPLOT, SEGMENT, CIRCLE, MIDPOINT, POLYGON
 
     [parent,label,args] = parse(varargin{:});
     h_ = mpoint(parent,label,args);

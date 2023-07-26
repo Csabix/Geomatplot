@@ -2,7 +2,7 @@ function h = PerpendicularBisector(varargin)
 % PerpendicularBisector  draws a perpendicular bisector.
 %   PerpendicularBisector({A,B}) draws the perpendicular bisector line seperating A and B points.
 %
-%   PerpendicularBisector(label,{A,B})  provides a label for the line. The labe is not drawn.
+%   PerpendicularBisector(label,{A,B})  provides a label for the line. The label is not drawn.
 %
 %   PerpendicularBisector(parent,___)  draws onto the given geomatplot, axes, or figure instead of
 %       the current one.

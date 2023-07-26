@@ -1,5 +1,27 @@
 function h = Polygon(varargin)
-% todo write help
+% Polygon  places a movable polygon on the canvas
+%   Polygon() awaits user to click on the current figure to draw the polygon vertex by vertex.
+%       Afterwards, the execution resumes and the polygon is adjustable. It will also update
+%       any Geomatplot drawings that depend on it when moved. Verices may be moved, or even created
+%       and deleted using the context menu when right clicking.
+%
+%   Point([x y]) specifies starting positions of the polygon vertices, thus no user input is needed
+%       after the call. It expects a Nx2 matrix as input.
+%
+%   Point(label,___)  provides a label for the polygon.
+%
+%   Point(parent,___)  draws onto the given geomatplot, axes, or figure instead of
+%       the current one. This must preceed the label argument if that is given also.
+%
+%   Point(___,color)  specifies the color of the point and its label, the default is 'b'. This may
+%       be a colorname or a three element vector.
+%
+%   Point(___,Name,Value)  specifies additional properties using one or more Name,
+%       Value pairs arguments.
+%
+%   h = Point(___)  returns the created handle.
+%
+%   See also GEOMATPLOT, POINT, SEGMENT, CIRCLE, INTERSECT
 
     [parent,label,args] = parse(varargin{:});
     h_ = mpolygon(parent,label,args);

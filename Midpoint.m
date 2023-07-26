@@ -18,6 +18,8 @@ function h = Midpoint(varargin)
 %       Value pairs arguments.
 %
 %   h = Midpoint(___)  returns the created handle.
+%
+%   See also POINT, SEGMENT, CIRCLE
 
     [parent,label,inputs,args] = parse(varargin{:});
     %callback = @(varargin) mean(vertcat(varargin{:}));

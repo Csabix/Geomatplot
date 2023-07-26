@@ -24,6 +24,8 @@ function [h,O,r] = Circle(varargin)
 %   [h,O] = Circle(___)  also returns the handle of the center point C.
 %
 %   [h,O,r] = Circle(___)  returns the radius handle r which is a dependent Geomaplot scalar.
+%
+%   See also CirclularArc, POINT, DISTANCE, SEGMENT, INTERSECT
 
     [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin{:});
 

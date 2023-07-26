@@ -2,7 +2,7 @@ function h = Line(varargin)
 % LINE  draws a line between two Geomatplot points.
 %   LINE({A,B}) draws a line between point A and point B extending past both points.
 %
-%   LINE(label,{A,B})  provides a label for the line. The labe is not drawn.
+%   LINE(label,{A,B})  provides a label for the line. The label is not drawn.
 %
 %   LINE(parent,___)  draws onto the given geomatplot, axes, or figure instead of
 %       the current one.
@@ -13,6 +13,8 @@ function h = Line(varargin)
 %       Value pairs arguments.
 %
 %   h = LINE(___)  returns the created handle.
+%
+%   See also POINT, SEGMENT, RAY, PerpendicularBisector, AngleBisector, INTERSECT
 
     [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin{:});
     drawing.mustBeOfLength(inputs,2);

@@ -1,10 +1,29 @@
 function h = Midpoint(varargin)
+% Midpoint  creates a midpoint or centroid between two points or more points
+%
+%   Midpoint({A,B}) creates a dependent Geomatplot point that is a midpoint between A and B points.
+%
+%   Midpoint({A,B,C,...}) creates the centroid point of any number of points or polygons or curves.
+%       For curves, it uses its automatic polygonization.
+%
+%   Midpoint(label,___)  provides a label for the point.
+%
+%   Midpoint(parent,___)  draws onto the given geomatplot, axes, or figure instead of
+%       the current one. Thus must preceed the label argument if that is given also.
+%
+%   Midpoint(___,color)  specifies the color of the point and its label, the default is 'b'. This may
+%       be a colorname or a three element vector.
+%
+%   Midpoint(___,Name,Value)  specifies additional properties using one or more Name,
+%       Value pairs arguments.
+%
+%   h = Midpoint(___)  returns the created handle.
 
     [parent,label,inputs,args] = parse(varargin{:});
     %callback = @(varargin) mean(vertcat(varargin{:}));
     for i = 1:length(inputs)
         l = inputs{i};
-        if isa(l,'dcurve') || isa(l,'dimage')
+        if isa(l,'dcurve') || isa(l,'dimage') || isa(l,'dscalar')
             eidType = 'Midpoint:invalidInput';
             msgType = 'The input drawing cannot be of this type.';
             throw(MException(eidType,msgType));

@@ -18,7 +18,8 @@ function [h,g] = Intersect(varargin)
 %   INTERSECT(parent,___)  draws onto the given geomatplot, axes, or figure instead of
 %       the current one.
 %
-%   INTERSECT(___,color)  specifies the color of the intersection, the default is 'k'.
+%   INTERSECT(___,color)  specifies the color of the intersection, the default is 'k'. This may
+%       be a colorname or a three element vector.
 %
 %   INTERSECT(___,Name,Value)  specifies additional properties using one or more Name,
 %       Value pairs arguments.

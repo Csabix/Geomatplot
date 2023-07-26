@@ -27,7 +27,7 @@ methods (Static,Hidden)
             parent         (1,1) Geomatplot
             label          (1,:) char       {mustBeValidVariableName}
             inputs         (1,:) cell       {drawing.mustBeInputList(inputs,parent)}
-            linespec       (1,:) char       {drawing.mustBeLineSpec}        = 'k'
+            linespec       (1,:) char       {drawing.mustBeLineSpec}        = 'k-'
             args.LineWidth (1,1) double     {mustBePositive}                = 1.5
             args.LineStyle (1,:) char
             args.Marker    (1,:) char

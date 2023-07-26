@@ -2,7 +2,7 @@ classdef mpoint < moveable & point_base
 methods
     function o = mpoint(parent,label,args)
         args = namedargs2cell(args);
-        h = drawpoint(args{:});
+        h = drawpoint('Deletable',0,args{:});
         o = o@moveable(parent,label,h);
     end
     function v = value(o)

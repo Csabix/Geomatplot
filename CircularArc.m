@@ -1,6 +1,30 @@
-
-function [h,c,r,alpha,beta] = CircularArc(varargin)
-% TODO write help
+function [h,O,r,alpha,beta] = CircularArc(varargin)
+% CircularArc  draws an circular arc
+%   CircularArc({O,B,C}) draws a circluar arc around A starting from B until it meets the AC line in
+%       anticlockwise direction.
+%
+%   CircularArc({O,B,alpha}) draws a circluar arc around A starting from B with angle alpha in
+%       anticlockwise direction.
+%
+%   CircularArc(label,{___})  provides a label for the circle. The labe is not drawn.
+%
+%   CircularArc(parent,___)  draws onto the given geomatplot, axes, or figure instead of
+%       the current one. Thus must preceed the label argument if that is given also.
+%
+%   CircularArc(___,linespec)  specifies line style, the default is 'k-'.
+%
+%   CircularArc(___,Name,Value)  specifies additional properties using one or more Name,
+%       Value pairs arguments.
+%
+%   h = CircularArc(___)  returns the created handle for the circle.
+%
+%   [h,O] = CircularArc(___)  also returns the handle of the center point O.
+%
+%   [h,O,r] = CircularArc(___)  returns the radius handle r which is a dependent Geomaplot scalar.
+%
+%   [h,O,r,alpha] = CircularArc(___)  returns the angle of the arc in radians.
+%
+%   [h,O,r,alpha,beta] = CircularArc(___)  returns the start angle compared to the x axis.
 
     [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin{:});
 
@@ -8,24 +32,24 @@ function [h,c,r,alpha,beta] = CircularArc(varargin)
     % (center, starting_point, third_point) -- third_point sets the arc angle
         c_ = inputs{1};
         r_ = Distance(parent,inputs(1:2));
-        alpha_ = dscalar(parent, parent.getNextLabel('small'), inputs(1:2), @base_angle);
-        beta_ = dscalar(parent, parent.getNextLabel('small'), inputs, @angle_between);
+        beta_ = dscalar(parent, parent.getNextLabel('small'), inputs(1:2), @base_angle);
+        alpha_ = dscalar(parent, parent.getNextLabel('small'), inputs, @angle_between);
     elseif drawing.isInputPatternMatching(inputs,{'point_base','point_base','dscalar'})
     % (center, starting_point, angle)
         c_ = inputs{1};
         r_ = Distance(parent,inputs(1:2));
-        alpha_ = dscalar(parent, parent.getNextLabel('small'), inputs(1:2), @base_angle);
-        beta_ = inputs{3};
+        beta_ = dscalar(parent, parent.getNextLabel('small'), inputs(1:2), @base_angle);
+        alpha_ = inputs{3};
     else
         eidType = 'CircularArc:invalidInputPattern';
         msgType = 'Unsupported input label types or unknown overload.';
         throw(MException(eidType,msgType));
     end
     
-    h_ = dcurve(parent,label,{c_,r_,alpha_,beta_},linespec,@circ_arc,args);
+    h_ = dcurve(parent,label,{c_,r_,beta_,alpha_},linespec,@circ_arc,args);
 
     if nargout >= 1; h = h_; end
-    if nargout >= 2; c = c_; end
+    if nargout >= 2; O = c_; end
     if nargout >= 3; r = r_; end
     if nargout >= 4; alpha = alpha_; end
     if nargout >= 5; beta = beta_; end

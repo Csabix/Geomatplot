@@ -2,6 +2,10 @@ classdef dpoint < dependent & point_base
 methods
     function o = dpoint(parent,label,labels,callback,args)
         o = o@dependent(parent,label,labels,callback);
+        if nargin < 5
+            args.Color='k'; args.MarkerSize=6; args.LabelAlpha=0; args.LabelTextColor='k';
+            args.Label=label; args.LabelVisible ='hover';
+        end
         args = namedargs2cell(args);
         o.fig = drawpoint('InteractionsAllowed','none',args{:},'Position',[0 0]);
         o.fig.UserData = o;

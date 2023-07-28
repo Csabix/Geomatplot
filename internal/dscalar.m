@@ -1,17 +1,8 @@
-classdef dscalar < dependent
+classdef dscalar < dnumeric
 properties
-    val (:,:) double
+    val % (1,1) double
 end
 methods
-    function o=dscalar(parent,label,inputs,callback)
-        o@dependent(parent,label,struct,inputs,callback);
-    end
-    function v = value(o)
-        v = o.val;
-    end
-    function updatePlot(o,val)
-        o.val = val;
-    end
     function c = plus(a,b)
         c = dscalar.operator(a,b,@plus);
     end
@@ -37,15 +28,6 @@ methods (Access=private,Static)
             c = dscalar(b.parent,b.parent.getNextLabel('small'),{b},@(b) op(a,b.value));
         else
             c = dscalar(a.parent,a.parent.getNextLabel('small'),{a},@(a) op(a.value,b));
-        end
-    end
-end
-methods (Static)
-    function args = parseOutputs(args)
-        if isempty(args)
-            error 'Callback has no outputs.'
-        elseif length(args)>1
-            error 'Callback has more then one output.'
         end
     end
 end

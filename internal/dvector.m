@@ -1,6 +1,6 @@
-classdef dvector < dscalar
+classdef dvector < dnumeric
 properties
-    %val (:,2) double;
+    val % (1,2) double
 end
 methods
     function c = plus(a,b)

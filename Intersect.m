@@ -33,19 +33,14 @@ function [h,g] = Intersect(varargin)
 
     [parent,labels,inputs,args,s] = parse(varargin{:});
     drawing.mustBeOfLength(inputs,2);
-    if drawing.isInputPatternMatching(inputs,{'point_base','drawing'}) || drawing.isInputPatternMatching(inputs,{'drawing','point_base'})
-        eidType = 'Intersect:intersectWithPoint';
-        msgType = 'Cannot intersect with point.';
-        throw(MException(eidType,msgType));
-    elseif drawing.isInputPatternMatching(inputs,{'dimage','drawing'}) || drawing.isInputPatternMatching(inputs,{'drawing','dimage'})
-        eidType = 'Intersect:intersectWithImage';
-        msgType = 'Cannot intersect with image.';
-        throw(MException(eidType,msgType));
-    elseif drawing.isInputPatternMatching(inputs,{'dcircle','dlines'}) || drawing.isInputPatternMatching(inputs,{'dlines','dcircle'}) ||...
-           drawing.isInputPatternMatching(inputs,{'dcircle','mpolygon'}) || drawing.isInputPatternMatching(inputs,{'mpolygon','dcircle'})
+    %if drawing.isInputPatternMatching(inputs,{'dcircle','dcircle'}})
+    %else
+    if drawing.isInputPatternMatching(inputs,{'dcircle',{'dlines','mpolygon'}})
         callback = @intersect_circle2polyline;
-        if isa(inputs{2},'dcircle'); inputs = inputs([2 1]); end
-    else
+    elseif drawing.isInputPatternMatching(inputs,{{'dlines','mpolygon'},'dcircle'})
+        callback = @intersect_circle2polyline;
+        inputs = inputs([2 1]);
+    elseif drawing.isInputPatternMatching(inputs,{{'dlines','mpolygon'},{'dlines','mpolygon'}})
         callback = @intersect_poly2poly;
     end
 
@@ -96,7 +91,7 @@ function v = intersect_circle2polyline(c,p)
     ab = [ab(l,:) ; ab(l,:)];
     d  = sqrt(d(l)); %d = [d; -d]; %both signes
 
-    t = -0.5*([B(l);B(l)]+sign(A).*[d; -d])./A;
+    t = -0.5*([B(l);B(l)]+[d;-d])./A;
     l = 0<t & t<1;
     %t2 = 0.5*(-B+sign(A).*d)./A;
     %b2 = 0<t2 & t2<1;

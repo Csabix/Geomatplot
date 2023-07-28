@@ -95,7 +95,17 @@ methods (Access=public,Static,Hidden)
         else
             b = true;
             for i = 1:length(inputs)
-                b = b && isa(inputs{i},pattern{i});
+                pat = pattern{i};
+                in = inputs{i};
+                if iscell(pat)
+                    b2 = false;
+                    for j=1:length(pat)
+                        b2 = b2 || isa(in,pat{j});
+                    end
+                    b = b && b2;
+                else
+                    b = b && isa(in,pat);
+                end
             end            
         end
     end

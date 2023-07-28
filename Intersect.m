@@ -41,10 +41,15 @@ function [h,g] = Intersect(varargin)
         eidType = 'Intersect:intersectWithImage';
         msgType = 'Cannot intersect with image.';
         throw(MException(eidType,msgType));
+    elseif drawing.isInputPatternMatching(inputs,{'dcircle','dlines'}) || drawing.isInputPatternMatching(inputs,{'dlines','dcircle'}) ||...
+           drawing.isInputPatternMatching(inputs,{'dcircle','mpolygon'}) || drawing.isInputPatternMatching(inputs,{'mpolygon','dcircle'})
+        callback = @intersect_circle2polyline;
+    else
+        callback = @intersect_poly2poly;
     end
 
     l = parent.getNextLabel('small');
-    g_ = dpointseq(parent,l,inputs,@intersect_poly2poly,s);
+    g_ = dpointseq(parent,l,inputs,callback,s);
     drawing.mustBeOfLength(inputs,2);
     
     for i = 1:length(labels)
@@ -66,6 +71,31 @@ function v = intersect_poly2poly(a,b)
 % maybe try this? https://www.mathworks.com/matlabcentral/fileexchange/22444-minimum-distance-between-two-polygons
     a = a.value; b = b.value; 
     [v(:,1), v(:,2)] = polyxpoly(a(:,1),a(:,2),b(:,1),b(:,2));
+end
+
+function v = intersect_circle2polyline(c,p)
+    p = p.value;
+    a = p(1:end-1,:);
+    ab = diff(p,1);
+    ac = a - c.center.value;
+    A = dot(ab,ab,2);
+    B = 2*dot(ab,ac,2);
+    %C = dot(ac,ac,2)-c.radius.value.^2;
+    d = B.*B-4.*A.*(dot(ac,ac,2)-c.radius.value.^2);
+    l = d>0;
+    A  = [A(l)    ; A(l)   ];
+   %B  = [B(l)    ; B(l)   ];
+    a  = [a(l,:)  ; a(l,:) ];
+    ab = [ab(l,:) ; ab(l,:)];
+    d  = sqrt(d(l)); %d = [d; -d]; %both signes
+
+    t = -0.5*([B(l);B(l)]+sign(A).*[d; -d])./A;
+    l = 0<t & t<1;
+    %t2 = 0.5*(-B+sign(A).*d)./A;
+    %b2 = 0<t2 & t2<1;
+
+    %v  = [ a(l,:)+ab(l,:).*t(l) ; a(b2,:)+ab(b2,:).*t2(b2) ];
+    v = a(l,:)+ab(l,:).*t(l);
 end
 
 function [parent,labels,inputs,args,s] = parse(varargin)

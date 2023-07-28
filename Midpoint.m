@@ -25,7 +25,7 @@ function h = Midpoint(varargin)
     %callback = @(varargin) mean(vertcat(varargin{:}));
     for i = 1:length(inputs)
         l = inputs{i};
-        if isa(l,'dcurve') || isa(l,'dimage') || isa(l,'dscalar')
+        if isa(l,'dcurve') || isa(l,'dimage') || isa(l,'dnumeric')
             eidType = 'Midpoint:invalidInput';
             msgType = 'The input drawing cannot be of this type.';
             throw(MException(eidType,msgType));

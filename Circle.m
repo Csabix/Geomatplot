@@ -34,9 +34,7 @@ function [h,O,r] = Circle(varargin)
         r_ = Distance(parent,{c_,inputs{1}});
     elseif drawing.isInputPatternMatching(inputs,{'point_base','dscalar'})
         c_ = inputs{1}; r_ = inputs{2};
-    elseif drawing.isInputPatternMatching(inputs,{'point_base','point_base'}) || ...
-           drawing.isInputPatternMatching(inputs,{'point_base','dpointlineseq'}) || ...
-           drawing.isInputPatternMatching(inputs,{'point_base','mpolygon'})
+    elseif drawing.isInputPatternMatching(inputs,{'point_base',{'point_base','dpointlineseq','mpolygon'}})
         c_ = inputs{1};
         r_ = Distance(parent,{c_,inputs{2}});
     else

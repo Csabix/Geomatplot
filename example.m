@@ -35,14 +35,13 @@ Circle({P,b},'y');
 
 %% Test
 clf; g = Geomatplot;
-%A = Point([0 1]); 
-%B = Point([1 0]); 
+A = Point([0 1]); 
+B = Point([1 0]); 
 C = Point([0 0]); 
 D = Point([.6 .6]);
-%a = Line({A,B});
-f = Polygon([-1 0;1 0;1 1;0.7 0.7;0.3 0.5;0 0.9;-0.5 0.3;-1 0.3],'g');
+a = Circle({A,B});
 b = Circle({C,D});
-[EF,gg] = Intersect(8,{b,f});
+[EF,gg] = Intersect(2,{a,b});
 
 %% Polygon
 clf; g = Geomatplot;

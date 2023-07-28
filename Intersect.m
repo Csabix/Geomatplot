@@ -33,9 +33,9 @@ function [h,g] = Intersect(varargin)
 
     [parent,labels,inputs,args,s] = parse(varargin{:});
     drawing.mustBeOfLength(inputs,2);
-    %if drawing.isInputPatternMatching(inputs,{'dcircle','dcircle'}})
-    %else
-    if drawing.isInputPatternMatching(inputs,{'dcircle',{'dlines','mpolygon'}})
+    if drawing.isInputPatternMatching(inputs,{'dcircle','dcircle'})
+        callback = @intersect_circle2circle;
+    elseif drawing.isInputPatternMatching(inputs,{'dcircle',{'dlines','mpolygon'}})
         callback = @intersect_circle2polyline;
     elseif drawing.isInputPatternMatching(inputs,{{'dlines','mpolygon'},'dcircle'})
         callback = @intersect_circle2polyline;
@@ -98,6 +98,22 @@ function v = intersect_circle2polyline(c,p)
 
     %v  = [ a(l,:)+ab(l,:).*t(l) ; a(b2,:)+ab(b2,:).*t2(b2) ];
     v = a(l,:)+ab(l,:).*t(l);
+end
+
+function v = intersect_circle2circle(c0,c1)
+    o0 = c0.center.value; %o1 = c1.center.value;
+    o01 = c1.center.value - o0;
+    d2 = 1/(o01(1)^2+o01(2)^2);
+    R2 = c0.radius.value.^2*d2;
+    r2 = c1.radius.value.^2*d2;
+    t = 0.5 + 0.5*(R2 - r2);
+    s = R2 - t^2;
+    if s > 0
+        s = sqrt(s);
+        v = o0 + t*o01 + [s;-s]*o01*[0 1; -1 0];
+    else
+        v = zeros(0,2);
+    end
 end
 
 function [parent,labels,inputs,args,s] = parse(varargin)

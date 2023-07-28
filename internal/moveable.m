@@ -25,7 +25,7 @@ methods (Static)
                 detail_level = 0.25;
         end
         values = struct2cell(fig.UserData.deps);
-        fig.UserData.runtime = 0;
+        runtime = 0;
         for i = 1:length(values)
             v = values{i}; v.defined = true;
             for j = 1:length(v.inputs)
@@ -34,10 +34,11 @@ methods (Static)
             if v.defined
                 v.update(detail_level);
                 if(v.defined)
-                    fig.UserData.runtime = fig.UserData.runtime + v.runtime;
+                    runtime = runtime + v.runtime;
                 end
             end
         end
+        fig.UserData.runtime = runtime;
     end
 end
 end

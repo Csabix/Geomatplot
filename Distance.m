@@ -17,11 +17,11 @@ function h = Distance(varargin)
     [parent,label,inputs] = parse(varargin{:});
     drawing.mustBeOfLength(inputs,2);
     
-    if drawing.isInputPatternMatching(inputs,{'point_base','point_base'}) || drawing.isInputPatternMatching(inputs,{'point_base','dpointseq'})
+    if drawing.isInputPatternMatching(inputs,{'point_base',{'point_base','dpointseq'}})
         callback = @dist_point2pointseq;
     elseif drawing.isInputPatternMatching(inputs,{'point_base','dcircle'})
         callback = @dist_point2circle; 
-    elseif drawing.isInputPatternMatching(inputs,{'point_base','dlines'}) || drawing.isInputPatternMatching(inputs,{'point_base','mpolygon'})
+    elseif drawing.isInputPatternMatching(inputs,{'point_base',{'dlines','mpolygon'}})
         callback = @dist_point2polyline;
     else
         eidType = 'Distance:invalidInputPattern';

@@ -26,9 +26,9 @@ end
 
 methods (Access = protected)
 
-    function addCallbacks(o,labels)
-        for i = 1:length(labels)
-            h = labels{i};
+    function addCallbacks(o,inputs)
+        for i = 1:length(inputs)
+            h = inputs{i};
             if isa(h,'moveable')
                 o.movs.(h.label) = h;
             else

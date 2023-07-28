@@ -44,6 +44,7 @@ function [h,g] = Intersect(varargin)
     elseif drawing.isInputPatternMatching(inputs,{'dcircle','dlines'}) || drawing.isInputPatternMatching(inputs,{'dlines','dcircle'}) ||...
            drawing.isInputPatternMatching(inputs,{'dcircle','mpolygon'}) || drawing.isInputPatternMatching(inputs,{'mpolygon','dcircle'})
         callback = @intersect_circle2polyline;
+        if isa(inputs{2},'dcircle'); inputs = inputs([2 1]); end
     else
         callback = @intersect_poly2poly;
     end
@@ -54,7 +55,13 @@ function [h,g] = Intersect(varargin)
     
     for i = 1:length(labels)
         args.Label = labels{i};
-        h_(i) = dpoint(parent,labels{i},{g_}, @(x) x.value(i), args);
+        try
+            h_(i) = dpoint(parent,labels{i},{g_}, @(x) x.value(i), args);
+        catch ME
+            if ~strcmp(ME.identifier,'MATLAB:badsubscript')
+                rethrow(ME);
+            end
+        end
     end
     
     if nargout >= 1

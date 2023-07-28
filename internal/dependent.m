@@ -1,17 +1,22 @@
 classdef (Abstract) dependent < drawing
 properties
-	inputs (1,:) cell
-	callback
+	inputs    (1,:) cell
+	callback  (1,1)
     movs
+    exception                       = []
 end
 methods
 
-    function o = dependent(parent,label,inputs,callback)
-        o = o@drawing(parent,label,[]);
+    function o = dependent(parent,label,fig,inputs,callback)
+        o = o@drawing(parent,label,fig);
         o.inputs = inputs;
-        o.callback = callback;
         o.parent.deps.(label)=o;
-        o.addCallbacks(o.inputs);
+        if ~isempty(callback)
+            o.callback = callback;
+            o.addCallbacks(o.inputs);
+            o.update;
+            if ~isempty(o.exception); rethrow(o.exception); end
+        end
     end
 
     function update(o,~)
@@ -44,8 +49,9 @@ methods (Access = protected)
         try
             outs = cell(1,abs(nargout(o.callback)));
             [outs{:}] = o.callback(varargin{:},o.inputs{:});
-        catch
+        catch ME
             o.defined = false;
+            o.exception = ME;
         end
         if o.defined
             ret = o.parseOutputs(outs);

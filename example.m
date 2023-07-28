@@ -1,15 +1,16 @@
 % Examples
 
 %% Geogebra like triangle
-clf; Geomatplot; ylim([-0.4 0.6])
+clf; g = Geomatplot; ylim([-0.4 0.6])
 A = Point([0  0]); % draggable point, automatically labelled A
 B = Point([1  0]); % automatic labels are applied if no label is given
 C = Point([.7 .5]);
+%CircularArc({A,B,C});
 Segment({A,B},'b'); % a blue segment from A and B
 Segment({B,C},'b');
 Segment({C,A},'b');
 Midpoint('S',{A,B,C}); % Barycenter of triangle labelled S
-Circle({A,B,C},'m--'); % Magenta dashed circumcircle of the triangle
+[~,~,r] = Circle({A,B,C},'m--'); % Magenta dashed circumcircle of the triangle
 PerpendicularBisector({A,B},':');
 PerpendicularBisector({B,C},':');
 PerpendicularBisector({C,A},':');
@@ -32,28 +33,37 @@ Image(@dist2bezier,{b0,b1,b2},c1,c2); colorbar;
 P = Point('P',[0 0],'y');
 Circle({P,b},'y');
 
-
 %% Test
 clf; g = Geomatplot;
-A = Point([0 0]); 
-B = Point([1 1]); 
-C = Point([0 1]); 
-D = Point([1 0]);
-a = Segment({A,B});
+%A = Point([0 1]); 
+%B = Point([1 0]); 
+C = Point([0 0]); 
+D = Point([.6 .6]);
+%a = Line({A,B});
+f = Polygon([-1 0;1 0;1 1;0.7 0.7;0.3 0.5;0 0.9;-0.5 0.3;-1 0.3],'g');
 b = Circle({C,D});
-Intersect(2,{'b','a'})
-%d = Distance({A,B});
+[EF,gg] = Intersect(8,{b,f});
 
-%% Dist
+%% Polygon
 clf; g = Geomatplot;
-b0 = Point('b0',[0.1 0.2],'r'); % draggable control points
-b1 = Point('b1',[0.7 0.9],'r'); % with given labels
-b2 = Point('b2',[0.9 0.2],'r');
-bt = @(t,b0,b1,b2)  b0.*(1-t).^2 + 2*b1.*t.*(1-t) + b2.*t.^2;
-b = Curve(bt,{b0,b1,b2},'r'); % A red quadratic Bézier curve
+f = Polygon([-1 0;1 0;1 1;0.7 0.7;0.3 0.5;0 0.9;-0.5 0.3;-1 0.3],'g');
+p0 = Point('p0',[-1,1]);
+Point('v0',[-0.9,0.9]);
+l = Line({'p0','v0'},'k');
+r = Ray({'p0','v0'},'r');
+p = p0;
+for i = 1:15
+    c = Circle({p,f});
+    p = Intersect({l,c});
+end
 
-A = Point([0 0]);
-Circle({A,b},'b');
+%%
+clf; g = Geomatplot;
+A = Point([0,0]);
+B = Point([1,1]);
+c = Circle('c',{A,B});
+P = Point('p',[.5 .5]);
+Circle({P,c});
 
 %% dist2bezier
 

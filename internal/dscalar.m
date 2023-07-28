@@ -4,8 +4,7 @@ properties
 end
 methods
     function o=dscalar(parent,label,inputs,callback)
-        o@dependent(parent,label,inputs,callback);
-        o.update(1);
+        o@dependent(parent,label,struct,inputs,callback);
     end
     function v = value(o)
         v = o.val;

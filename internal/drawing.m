@@ -1,10 +1,10 @@
 classdef (Abstract) drawing < handle
 properties
 	parent  (1,1) Geomatplot
-	label	(1,:) char % indetifier
-	fig		% plot handle to ROI or matlab plot
-    runtime (1,1) double = 0
-    defined (1,1) logical = true;
+	label	(1,:) char           % indetifier
+	fig                          % plot handle to ROI or matlab plot
+    runtime (1,1) double  = 0
+    defined (1,1) logical = true
 end
 
 methods
@@ -12,6 +12,7 @@ methods
         o.parent = parent;
         o.label = label;
         o.fig = fig;
+        o.fig.UserData = o;
     end
 end
 

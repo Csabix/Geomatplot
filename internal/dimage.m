@@ -1,57 +1,64 @@
 classdef dimage < dependent
 properties
-    c0
-    c1
+    corner0
+    corner1
 end
 methods
-    function o = dimage(parent,label,labels,callback,c0,c1,args)
-        o = o@dependent(parent,label,labels,callback);
-        o.c0 = c0;      o.c1 = c1;
-        o.fig = imagesc('XData',[0 1],'YData',[0 1],'CData',0,args{:});
-        o.fig.UserData = o;
-        uistack(o.fig,"bottom");
-        if isa(o.c0,'point_base')
-            o.addCallbacks({c0});
+    function o = dimage(parent,label,inputs,callback,c0,c1,args)
+        fig = imagesc('XData',[0 1],'YData',[0 1],'CData',0,args{:});
+        uistack(fig,"bottom");
+        o = o@dependent(parent,label,fig,inputs,[]);
+        o.corner0 = c0;      o.corner1 = c1;
+        o.callback = callback;
+        if isa(o.corner0,'point_base')
+            inputs = [inputs {c0}];
         end
-        if isa(o.c1,'point_base')
-            o.addCallbacks({c1});
+        if isa(o.corner1,'point_base')
+            inputs = [inputs {c1}];
         end
-        o.update(1);
+        o.addCallbacks(inputs);
+        o.update;
+        if ~isempty(o.exception); rethrow(o.exception); end
     end
 
     function v = value(o)
-        v = [o.getRange(1); o.getRange(2)]';
+        [x,y] = o.getRanges;
+        v = [x;y]';
     end
 
     function update(o,detail_level)
+        if nargin < 2; detail_level = 1; end
         [x,y] = o.getMeshgrid(256*detail_level);
         o.call(x,y);
     end
 
     function updatePlot(o,C)
         o.fig.CData = C;
-        o.fig.XData = o.getRange(1);
-        o.fig.YData = o.getRange(2);
+        [o.fig.XData,o.fig.YData] = o.getRanges;
     end
     
 end
 methods (Access=private)
-    function r = getRange(o,dim)
-        if isa(o.c0,'point_base')
-            c0 = o.c0.value;
+    
+    function [xrange,yrange] = getRanges(o)
+        if isa(o.corner0,'point_base')
+            c0 = o.corner0.value;
         else
-            c0 = o.c0;
+            c0 = o.corner0;
         end
-        if isa(o.c1,'point_base')
-            c1 = o.c1.value;
+        if isa(o.corner1,'point_base')
+            c1 = o.corner1.value;
         else
-            c1 = o.c1;
+            c1 = o.corner1;
         end
-        r = [c0(dim) c1(dim)];
-        if r(1)>r(2); r = r([2 1]); end
+        xrange = [c0(1) c1(1)];
+        if xrange(1)>xrange(2); xrange = xrange([2 1]); end
+        yrange = [c0(2) c1(2)];
+        if yrange(1)>yrange(2); yrange = yrange([2 1]); end
     end
+    
     function [x,y] = getMeshgrid(o,res)
-        xr = o.getRange(1); yr = o.getRange(2);
+        [xr,yr] = o.getRanges;
         xl = xr(2) - xr(1); yl = yr(2) - yr(1);
         x = linspace(xr(1),xr(2),res*xl/(xl+yl));
         y = linspace(yr(1),yr(2),res*yl/(xl+yl));

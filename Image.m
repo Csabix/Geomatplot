@@ -1,6 +1,6 @@
-function h = Image(usercallback,varargin)
+function h = Image(varargin)
 % Image  visualizes a given 2D function over an area
-%   Image(callback,{A,B,...}) draws an image using the given callback function handle of the form
+%   Image({A,B,...},callback) draws an image using the given callback function handle of the form
 %           callback(X,Y,A,B,...) -> C
 %       where A,B,... are n >= 1 number of ony Geomaplot handles, and their values will be passed to
 %       the given callback. For example, if A is a point, then its position vector [x y] will be
@@ -11,11 +11,12 @@ function h = Image(usercallback,varargin)
 %       Note that if the callback throws any error, the excecution does not stop, the image goes
 %       into the 'undefined' state and it will not be drawn.
 %       For example, the following visualizes the distance function of a single point:
-%           Image(@(X,Y,A) sqrt((X-A(1)).^2 + (Y-A(2)).^2),{Point})
+%           Image({Point},@(X,Y,A) sqrt((X-A(1)).^2 + (Y-A(2)).^2))
 %
-%   Image(___,corner0,corner1)  specifies a corners (eg. lower left and upper right) of the plotted
-%       region. The values may be two element position vectors, or even point objects allowing for
-%       dynamically changing the visualized function domain. The default corners are [0,0] and [1,1]. 
+%   Image({A,B,...},callback,corner0,corner1)  specifies a corners (eg. lower left and upper right)
+%       of the plotted region. The values may be two element position vectors, or even point objects
+%       allowing for dynamically changing the visualized function domain. The default corners are
+%       [0,0] and [1,1]. 
 %
 %   Image(label,{___})  provides a label for the curve. The label is not drawn.
 %
@@ -29,13 +30,7 @@ function h = Image(usercallback,varargin)
 %
 %   See also Curve, POINT, DISTANCE, Circle
 
-    [parent,label,inputs,corner0,corner1] = parse_image_inputs(varargin{:});
-    if nargin(usercallback) ~= length(inputs)+2
-        eidType = 'Image:callbackWrongNumberOfArguments';
-        msgType = ['Callback needs ' int2str(length(inputs)+2) ' number of arguments with the\n' ...
-                   'first two being the X and Y sample positions.'];
-        throw(MException(eidType,msgType));
-    end
+    [parent,label,inputs,usercallback,corner0,corner1] = parse(varargin{:});
 
     n = abs(nargout(usercallback));
     function varargout = internalcallback(varargin)
@@ -50,20 +45,30 @@ function h = Image(usercallback,varargin)
     if nargout == 1; h=h_; end
 end
 
-function [parent,label,inputs,corner0,corner1] = parse_image_inputs(varargin)
+function [parent,label,inputs,usercallback,corner0,corner1] = parse(varargin)
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
     [label,varargin] = parent.extractLabel(varargin,'capital');
-    [parent,label,inputs,corner0,corner1]= parse_image_inputs_(parent,label,varargin{:});
+    [parent,label,inputs,usercallback,corner0,corner1]= parse_(parent,label,varargin{:});
     inputs = parent.getHandlesOfLabels(inputs);
 end
 
-function [parent,label,inputs,corner0,corner1] = parse_image_inputs_(parent,label,inputs,corner0,corner1)
+function [parent,label,inputs,usercallback,corner0,corner1] = parse_(parent,label,inputs,usercallback,corner0,corner1)
     arguments
         parent          (1,1) Geomatplot
-        label           (1,:) char      {mustBeValidVariableName}
-        inputs          (1,:) cell      {drawing.mustBeInputList(inputs,parent)}
-        corner0                         {mustBePoint} = [0 0]
-        corner1                         {mustBePoint} = [1 1]
+        label           (1,:) char              {mustBeValidVariableName}
+        inputs          (1,:) cell              {drawing.mustBeInputList(inputs,parent)}
+        usercallback    (1,1) function_handle   {mustBeImageCallback(usercallback,inputs)}
+        corner0                                 {mustBePoint} = [0 0]
+        corner1                                 {mustBePoint} = [1 1]
+    end
+end
+
+function mustBeImageCallback(usercallback,inputs)
+    if nargin(usercallback) ~= length(inputs)+2
+        eidType = 'Image:callbackWrongNumberOfArguments';
+        msgType = ['Callback needs ' int2str(length(inputs)+2) ' number of arguments with the\n' ...
+                   'first two being the X and Y sample positions.'];
+        throw(MException(eidType,msgType));
     end
 end
 

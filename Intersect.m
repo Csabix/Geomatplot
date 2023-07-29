@@ -44,7 +44,7 @@ function [h,g] = Intersect(varargin)
         callback = @intersect_poly2poly;
     end
 
-    l = parent.getNextLabel('small');
+    l = parent.getNextLabel('ptseq');
     g_ = dpointseq(parent,l,inputs,callback,s);
     drawing.mustBeOfLength(inputs,2);
     

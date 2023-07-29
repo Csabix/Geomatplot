@@ -31,7 +31,7 @@ end
 
 function [parent,label,args] = parse(varargin)
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
-    [label,varargin] = parent.extractLabel(varargin,'small');
+    [label,varargin] = parent.extractLabel(varargin,'poly');
     [position,varargin] = drawing.extractPosition(varargin,inf);
     [parent,label,args] = parse_(parent,label,position,varargin{:});
 end

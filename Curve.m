@@ -44,7 +44,7 @@ end
 
 function [parent,label,inputs,usercallback,linespec,args] = parse(varargin)
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);   
-    [label,varargin] = parent.extractLabel(varargin,'small');
+    [label,varargin] = parent.extractLabel(varargin,'curve');
     [parent,label,inputs,usercallback,linespec,args] = parse_(parent,label,varargin{:});
     inputs = parent.getHandlesOfLabels(inputs);
 end

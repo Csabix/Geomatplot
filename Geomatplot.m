@@ -5,8 +5,9 @@ properties
 	deps % struct mapping label -> dependent class handles 
 end
 properties (Hidden)
-    nextCapitalLabel (1,1) int32 = 0; % 65 = 'A' = 'Z'-25
-    nextSmallLabel (1,1) int32 = 0;   % 97 = 'a' = 'z'-25
+    nextCapitalLabel (1,1) int32  = 0;      % 65 = 'A' = 'Z'-25
+    nextSmallLabel   (1,1) int32  = 0;      % 97 = 'a' = 'z'-25
+    nextOtherLabels  (1,1) struct = struct;
 end
     
 methods (Access = public)
@@ -14,6 +15,7 @@ methods (Access = public)
     function o = Geomatplot(ax)
         % todo xlim
         addpath internal\
+        addpath examples\
         if nargin == 0
             o.ax = gca;
         elseif isa(ax,'matlab.ui.Figure')
@@ -30,6 +32,7 @@ methods (Access = public)
         % todo? buildMap?
         o.movs = struct; o.deps = struct;
         o.ax.UserData = o;
+        refreshdata(o.ax);
     end
 
     function h = getHandle(o,label)
@@ -51,17 +54,6 @@ methods (Access = public)
         b = isfield(o.movs,l) || isfield(o.deps,l);
     end
 
-%     function varargout = subsref(o,subs)
-%         switch subs(1).type
-%             case '()'
-%                 if length(o) > 1 || length(subs) > 1 || length(subs.subs) > 1 || ~ischar(subs.subs{1})
-%                     error 'Not supported indexing';
-%                 end                
-%                 varargout = {o.getElement(subs.subs{1})};
-%             otherwise   
-%               [varargout{1:nargout}]=builtin('subsref',o,subs);
-%         end
-%     end
 end % public
 
 methods (Access = public, Hidden)
@@ -145,7 +137,12 @@ methods (Access = public, Hidden)
                 l = convert(o.nextCapitalLabel,65); % 'A'
                 o.nextCapitalLabel = o.nextCapitalLabel + 1;
             otherwise
-                error 'Invalid flag'
+                if ~isfield(o.nextOtherLabels,flag)
+                    o.nextOtherLabels.(flag) = 1;
+                else
+                    o.nextOtherLabels.(flag) = o.nextOtherLabels.(flag) + 1;
+                end
+                l = [flag int2str(o.nextOtherLabels.(flag))];
         end
         if o.isLabel(l); l = o.getNextLabel(flag); end
     end

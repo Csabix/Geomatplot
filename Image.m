@@ -47,7 +47,7 @@ end
 
 function [parent,label,inputs,usercallback,corner0,corner1] = parse(varargin)
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
-    [label,varargin] = parent.extractLabel(varargin,'capital');
+    [label,varargin] = parent.extractLabel(varargin,'image');
     [parent,label,inputs,usercallback,corner0,corner1]= parse_(parent,label,varargin{:});
     inputs = parent.getHandlesOfLabels(inputs);
 end

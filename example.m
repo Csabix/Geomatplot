@@ -1,6 +1,4 @@
-% Examples
-
-%% Geogebra like triangle
+%% Triangle
 clf; g = Geomatplot; ylim([-0.4 0.6])
 A = Point([0  0]); % draggable point, automatically labelled A
 B = Point([1  0]); % automatic labels are applied if no label is given
@@ -27,42 +25,37 @@ c1 = Point('c1',[-.5 0],'k','MarkerSize',5); % adjustable corner
 c2 = Point('c2',[1.5 1],'k','MarkerSize',5); %   for the image
 % parametric callback with t in [0,1] and dependent variables:
 bt = @(t,b0,b1,b2)  b0.*(1-t).^2 + 2*b1.*t.*(1-t) + b2.*t.^2;
-b = Curve(bt,{b0,b1,b2},'r'); % A red quadratic Bézier curve
-Image(@dist2bezier,{b0,b1,b2},c1,c2); colorbar;
+b = Curve({b0,b1,b2},bt,'r'); % A red quadratic Bézier curve
+Image({b0,b1,b2},@dist2bezier,c1,c2); colorbar;
 % where 'dist2bezier' is a (x,y,b0,b1,b2) -> real function
 P = Point('P',[0 0],'y');
 Circle({P,b},'y');
 
-%% Test
+%% Intersect
 clf; g = Geomatplot;
 A = Point([0 1]); 
 B = Point([1 0]); 
-C = Point([0 0]); 
+C = Point([0 0]);
+f = Polygon([-1 0;1 0;1 1;0.7 0.7;0.3 0.5;0 0.9;-0.5 0.3;-1 0.3],'g');
 D = Point([.6 .6]);
 a = Circle({A,B});
 b = Circle({C,D});
-[EF,gg] = Intersect(2,{a,b});
+Intersect(2,{a,b})
+Intersect(5,{a,f});
 
-%% Polygon
+%% Polygon Sphere trace
 clf; g = Geomatplot;
 f = Polygon([-1 0;1 0;1 1;0.7 0.7;0.3 0.5;0 0.9;-0.5 0.3;-1 0.3],'g');
 p0 = Point('p0',[-1,1]);
-Point('v0',[-0.9,0.9]);
-l = Line({'p0','v0'},'k');
-r = Ray({'p0','v0'},'r');
+vp0 = Point('v0',[-0.9,0.9]);
+v0 = (vp0-p0)/Distance({p0,vp0});
+Ray({p0,vp0},'r');
 p = p0;
 for i = 1:15
-    c = Circle({p,f});
-    p = Intersect({l,c});
+    d = Distance({p,f});
+    Circle({p,d});
+    p = p + v0*d;
 end
-
-%%
-clf; g = Geomatplot;
-A = Point([0,0]);
-B = Point([1,1]);
-c = Circle('c',{A,B});
-P = Point('p',[.5 .5]);
-Circle({P,c});
 
 %% dist2bezier
 

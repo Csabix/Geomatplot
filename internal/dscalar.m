@@ -4,31 +4,44 @@ properties
 end
 methods
     function c = plus(a,b)
-        c = dscalar.operator(a,b,@plus);
+        arguments
+            a   (1,1) {mustBeA(a,["dscalar","numeric"])}
+            b   (1,1) {mustBeA(b,["dscalar","numeric"])}
+        end
+        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'+',[1 1]);
+        c = dscalar(parent,parent.getNextLabel('small'),inputs,callback);
     end
     function c = minus(a,b)
-        c = dscalar.operator(a,b,@minus);
-    end
-    function c = times(a,b)
-        c = dscalar.operator(a,b,@times);
-    end
-    function c = power(a,b)
-        c = dscalar.operator(a,b,@power);
-    end
-    function c = rdivide(a,b)
-        c = dscalar.operator(a,b,@rdivide);
-    end
-end
-methods (Access=private,Static)
-    function c = operator(a,b,op)
-        if isa(b,'dscalar') && isa(a,'dscalar')
-            assert(a.parent==b.parent);
-            c = dscalar(a.parent,a.parent.getNextLabel('small'),{a,b},@(a,b) op(a.value,b.value));
-        elseif isa(b,'dscalar')
-            c = dscalar(b.parent,b.parent.getNextLabel('small'),{b},@(b) op(a,b.value));
-        else
-            c = dscalar(a.parent,a.parent.getNextLabel('small'),{a},@(a) op(a.value,b));
+        arguments
+            a   (1,1) {mustBeA(a,["dscalar","numeric"])}
+            b   (1,1) {mustBeA(b,["dscalar","numeric"])}
         end
+        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'-',[1 1]);
+        c = dscalar(parent,parent.getNextLabel('small'),inputs,callback);
+    end
+    function c = mtimes(a,b)
+        arguments
+            a   (1,1) {mustBeA(a,["dscalar","numeric"])}
+            b   (1,1) {mustBeA(b,["dscalar","numeric"])}
+        end
+        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'*',[1 1]);
+        c = dscalar(parent,parent.getNextLabel('small'),inputs,callback);
+    end
+    function c = mrdivide(a,b)
+        arguments
+            a   (1,1) {mustBeA(a,["dscalar","numeric"])}
+            b   (1,1) {mustBeA(b,["dscalar","numeric"])}
+        end
+        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'/',[1 1]);
+        c = dscalar(parent,parent.getNextLabel('small'),inputs,callback);
+    end
+    function c = mpower(a,b)
+        arguments
+            a   (1,1) {mustBeA(a,["dscalar","numeric"])}
+            b   (1,1) {mustBeA(b,["dscalar","numeric"])}
+        end
+        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'^',[1 1]);
+        c = dscalar(parent,parent.getNextLabel('small'),inputs,callback);
     end
 end
 end

@@ -1,57 +1,61 @@
-classdef dvector < dnumeric
+classdef (InferiorClasses = {?dscalar}) dvector < dnumeric
 properties
     val % (1,2) double
+    pt  = [] %  (1,1) dpoint
 end
 methods
+    function o = dvector(parent,label,inputs,callback,pt,linespec,args)
+        o=o@dnumeric(parent,label,inputs,callback);
+        if nargin >= 5
+            o.pt = pt;
+            parent.ax.NextPlot ='add';
+            args = namedargs2cell(args);
+            o.fig = quiver(0,0,0,0,1.,linespec,args{:});
+            o.update;
+            if ~isempty(o.exception); rethrow(o.exception); end
+        end
+    end
+    function updatePlot(o,val)
+        updatePlot@dnumeric(o,val);
+        if ~isempty(o.pt)
+            p = o.pt.value;
+            o.fig.XData = p(1);   o.fig.YData = p(2);
+            o.fig.UData = val(1); o.fig.VData = val(2);
+        end
+    end
     function c = plus(a,b)
-        c = dvector.operator(a,b,@plus,'dscalar','dscalar',@dvector,'dvector','numeric',@dvector,'numeric','dvector',@dvector,'dvector','point_base',@dpoint);
+        arguments
+            a   (1,:) {mustBeA(a,["dvector","numeric"])}
+            b   (1,:) {mustBeA(b,["dvector","numeric"])}
+        end
+        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'+',[1 2]);
+        c = dvector(parent,parent.getNextLabel('small'),inputs,callback);
     end
     function c = minus(a,b)
-        c = dvector.operator(a,b,@minus,'dscalar','dscalar',@dvector,'dvector','numeric',@dvector,'numeric','dvector',@dvector,'dvector','point_base',@dpoint);
-    end
-    function c = times(a,b)
-        c = dvector.operator(a,b,@times,'dscalar','dscalar',@dvector,'dvector','numeric',@dvector,'numeric','dvector',@dvector);
-    end
-    function c = rdivide(a,b)
-        c = dvector.operator(a,b,@rdivide,'dscalar','dscalar',@dvector,'dvector','numeric',@dvector,'numeric','dvector',@dvector);
-    end
-end
-methods (Access=public,Static,Hidden)
-    function c = operator(a,b,op,atype,btype,constructor)
         arguments
-            a
-            b
-            op (1,1) function_handle
+            a   (1,:) {mustBeA(a,["dvector","numeric"])}
+            b   (1,:) {mustBeA(b,["dvector","numeric"])}
         end
-        arguments (Repeating)
-            atype (1,:) char
-            btype (1,:) char
-            constructor (1,1) function_handle
+        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'-',[1 2]);
+        c = dvector(parent,parent.getNextLabel('small'),inputs,callback);
+    end
+    function c = mtimes(a,b)
+        arguments
+            a   (1,1) {mustBeA(a,["dvector","dscalar","numeric"])}
+            b   (1,1) {mustBeA(b,["dvector","dscalar","numeric"])}
         end
-        if isa(a,'drawing')
-            if isa(b,'drawing')
-                callback = @(a,b) op(a.value,b.value);
-                inputs = {a,b};
-                assert(a.parent==b.parent)
-            else
-                callback = @(a) op(a.value,b);
-                inputs = {a};
-            end
-            g = a.parent;
-        else
-            assert(isa(b,'drawing'));
-            callback = @(b) op(a,b.value);
-            inputs = {b};
-            g = b.parent;
+        assert(~isa(a,'dvector') || ~isa(b,'dvector'),'invalid input');
+        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'*',[1 1]);
+        c = dvector(parent,parent.getNextLabel('small'),inputs,callback);
+    end
+    function c = mrdivide(a,b)
+        arguments
+            a   (1,1) {mustBeA(a,["dvector","dscalar","numeric"])}
+            b   (1,1) {mustBeA(b,["dvector","dscalar","numeric"])}
         end
-        l = g.getNextLabel('small');
-        for i=1:length(atype)
-            if isa(a,atype{i}) && isa(b,btype{i})
-                c = constructor{i}(g,l,inputs,callback);
-                break;
-            end
-        end
-        % todo if matches none
+        assert(~isa(a,'dvector') || ~isa(b,'dvector'),'invalid input');
+        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'/',[1 1]);
+        c = dvector(parent,parent.getNextLabel('small'),inputs,callback);
     end
 end
 end

@@ -11,6 +11,10 @@ methods
         c = dpoint(parent,parent.getNextLabel('capital'),inputs,callback);
     end
     function c = minus(a,b)
+        arguments
+            a   (1,:) {mustBeA(a,["point_base","dvector","numeric"])}
+            b   (1,:) {mustBeA(b,["point_base","dvector","numeric"])}
+        end
         if isa(a,'point_base') && isa(b,'point_base')
             assert(a.parent==b.parent,'different Geomatplots');
             c = dvector(a.parent,a.parent.getNextLabel('small'),{a,b},@(a,b) a.value-b.value);

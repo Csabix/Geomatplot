@@ -22,7 +22,6 @@ function h = Midpoint(varargin)
 %   See also POINT, SEGMENT, CIRCLE
 
     [parent,label,inputs,args] = parse(varargin{:});
-    %callback = @(varargin) mean(vertcat(varargin{:}));
     for i = 1:length(inputs)
         l = inputs{i};
         if isa(l,'dcurve') || isa(l,'dimage') || isa(l,'dnumeric')
@@ -31,11 +30,11 @@ function h = Midpoint(varargin)
             throw(MException(eidType,msgType));
         end
     end
-    h = dpoint(parent,label,inputs,@callback,args);
-    
+    h_ = dpoint(parent,label,inputs,@midpoint_,args);
+    if nargout >=1; h=h_; end
 end
 
-function v = callback(varargin)
+function v = midpoint_(varargin)
     x = varargin{1}.value;
     n = size(x,1);
     v = mean(x,1);

@@ -29,10 +29,8 @@ methods (Access = public)
         end
         axis(o.ax,'equal'); axis(o.ax,'manual');
         o.ax.Interactions = [panInteraction zoomInteraction]; % disableDefaultInteractivity(o.ax);
-        % todo? buildMap?
         o.movs = struct; o.deps = struct;
         o.ax.UserData = o;
-        refreshdata(o.ax);
     end
 
     function h = getHandle(o,label)

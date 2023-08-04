@@ -2,7 +2,7 @@ classdef dpoint < dependent & point_base
 methods
     function o = dpoint(parent,label,inputs,callback,args)
         if nargin < 5
-            args.Color='k'; args.MarkerSize=6; args.LabelAlpha=0; args.LabelTextColor='k';
+            args.Color='k'; args.MarkerSize=5; args.LabelAlpha=0; args.LabelTextColor='k';
             args.Label=label; args.LabelVisible ='hover';
         end
         args = namedargs2cell(args);
@@ -46,6 +46,7 @@ methods (Static,Hidden)
             args.LabelAlpha (1,1) double    {mustBeInRange(args.LabelAlpha,0,1)}= 0
             args.LabelTextColor             {drawing.mustBeColor}
             args.LineWidth  (1,1) double    {mustBePositive}
+            args.LabelVisible (1,:) char
         end
         args.Label = label;
         args.Color = color;

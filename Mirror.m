@@ -1,7 +1,7 @@
 function h = Mirror(varargin)
 
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
-    [label,varargin] = parent.extractLabel(varargin,'capital');
+    [label,varargin] = parent.extractLabel(varargin,'capital'); % Label capitalness can be wrong!
     eidType = 'Mirror:invalidInputPattern';
     msgType = 'Cannot mirror for these input types';
     if isempty(varargin) || ~iscell(varargin{1}) || length(varargin{1})<2
@@ -62,7 +62,7 @@ function p = mirror_point2segment(p,a,b)
     p = p.value; a = a.value;
     n = (b.value-a)*[0 1; -1 0];
     a = p - a;
-    p = p - 2*(n(1)*a(:,1)+n(2)*a(:,2))*n;
+    p = p - 2*(n(1)*a(:,1)+n(2)*a(:,2))*n/(n(1).^2+n(2).^2);
 end
 
 function p = mirror_point2pointseq(p,s)

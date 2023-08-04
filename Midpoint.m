@@ -22,15 +22,19 @@ function h = Midpoint(varargin)
 %   See also POINT, SEGMENT, CIRCLE
 
     [parent,label,inputs,args] = parse(varargin{:});
-    for i = 1:length(inputs)
-        l = inputs{i};
-        if isa(l,'dcurve') || isa(l,'dimage') || isa(l,'dnumeric')
-            eidType = 'Midpoint:invalidInput';
-            msgType = 'The input drawing cannot be of this type.';
-            throw(MException(eidType,msgType));
+    if length(inputs)==1 && isa(inputs{1},'dcircle')
+        h_ = inputs{1}.center;
+    else
+        for i = 1:length(inputs)
+            l = inputs{i};
+            if isa(l,'dcurve') || isa(l,'dimage') || isa(l,'dnumeric')
+                eidType = 'Midpoint:invalidInput';
+                msgType = 'The input cannot be of this type.';
+                throw(MException(eidType,msgType));
+            end
         end
+        h_ = dpoint(parent,label,inputs,@midpoint_,args);
     end
-    h_ = dpoint(parent,label,inputs,@midpoint_,args);
     if nargout >=1; h=h_; end
 end
 

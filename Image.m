@@ -2,7 +2,7 @@ function h = Image(varargin)
 % Image  visualizes a given 2D function over an area
 %   Image({A,B,...},callback) draws an image using the given callback function handle of the form
 %           callback(X,Y,A,B,...) -> C
-%       where A,B,... are n >= 1 number of ony Geomaplot handles, and their values will be passed to
+%       where A,B,... are n >= 1 number of any Geomaplot handles, and their values will be passed to
 %       the given callback. For example, if A is a point, then its position vector [x y] will be
 %       given to the callback to calculate with. The parameter X and Y are given automatically and
 %       are NxM matrices retuned from a meshgrid command. The X(i,j) and Y(i,j) position corresponds

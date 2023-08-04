@@ -47,9 +47,9 @@ Intersect(5,{a,f});
 clf; g = Geomatplot;
 f = Polygon([-1 0;1 0;1 1;0.7 0.7;0.3 0.5;0 0.9;-0.5 0.3;-1 0.3],'g');
 p0 = Point('p0',[-1,1]);
-vp0 = Point('v0',[-0.9,0.9]);
-v0 = (vp0-p0)/Distance({p0,vp0});
-Ray({p0,vp0},'r');
+q0 = Point('q0',[-0.9,0.9]);
+v0 = (q0-p0)/Distance({p0,q0});
+Ray({p0,q0},'r');
 p = p0;
 for i = 1:15
     d = Distance({p,f});

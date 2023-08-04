@@ -2,7 +2,7 @@ function h = Curve(varargin)
 % Curve  draws a curve with the given callback function
 %   Curve({A,B,...},callback) draws a curve using the given parametric function handle of the form
 %           callback(t,A,B,...) -> [x y]
-%       where A,B,... are n >= 1 number of ony Geomaplot handles, and their values will be passed to
+%       where A,B,... are n >= 1 number of any Geomaplot handles, and their values will be passed to
 %       the given callback. For example, if A is a point, then its position vector [x y] will be
 %       given to the callback to calculate with. The parameter t is an automatically given column
 %       vector with N elements and values between 0 and 1. The output is expected to be an Nx2

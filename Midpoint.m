@@ -21,7 +21,8 @@ function h = Midpoint(varargin)
 %
 %   See also POINT, SEGMENT, CIRCLE
 
-    [parent,label,inputs,args] = parse(varargin{:});
+    [parent,label,inputs,args] = dpoint.parse_inputs(varargin{:});
+
     if length(inputs)==1 && isa(inputs{1},'dcircle')
         h_ = inputs{1}.center;
     else
@@ -35,6 +36,7 @@ function h = Midpoint(varargin)
         end
         h_ = dpoint(parent,label,inputs,@midpoint_,args);
     end
+    
     if nargout >=1; h=h_; end
 end
 
@@ -49,27 +51,3 @@ function v = midpoint_(varargin)
         n = n + n1;
     end
 end
-
-function [parent,label,inputs,args] = parse(varargin)
-    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
-    [label,varargin] = parent.extractLabel(varargin,'capital');
-    [parent,label,inputs,args] = parse_(parent,label,varargin{:});
-    inputs = parent.getHandlesOfLabels(inputs);
-end
-
-function [parent,label,inputs,args] = parse_(parent,label,inputs,color,args)
-    arguments
-        parent          (1,1) Geomatplot
-        label           (1,:) char      {mustBeValidVariableName}
-        inputs          (1,:) cell      {drawing.mustBeInputList(inputs,parent)}
-        color                           {drawing.mustBeColor}               = 'k'
-        args.MarkerSize (1,1) double    {mustBePositive}                    = 7
-        args.LabelAlpha (1,1) double    {mustBeInRange(args.LabelAlpha,0,1)}= 0
-        args.LabelTextColor             {drawing.mustBeColor}
-        args.LineWidth  (1,1) double    {mustBePositive}
-    end
-    args.Label = label;
-    args.Color = color;
-    if ~isfield(args,'LabelTextColor'); args.LabelTextColor = color; end
-end
-

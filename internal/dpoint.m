@@ -27,4 +27,30 @@ methods (Static)
         end
     end
 end
+methods (Static,Hidden)
+
+    function [parent,label,inputs,args] = parse_inputs(varargin)
+        [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
+        [label,varargin] = parent.extractLabel(varargin,'capital');
+        [parent,label,inputs,args] = dpoint.parse_inputs_(parent,label,varargin{:});
+        inputs = parent.getHandlesOfLabels(inputs);
+    end
+    
+    function [parent,label,inputs,args] = parse_inputs_(parent,label,inputs,color,args)
+        arguments
+            parent          (1,1) Geomatplot
+            label           (1,:) char      {mustBeValidVariableName}
+            inputs          (1,:) cell      {drawing.mustBeInputList(inputs,parent)}
+            color                           {drawing.mustBeColor}               = 'k'
+            args.MarkerSize (1,1) double    {mustBePositive}                    = 7
+            args.LabelAlpha (1,1) double    {mustBeInRange(args.LabelAlpha,0,1)}= 0
+            args.LabelTextColor             {drawing.mustBeColor}
+            args.LineWidth  (1,1) double    {mustBePositive}
+        end
+        args.Label = label;
+        args.Color = color;
+        if ~isfield(args,'LabelTextColor'); args.LabelTextColor = color; end
+    end
+
+end
 end

@@ -3,7 +3,7 @@ properties
 	inputs    (1,:) cell
 	callback  (1,1)
     movs
-    exception                       = []
+    exception            = []
 end
 methods
 

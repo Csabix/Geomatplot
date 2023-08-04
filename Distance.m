@@ -15,7 +15,6 @@ function h = Distance(varargin)
 %   See also CIRCLE
 
     [parent,label,inputs] = parse(varargin{:});
-    drawing.mustBeOfLength(inputs,2);
     
     if drawing.isInputPatternMatching(inputs,{'point_base',{'point_base','dpointseq'}})
         callback = @dist_point2pointseq;
@@ -39,9 +38,9 @@ function v = dist_point2circle(p,c)
     v = abs(sqrt(v(1).^2 + v(2).^2) - c.radius.value);
 end
 
-function v = dist_point2pointseq(a,b)
-    c = a.value-b.value;
-    v = sqrt(c(:,1).^2 + c(:,2).^2);
+function d = dist_point2pointseq(a,b)
+    a = a.value-b.value;
+    d = sqrt(min(a(:,1).^2 + a(:,2).^2));
 end
 
 function [parent,label,inputs] = parse(varargin)
@@ -55,37 +54,18 @@ function [parent,label,inputs] = parse_(parent,label,inputs)
     arguments
         parent          (1,1) Geomatplot
         label           (1,:) char      {mustBeValidVariableName}
-        inputs          (1,:) cell      {drawing.mustBeInputList(inputs,parent)}
+        inputs          (1,2) cell      {drawing.mustBeInputList(inputs,parent)}
     end
 end
 
 function d = dist_point2polyline(p,polyline)
-    %https://www.mathworks.com/matlabcentral/fileexchange/12744-distance-from-points-to-polyline-or-polygon
-    polyline = polyline.value; p = p.value;
-    xv = polyline(:,1); yv = polyline(:,2);
-    
-    % linear parameters of segments that connect the vertices
-    dx =  diff(xv);    dy = -diff(yv);
-    C = yv(2:end).*xv(1:end-1) - xv(2:end).*yv(1:end-1);
+    polyline = polyline.value; p  = p.value;
+    xv = polyline(:,1) - p(1); dx = diff(xv);
+    yv = polyline(:,2) - p(2); dy = diff(yv);       
 
-    % find the projection of point (x,y) on each rib
-    AB = 1./(dy.^2 + dx.^2);
-    vv = (dy*p(1)+dx*p(2)+C);
-    xp = p(1) - (dy.*AB).*vv;
-    yp = p(2) - (dx.*AB).*vv;
+    t = min(1,max(0,...
+            -(xv(1:end-1).*dx + yv(1:end-1).*dy) ./ (dx.^2 + dy.^2)...
+        ));
 
-    % find all cases where projected point is inside the segment
-    idx_x = (((xp>=xv(1:end-1)) & (xp<=xv(2:end))) | ((xp>=xv(2:end)) & (xp<=xv(1:end-1))));
-    idx_y = (((yp>=yv(1:end-1)) & (yp<=yv(2:end))) | ((yp>=yv(2:end)) & (yp<=yv(1:end-1))));
-    idx = idx_x & idx_y;
-
-    % distance from point (x,y) to the vertices
-    dv = sqrt((xv(1:end-1)-p(1)).^2 + (yv(1:end-1)-p(2)).^2);
-    if(~any(idx)) % all projections are outside of polygon ribs
-       d = min(dv);
-    else
-       % distance from point (x,y) to the projection on ribs
-       dp = sqrt((xp(idx)-p(1)).^2 + (yp(idx)-p(2)).^2);
-       d = min(min(dv), min(dp));
-    end
+    d = sqrt(min( (xv(1:end-1) + t.*dx).^2 + (yv(1:end-1) + t.*dy).^2 ));
 end

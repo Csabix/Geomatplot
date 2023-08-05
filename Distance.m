@@ -14,7 +14,12 @@ function h = Distance(varargin)
 %
 %   See also CIRCLE
 
-    [parent,label,inputs] = parse(varargin{:});
+    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
+    [label,varargin] = parent.extractLabel(varargin,'small');
+    [inputs,varargin] = parent.extractInputs(varargin,2,2);
+    if ~isempty(varargin)
+        throw(MException('Distance:tooManyArguments','Too many arguments.'));
+    end
     
     if drawing.isInputPatternMatching(inputs,{'point_base',{'point_base','dpointseq'}})
         callback = @dist_point2pointseq;
@@ -23,9 +28,7 @@ function h = Distance(varargin)
     elseif drawing.isInputPatternMatching(inputs,{'point_base',{'dlines','mpolygon'}})
         callback = @dist_point2polyline;
     else
-        eidType = 'Distance:invalidInputPattern';
-        msgType = 'Cannot measure distance between these input types';
-        throw(MException(eidType,msgType));
+        throw(MException('Distance:invalidInputPattern','Cannot measure distance between these input types'));
     end
 
     h_ = dscalar(parent,label,inputs,callback);
@@ -41,21 +44,6 @@ end
 function d = dist_point2pointseq(a,b)
     a = a.value-b.value;
     d = sqrt(min(a(:,1).^2 + a(:,2).^2));
-end
-
-function [parent,label,inputs] = parse(varargin)
-    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
-    [label,varargin] = parent.extractLabel(varargin,'small');
-    [parent,label,inputs] = parse_(parent,label,varargin{:});
-    inputs = parent.getHandlesOfLabels(inputs);
-end
-
-function [parent,label,inputs] = parse_(parent,label,inputs)
-    arguments
-        parent          (1,1) Geomatplot
-        label           (1,:) char      {mustBeValidVariableName}
-        inputs          (1,2) cell      {drawing.mustBeInputList(inputs,parent)}
-    end
 end
 
 function d = dist_point2polyline(p,polyline)

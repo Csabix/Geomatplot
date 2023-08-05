@@ -31,17 +31,20 @@ function h = Point(varargin)
 %
 %   See also GEOMATPLOT, SEGMENT, CIRCLE, MIDPOINT, POLYGON
 
-    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
-    [label,varargin] = parent.extractLabel(varargin,'capital');
+    [parent,  varargin] = Geomatplot.extractGeomatplot(varargin);    
+    [label,   varargin] = parent.extractLabel(varargin,'capital');
     [position,varargin] = drawing.extractPosition(varargin);
+
     if isempty(position) && ~isempty(varargin) && iscell(varargin{1})
         isdependent = true;  % because cannot define function inside an if statement
-        [parent,label,inputs,usercallback,args] = parse_dpoint(parent,label,varargin{:});
+        [inputs,  varargin] = parent.extractInputs(varargin,0,inf);
+        [usercallback,args] = parse_dpoint(inputs,varargin{:});
         n = abs(nargout(usercallback));
     else
         isdependent = false;
-        [parent,label,args] = parse_mpoint(parent,label,position,varargin{:});
+        args = parse_mpoint(position,varargin{:});
     end
+    args.Label = label;
     
     function varargout = internalcallback(varargin)
         params = cell(1,nargin);
@@ -60,10 +63,8 @@ function h = Point(varargin)
     if nargout == 1; h = h_; end
 end
 
-function [parent,label,args] = parse_mpoint(parent,label,position,color,args)
+function args = parse_mpoint(position,color,args)
     arguments
-        parent          (1,1) Geomatplot
-        label           (1,:) char      {mustBeValidVariableName}
         position        (:,2) double    {mustBeReal}
         color                           {drawing.mustBeColor}               = 'b'
         args.MarkerSize (1,1) double    {mustBePositive}                    = 8
@@ -71,17 +72,14 @@ function [parent,label,args] = parse_mpoint(parent,label,position,color,args)
         args.LabelTextColor             {drawing.mustBeColor}
         args.LineWidth  (1,1) double    {mustBePositive}
     end
-    args.Label = label;
     args.Color = color;
     if ~isfield(args,'LabelTextColor'); args.LabelTextColor = color; end
     if ~isempty(position); args.Position = position; end
 end
 
-function [parent,label,inputs,usercallback,args] = parse_dpoint(parent,label,inputs,usercallback,color,args)
+function [usercallback,args] = parse_dpoint(inputs,usercallback,color,args)
     arguments
-        parent          (1,1) Geomatplot
-        label           (1,:) char            {mustBeValidVariableName}
-        inputs          (1,:) cell            {drawing.mustBeInputList(inputs,parent)}
+        inputs          (1,:) cell                                         %#ok<INUSA> 
         usercallback    (1,1) function_handle {mustBePointCallback(usercallback,inputs)}
         color                                 {drawing.mustBeColor}                      = 'k'
         args.MarkerSize (1,1) double          {mustBePositive}                           = 7
@@ -89,7 +87,6 @@ function [parent,label,inputs,usercallback,args] = parse_dpoint(parent,label,inp
         args.LabelTextColor                   {drawing.mustBeColor}
         args.LineWidth  (1,1) double          {mustBePositive}
     end
-    args.Label = label;
     args.Color = color;
     if ~isfield(args,'LabelTextColor'); args.LabelTextColor = color; end
 end

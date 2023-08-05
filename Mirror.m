@@ -1,15 +1,13 @@
 function h = Mirror(varargin)
 
-    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
-    [label,varargin] = parent.extractLabel(varargin,'capital'); % Label capitalness can be wrong!
     eidType = 'Mirror:invalidInputPattern';
-    msgType = 'Cannot mirror for these input types';
-    if isempty(varargin) || ~iscell(varargin{1}) || length(varargin{1})<2
-        throw(MException(eidType,msgType));
-    end
-    if isa(varargin{1}{1},'point_base')
-        [parent,label,inputs,args] = dpoint.parse_inputs_(parent,label,varargin{:});
-        inputs = parent.getHandlesOfLabels(inputs);
+    msgType = 'Cannot mirror for these input types.';
+
+    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
+    [label, varargin] = parent.extractLabel(varargin,'capital'); % Label capitalness can be wrong!
+    [inputs,varargin] = parent.extractInputs(varargin,2,3);
+
+    if isa(inputs{1},'point_base')
         if drawing.isInputPatternMatching(inputs,{'drawing','point_base'})
             callback = @mirror_point2point;
         elseif drawing.isInputPatternMatching(inputs,{'drawing','point_base','point_base'})
@@ -23,10 +21,9 @@ function h = Mirror(varargin)
         else
             throw(MException(eidType,msgType));
         end
+        args = dpoint.parse_inputs_(varargin{:});
         h_ = dpoint(parent,label,inputs,callback,args);
-    elseif isa(varargin{1}{1},'dcircle')
-        [parent,label,inputs,linespec,args] = dlines.parse_inputs_(parent,label,varargin{:});
-        inputs = parent.getHandlesOfLabels(inputs);
+    elseif isa(inputs{1},'dcircle')
         if drawing.isInputPatternMatching(inputs,{'drawing','point_base'})
             % do nothing
         elseif drawing.isInputPatternMatching(inputs,{'drawing','point_base','point_base'})
@@ -34,11 +31,10 @@ function h = Mirror(varargin)
         else
             throw(MException(eidType,msgType));
         end
+        [linespec,args] = dlines.parse_inputs_(varargin{:});
         c_ = Mirror(parent,[{inputs{1}.center},inputs(2:end)],'LabelVisible','off','MarkerSize',5);
         h_ = dcircle(parent,label,c_,inputs{1}.radius,linespec,args);
-    elseif isa(varargin{1}{1},'dlines') || isa(varargin{1}{1},'mpolygon')  % includes dcurves
-        [parent,label,inputs,linespec,args] = dlines.parse_inputs_(parent,label,varargin{:});
-        inputs = parent.getHandlesOfLabels(inputs);
+    elseif isa(inputs{1},'dlines') || isa(inputs{1},'mpolygon')  % includes dcurves
         if drawing.isInputPatternMatching(inputs,{'drawing','point_base'})
             callback = @mirror_point2point;
         elseif drawing.isInputPatternMatching(inputs,{'drawing','point_base','point_base'})
@@ -46,6 +42,7 @@ function h = Mirror(varargin)
         else
             throw(MException(eidType,msgType));
         end
+        [linespec,args] = dlines.parse_inputs_(varargin{:});
         h_ = dlines(parent,label,inputs,linespec,callback,args);
     else
         throw(MException(eidType,msgType));        

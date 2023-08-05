@@ -1,23 +1,35 @@
 %% Triangle
-clf; g = Geomatplot; ylim([-0.4 0.6])
-A = Point([0  0]); % draggable point, automatically labelled A
-B = Point([1  0]); % automatic labels are applied if no label is given
-C = Point([.7 .5]);
-%CircularArc({A,B,C});
-Segment({A,B},'b'); % a blue segment from A and B
-Segment({B,C},'b');
-Segment({C,A},'b');
-Midpoint('S',{A,B,C}); % Barycenter of triangle labelled S
-[~,~,r] = Circle({A,B,C},'m--'); % Magenta dashed circumcircle of the triangle
-PerpendicularBisector({A,B},':');
-PerpendicularBisector({B,C},':');
-PerpendicularBisector({C,A},':');
-AngleBisector({A,B,C},':');
-AngleBisector({B,C,A},':');
-AngleBisector({C,A,B},':');
+clf; g = Geomatplot; ylim([-0.35 0.7]); disp Triangle
+A = Point([0.0 0.0]); % draggable point, automatically labelled A
+B = Point([1.0 0.0]); % automatic labels are applied if no label is given
+C = Point([.65 .55]);
+ab = Segment(A,B,'b'); % a blue segment from A and B
+bc = Segment(B,C,'b');
+cd = Segment(C,A,'b');
+
+Segment(A,Midpoint(B,C),':');
+Segment(B,Midpoint(C,A),':');
+Segment(C,Midpoint(A,B),':');
+S=Midpoint('S',A,B,C); % Barycenter of the triangle labelled S
+
+PerpendicularBisector(A,B,':','LineWidth',1);
+PerpendicularBisector(B,C,':','LineWidth',1);
+PerpendicularBisector(C,A,':','LineWidth',1);
+[~,K] = Circle(A,B,C,'m--'); % Magenta dashed circumcircle of the triangle
+
+la = AngleBisector(A,B,C,':','LineWidth',1);
+lb = AngleBisector(B,C,A,':','LineWidth',1);
+lc = AngleBisector(C,A,B,':','LineWidth',1);
+Circle(Intersect('O',la,lb),ab,'c'); % (inscribed) circle touching segment AB
+
+ma = PerpendicularLine(A,B,C,':','LineWidth',1);
+mb = PerpendicularLine(B,C,A,':','LineWidth',1);
+mc = PerpendicularLine(C,A,B,':','LineWidth',1);
+M = Intersect('M',ma,mb);
+Segment(M,K,'r');
 
 %% Image
-clf; g = Geomatplot;
+clf; g = Geomatplot; disp Image
 b0 = Point('b0',[0.1 0.2],'r'); % draggable control points
 b1 = Point('b1',[0.7 0.9],'r'); % with given labels
 b2 = Point('b2',[0.9 0.2],'r');
@@ -25,35 +37,35 @@ c1 = Point('c1',[-.5 0],'k','MarkerSize',5); % adjustable corner
 c2 = Point('c2',[1.5 1],'k','MarkerSize',5); %   for the image
 % parametric callback with t in [0,1] and dependent variables:
 bt = @(t,b0,b1,b2)  b0.*(1-t).^2 + 2*b1.*t.*(1-t) + b2.*t.^2;
-b = Curve({b0,b1,b2},bt,'r'); % A red quadratic Bézier curve
-Image({b0,b1,b2},@dist2bezier,c1,c2); colorbar;
+b = Curve(b0,b1,b2,bt,'r'); % A red quadratic Bézier curve
+Image(b0,b1,b2,@dist2bezier,c1,c2); colorbar;
 % where 'dist2bezier' is a (x,y,b0,b1,b2) -> real function
-P = Point('P',[0 0],'y');
-Circle({P,b},'y');
+P = Point('P',[.5 .4],'y');
+Circle(P,b,'y');
 
 %% Intersect
-clf; g = Geomatplot;
+clf; g = Geomatplot; disp Intersect
 A = Point([0 1]); 
 B = Point([1 0]); 
 C = Point([0 0]);
 f = Polygon([-1 0;1 0;1 1;0.7 0.7;0.3 0.5;0 0.9;-0.5 0.3;-1 0.3],'g');
 D = Point([.6 .6]);
-a = Circle({A,B});
-b = Circle({C,D});
-Intersect(2,{a,b})
-Intersect(5,{a,f});
+a = Circle(A,B);
+b = Circle(C,D);
+Intersect(2,a,b)
+Intersect(5,a,f);
 
 %% Polygon Sphere trace
-clf; g = Geomatplot;
+clf; g = Geomatplot; xlim([-1.5 1.3]); ylim([0 1.7]);
 f = Polygon([-1 0;1 0;1 1;0.7 0.7;0.3 0.5;0 0.9;-0.5 0.3;-1 0.3],'g');
-p0 = Point('p0',[-1,1]);
-q0 = Point('q0',[-0.9,0.9]);
-v0 = (q0-p0)/Distance({p0,q0});
-Ray({p0,q0},'r');
+p0 = Point('p0',[-.8,1]);
+q0 = Point('q0',[.5 ,1.05]);
+v0 = (q0-p0)/Distance(p0,q0);
+Ray(p0,q0,'r');
 p = p0;
 for i = 1:15
-    d = Distance({p,f});
-    Circle({p,d});
+    d = Distance(p,f);
+    Circle(p,d);
     p = p + v0*d;
 end
 

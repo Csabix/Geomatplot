@@ -30,7 +30,11 @@ function h = Image(varargin)
 %
 %   See also Curve, POINT, DISTANCE, Circle
 
-    [parent,label,inputs,usercallback,corner0,corner1] = parse(varargin{:});
+    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);  
+    [label,varargin] = parent.extractLabel(varargin,'image');
+    [inputs,varargin] = parent.extractInputs(varargin);
+    [usercallback,corner0,corner1]= parse_(inputs,varargin{:});
+    inputs = parent.getHandlesOfLabels(inputs);
 
     n = abs(nargout(usercallback));
     function varargout = internalcallback(varargin)
@@ -45,18 +49,9 @@ function h = Image(varargin)
     if nargout == 1; h=h_; end
 end
 
-function [parent,label,inputs,usercallback,corner0,corner1] = parse(varargin)
-    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
-    [label,varargin] = parent.extractLabel(varargin,'image');
-    [parent,label,inputs,usercallback,corner0,corner1]= parse_(parent,label,varargin{:});
-    inputs = parent.getHandlesOfLabels(inputs);
-end
-
-function [parent,label,inputs,usercallback,corner0,corner1] = parse_(parent,label,inputs,usercallback,corner0,corner1)
+function [usercallback,corner0,corner1] = parse_(inputs,usercallback,corner0,corner1)
     arguments
-        parent          (1,1) Geomatplot
-        label           (1,:) char              {mustBeValidVariableName}
-        inputs          (1,:) cell              {drawing.mustBeInputList(inputs,parent)}
+        inputs          (1,:) cell                                            %#ok<INUSA> 
         usercallback    (1,1) function_handle   {mustBeImageCallback(usercallback,inputs)}
         corner0                                 {mustBePoint} = [0 0]
         corner1                                 {mustBePoint} = [1 1]
@@ -65,17 +60,13 @@ end
 
 function mustBeImageCallback(usercallback,inputs)
     if nargin(usercallback) ~= length(inputs)+2
-        eidType = 'Image:callbackWrongNumberOfArguments';
-        msgType = ['Callback needs ' int2str(length(inputs)+2) ' number of arguments with the\n' ...
-                   'first two being the X and Y sample positions.'];
-        throw(MException(eidType,msgType));
+        msgType = ['Callback needs ' int2str(length(inputs)+2) ' number of arguments with the\n first two being the X and Y sample positions.'];
+        throw(MException('Image:callbackWrongNumberOfArguments',msgType));
     end
 end
 
 function mustBePoint(x)
     if ~(isnumeric(x) && length(x)==2 || isa(x,'point_base'))
-        eidType = 'mustBePoint:notPoint';
-        msgType = 'The input must be a position or a point drawing';
-        throwAsCaller(MException(eidType,msgType));
+        throwAsCaller(MException('mustBePoint:notPoint','The input must be a position or a point drawing'));
     end
 end

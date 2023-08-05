@@ -26,7 +26,10 @@ function h = Curve(varargin)
 %
 %   See also Circle, CirclularArc, POINT, DISTANCE, INTERSECT, IMAGE
 
-    [parent,label,inputs,usercallback,linespec,args] = parse(varargin{:});
+    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);   
+    [label, varargin] = parent.extractLabel(varargin,'curve');   
+    [inputs,varargin] = parent.extractInputs(varargin);
+    [usercallback,linespec,args] = parse_(inputs,varargin{:});
     
     n = abs(nargout(usercallback));
     function varargout = internalcallback(varargin)
@@ -42,18 +45,9 @@ function h = Curve(varargin)
     if nargout == 1; h = h_; end
 end
 
-function [parent,label,inputs,usercallback,linespec,args] = parse(varargin)
-    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);   
-    [label,varargin] = parent.extractLabel(varargin,'curve');
-    [parent,label,inputs,usercallback,linespec,args] = parse_(parent,label,varargin{:});
-    inputs = parent.getHandlesOfLabels(inputs);
-end
-
-function [parent,label,inputs,usercallback,linespec,args] = parse_(parent,label,inputs,usercallback,linespec,args)
+function [usercallback,linespec,args] = parse_(inputs,usercallback,linespec,args)
     arguments
-        parent         (1,1) Geomatplot
-        label          (1,:) char            {mustBeValidVariableName}
-        inputs         (1,:) cell            {drawing.mustBeInputList(inputs,parent)}
+        inputs         (1,:) cell                                          %#ok<INUSA> 
         usercallback   (1,1) function_handle {mustBeCurveCallback(usercallback,inputs)}
         linespec       (1,:) char            {drawing.mustBeLineSpec}        = 'k-'
         args.LineWidth (1,1) double          {mustBePositive}                = 1.5
@@ -65,9 +59,7 @@ end
 
 function mustBeCurveCallback(usercallback,inputs)
     if nargin(usercallback) ~= length(inputs)+1
-        eidType = 'Curve:callbackWrongNumberOfArguments';
-        msgType = ['Callback needs ' int2str(length(inputs)+1) ' number of arguments with the\n' ...
-                   'first one being a column vector of sample points (t).'];
-        throw(MException(eidType,msgType));
+        msgType = ['Callback needs ' int2str(length(inputs)+1) ' number of arguments with the\n first one being a column vector of sample points (t).'];
+        throw(MException('Curve:callbackWrongNumberOfArguments',msgType));
     end
 end

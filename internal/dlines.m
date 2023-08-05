@@ -12,18 +12,19 @@ methods
 end
 
 methods (Static,Hidden)
-    function [parent,label,inputs,linespec,args] = parse_inputs(varargin)
-        [parent,varargin] = Geomatplot.extractGeomatplot(varargin);   
-        [label,varargin] = parent.extractLabel(varargin,'small');
-        [parent,label,inputs,linespec,args] = dlines.parse_inputs_(parent,label,varargin{:});
-        inputs = parent.getHandlesOfLabels(inputs);
+    function [parent,label,inputs,linespec,params] = parse_inputs(args,flag,mina,maxa)
+        arguments
+            args (1,:) cell;       flag (1,:) char   = 'small';
+            mina (1,1) double = 2; maxa (1,1) double = 2;
+        end
+        [parent,  args]   = Geomatplot.extractGeomatplot(args);   
+        [label ,  args]   = parent.extractLabel(args,flag);
+        [inputs,  args]   = parent.extractInputs(args,mina,maxa);
+        [linespec,params] = dlines.parse_inputs_(args{:});
     end
 
-    function [parent,label,inputs,linespec,args] = parse_inputs_(parent,label,inputs,linespec,args)
+    function [linespec,args] = parse_inputs_(linespec,args)
         arguments
-            parent         (1,1) Geomatplot
-            label          (1,:) char       {mustBeValidVariableName}
-            inputs         (1,:) cell       {drawing.mustBeInputList(inputs,parent)}
             linespec       (1,:) char       {drawing.mustBeLineSpec}        = 'k-'
             args.LineWidth (1,1) double     {mustBePositive}                = 1.5
             args.LineStyle (1,:) char

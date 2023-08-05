@@ -1,7 +1,6 @@
 function h = ClosestPoint(varargin)
 
-    [parent,label,inputs,args] = dpoint.parse_inputs(varargin{:});
-    drawing.mustBeOfLength(inputs,2);
+    [parent,label,inputs,args] = dpoint.parse_inputs(varargin,'capital',2,2);
 
     if drawing.isInputPatternMatching(inputs,{'point_base',{'point_base','dpointseq'}})
         callback = @closest_point2pointseq;

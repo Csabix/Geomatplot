@@ -21,7 +21,7 @@ function h = Midpoint(varargin)
 %
 %   See also POINT, SEGMENT, CIRCLE
 
-    [parent,label,inputs,args] = dpoint.parse_inputs(varargin{:});
+    [parent,label,inputs,args] = dpoint.parse_inputs(varargin);
 
     if length(inputs)==1 && isa(inputs{1},'dcircle')
         h_ = inputs{1}.center;

@@ -23,23 +23,17 @@ function h = Polygon(varargin)
 %
 %   See also GEOMATPLOT, POINT, SEGMENT, CIRCLE, INTERSECT
 
-    [parent,label,args] = parse(varargin{:});
+    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
+    [label,varargin] = parent.extractLabel(varargin,'poly');
+    [position,varargin] = drawing.extractPosition(varargin,inf);
+    args = parse_(position,varargin{:});
     h_ = mpolygon(parent,label,args);
     
     if nargout == 1; h=h_; end
 end
 
-function [parent,label,args] = parse(varargin)
-    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
-    [label,varargin] = parent.extractLabel(varargin,'poly');
-    [position,varargin] = drawing.extractPosition(varargin,inf);
-    [parent,label,args] = parse_(parent,label,position,varargin{:});
-end
-
-function [parent,label,args] = parse_(parent,label,position,color,args)
+function args = parse_(position,color,args)
     arguments
-        parent          (1,1) Geomatplot
-        label           (1,:) char      {mustBeValidVariableName}
         position        (:,2) double    {mustBeReal}
         color                           {drawing.mustBeColor}               = 'b'
         args.MarkerSize (1,1) double    {mustBePositive}                    = 7
@@ -50,7 +44,6 @@ function [parent,label,args] = parse_(parent,label,position,color,args)
         args.FaceSelectable (1,1) logical                                   = true
         args.InteractionsAllowed (1,:) char {mustBeMember(args.InteractionsAllowed,{'all','none','translate','reshape'})} = 'all'
     end
-    %args.Label = label;
     args.Color = color;
     if ~isfield(args,'LabelTextColor'); args.LabelTextColor = color; end
     if ~isempty(position); args.Position = position; end

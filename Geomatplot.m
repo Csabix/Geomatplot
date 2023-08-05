@@ -121,6 +121,44 @@ methods (Access = public, Hidden)
         end
     end
 
+    function [inputs,args]=extractInputs(o,args,mina,maxa)
+        arguments
+            o (1,1) Geomatplot; args (1,:) cell; mina (1,1) double = 0; maxa (1,1) double = inf;
+        end
+        if isempty(args); inputs = {}; return; end
+        if isa(args{1},'cell')
+            inputs = args{1};
+
+            for i = 1:length(inputs)
+                h = inputs{i};
+                if size(h,1)==1 && ischar(h) || isStringScalar(h)
+                    if ~isvarname(h)
+                        throwAsCaller(MException('extractInputs:notVariableName',['The input label ''' h ''' is not a valid variable name.']));
+                    end
+                    if ~o.isLabel(h)
+                        throwAsCaller(MException('extractInputs:labelNotFound',['The input label ''' h ''' does not exist.']));
+                    end
+                    inputs{i}=o.getHandle(h);
+                elseif ~isa(h,'drawing')
+                    throwAsCaller(MException('extractInputs:invalidType','The input label is of invalid type or size.'));
+                end
+            end
+            args = args(2:end);
+        else
+            for i=1:length(args)
+                if ~isa(args{i},'drawing'); i=i-1; break; end %#ok<FXSET> 
+                if args{i}.parent ~= o
+                    throwAsCaller(MException('extractInputs:differentParent','The input has a different Geomatplot then expected.\n(Sometimes it is a one-off, try running your code again)'));
+                end
+            end
+            inputs = args(1:i);
+            args = args(i+1:end);
+        end
+        if length(inputs)<mina || length(inputs)>maxa
+            throwAsCaller(MException('extractInputs:wrongNumberOfInputs','Invalid number of input geomatplot arguments.'));
+        end
+    end
+
     function l = getNextLabel(o,flag)
         function l = convert(index,offset)
             l = char(mod(index,26)+offset);

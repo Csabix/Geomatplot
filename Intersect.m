@@ -31,8 +31,11 @@ function [h,g] = Intersect(varargin)
 %
 %   See also GEOMATPLOT, SEGMENT, POLYGON, CURVE
 
-    [parent,labels,inputs,args,s] = parse(varargin{:});
-    drawing.mustBeOfLength(inputs,2);
+    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);
+    [labels,varargin] = parent.extractMultipleLabels(varargin,'capital');
+    [inputs,varargin] = parent.extractInputs(varargin,2,2);
+    [args  ,s]        = parse_(varargin{:});
+
     if drawing.isInputPatternMatching(inputs,{'dcircle','dcircle'})
         callback = @intersect_circle2circle;
     elseif drawing.isInputPatternMatching(inputs,{'dcircle',{'dlines','mpolygon'}})
@@ -116,18 +119,8 @@ function v = intersect_circle2circle(c0,c1)
     end
 end
 
-function [parent,labels,inputs,args,s] = parse(varargin)
-    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);
-    [labels,varargin] = parent.extractMultipleLabels(varargin,'capital');
-    [parent,labels,inputs,args,s] = parse_(parent,labels,varargin{:});
-    inputs = parent.getHandlesOfLabels(inputs);
-end
-
-function [parent,labels,inputs,args,s] = parse_(parent,labels,inputs,color,args,s)
+function [args,s] = parse_(color,args,s)
     arguments
-        parent          (1,1) Geomatplot
-        labels          (1,:) cell      
-        inputs          (1,:) cell      {drawing.mustBeInputList(inputs,parent)}
         color                           {drawing.mustBeColor}               = 'k'
         args.MarkerSize (1,1) double    {mustBePositive}                    = 7
         args.LabelAlpha (1,1) double    {mustBeInRange(args.LabelAlpha,0,1)}= 0

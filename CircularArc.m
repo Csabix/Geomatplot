@@ -28,7 +28,7 @@ function [h,O,r,alpha,beta] = CircularArc(varargin)
 %
 %   See also Circle, POINT, DISTANCE, SEGMENT, INTERSECT
 
-    [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin{:});
+    [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin,'small',3,3);
 
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
     % (center, starting_point, third_point) -- third_point sets the arc angle
@@ -43,9 +43,7 @@ function [h,O,r,alpha,beta] = CircularArc(varargin)
         beta_ = dscalar(parent, parent.getNextLabel('small'), inputs(1:2), @base_angle);
         alpha_ = inputs{3};
     else
-        eidType = 'CircularArc:invalidInputPattern';
-        msgType = 'Unsupported input label types or unknown overload.';
-        throw(MException(eidType,msgType));
+        throw(MException('CircularArc:invalidInputPattern','Unsupported input label types or unknown overload.'));
     end
     
     h_ = dcurve(parent,label,{c_,r_,beta_,alpha_},linespec,@circ_arc,args);

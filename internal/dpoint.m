@@ -29,28 +29,29 @@ methods (Static)
 end
 methods (Static,Hidden)
 
-    function [parent,label,inputs,args] = parse_inputs(varargin)
-        [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
-        [label,varargin] = parent.extractLabel(varargin,'capital');
-        [parent,label,inputs,args] = dpoint.parse_inputs_(parent,label,varargin{:});
-        inputs = parent.getHandlesOfLabels(inputs);
+    function [parent,label,inputs,params] = parse_inputs(args,flag,mina,maxa)
+        arguments
+            args (1,:) cell;       flag (1,:) char   = 'capital';
+            mina (1,1) double = 1; maxa (1,1) double = inf;
+        end
+        [parent,args] = Geomatplot.extractGeomatplot(args);    
+        [label, args] = parent.extractLabel(args,flag);
+        [inputs,args] = parent.extractInputs(args,mina,maxa);
+        params        = dpoint.parse_inputs_(args{:});
+        params.Label  = label;
     end
     
-    function [parent,label,inputs,args] = parse_inputs_(parent,label,inputs,color,args)
+    function params = parse_inputs_(color,params)
         arguments
-            parent          (1,1) Geomatplot
-            label           (1,:) char      {mustBeValidVariableName}
-            inputs          (1,:) cell      {drawing.mustBeInputList(inputs,parent)}
             color                           {drawing.mustBeColor}               = 'k'
-            args.MarkerSize (1,1) double    {mustBePositive}                    = 7
-            args.LabelAlpha (1,1) double    {mustBeInRange(args.LabelAlpha,0,1)}= 0
-            args.LabelTextColor             {drawing.mustBeColor}
-            args.LineWidth  (1,1) double    {mustBePositive}
-            args.LabelVisible (1,:) char
+            params.MarkerSize (1,1) double    {mustBePositive}                    = 7
+            params.LabelAlpha (1,1) double    {mustBeInRange(params.LabelAlpha,0,1)}= 0
+            params.LabelTextColor             {drawing.mustBeColor}
+            params.LineWidth  (1,1) double    {mustBePositive}
+            params.LabelVisible (1,:) char
         end
-        args.Label = label;
-        args.Color = color;
-        if ~isfield(args,'LabelTextColor'); args.LabelTextColor = color; end
+        params.Color = color;
+        if ~isfield(params,'LabelTextColor'); params.LabelTextColor = color; end
     end
 
 end

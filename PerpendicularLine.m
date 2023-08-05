@@ -14,23 +14,20 @@ function [h,p] = PerpendicularLine(varargin)
 %
 %   h = PerpendicularLine(___)  returns the created handle.
 
-    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);   
-    [label,varargin] = parent.extractLabel(varargin,'small');
     eidType = 'Perpendicular:invalidInputPattern';
     msgType = 'Cannot create perpendicular line for these input types';
-    if isempty(varargin) || ~iscell(varargin{1}) || length(varargin{1})<2
-        throw(MException(eidType,msgType));
-    end
 
-    if drawing.isInputPatternMatching(varargin{1},{'point_base','point_base','point_base'})
-        [parent,label,inputs,linespec,args] = dlines.parse_inputs_(parent,label,varargin{:});
-        inputs = parent.getHandlesOfLabels(inputs);
+    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);   
+    [label, varargin] = parent.extractLabel(varargin,'small');
+    [inputs,varargin] = parent.extractInputs(varargin,2,3);
+
+    if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
+        [linespec,args] = dlines.parse_inputs_(varargin{:});
         h_ = dlines(parent,label,inputs,linespec,@perpline2segment,args);
-    elseif drawing.isInputPatternMatching(varargin{1},{'point_base','point_base'})
-        [parent,label,inputs,linespec,args] = dlines.parse_inputs_(parent,label,varargin{:});
-        inputs = parent.getHandlesOfLabels(inputs);
+    elseif drawing.isInputPatternMatching(inputs,{'point_base','point_base'})
+        [linespec,args] = dlines.parse_inputs_(varargin{:});
         h_ = dlines(parent,label,inputs,linespec,@perpline2point,args);
-    elseif drawing.isInputPatternMatching(varargin{1},{'point_base','drawing'})
+    elseif drawing.isInputPatternMatching(inputs,{'point_base','drawing'})
         p_ = ClosestPoint(parent,varargin{1},'LabelVisible','off','MarkerSize',5);
         h_ = Line(parent,label,{varargin{1}{1},p_},varargin{2:end});
     else

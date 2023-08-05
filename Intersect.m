@@ -45,6 +45,8 @@ function [h,g] = Intersect(varargin)
         inputs = inputs([2 1]);
     elseif drawing.isInputPatternMatching(inputs,{{'dlines','mpolygon'},{'dlines','mpolygon'}})
         callback = @intersect_poly2poly;
+    else
+        throw(MException('Intersect:invalidInputPattern','Cannot intersect these input types'));        
     end
 
     l = parent.getNextLabel('ptseq');

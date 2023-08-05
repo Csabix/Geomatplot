@@ -17,7 +17,13 @@ function h = Segment(varargin)
 %   See also POINT, LINE, RAY, PerpendicularBisector, AngleBisector, INTERSECT
 
     [parent,label,inputs,args] = dlines.parse_inputs(varargin);
-    callback = @(a,b) a.value+(b.value-a.value).*[0;1];
+    if drawing.isInputPatternMatching(inputs,{'point_base','point_base'})
+        callback = @(a,b) a.value+(b.value-a.value).*[0;1];
+    elseif drawing.isInputPatternMatching(inputs,{'point_base','dvector'})
+        callback = @(a,b) a.value+b.value.*[0;1];
+    else
+        throw(MException('Segment:invalidInputPattern','Unknown overload.')); 
+    end
     h_ = dlines(parent,label,inputs,callback,args);
 
     if nargout == 1; h = h_; end

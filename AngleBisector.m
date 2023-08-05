@@ -17,6 +17,11 @@ function h = AngleBisector(varargin)
 %   See also POINT, LINE, SEGMENT, RAY, PerpendicularBisector, INTERSECT
 
     [parent,label,inputs,args] = dlines.parse_inputs(varargin,'small',3,3);
+    if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
+        % do nothing
+    else
+        throw(MException('AngleBisector:invalidInputPattern','Unknown overload.'));
+    end
 
     h_ = dlines(parent,label,inputs,@angle_bisector,args);
 

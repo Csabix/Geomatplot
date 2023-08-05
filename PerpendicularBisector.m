@@ -15,6 +15,11 @@ function h = PerpendicularBisector(varargin)
 %   h = PerpendicularBisector(___)  returns the created handle.
 
     [parent,label,inputs,args] = dlines.parse_inputs(varargin);
+    if drawing.isInputPatternMatching(inputs,{'point_base','point_base'})
+        % do nothing
+    else
+        throw(MException('PerpendicularBisector:invalidInputPattern','Unknown overload.')); 
+    end
 
     h_ = dlines(parent,label,inputs,@perpendicular_bisector,args);
 

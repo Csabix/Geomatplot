@@ -29,7 +29,7 @@ function h = Curve(varargin)
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);   
     [label, varargin] = parent.extractLabel(varargin,'curve');   
     [inputs,varargin] = parent.extractInputs(varargin);
-    [usercallback,linespec,args] = parse_(inputs,varargin{:});
+    [usercallback,args] = parse_(inputs,varargin{:});
     
     n = abs(nargout(usercallback));
     function varargout = internalcallback(varargin)
@@ -40,21 +40,24 @@ function h = Curve(varargin)
         [varargout{1:n}] = usercallback(varargin{1},params{:});
     end
 
-    h_ = dcurve(parent,label,inputs,linespec,@internalcallback,args);
+    h_ = dcurve(parent,label,inputs,@internalcallback,args);
 
     if nargout == 1; h = h_; end
 end
 
-function [usercallback,linespec,args] = parse_(inputs,usercallback,linespec,args)
+function [usercallback,params] = parse_(inputs,usercallback,linespec,linewidth,params)
     arguments
         inputs         (1,:) cell                                          %#ok<INUSA> 
         usercallback   (1,1) function_handle {mustBeCurveCallback(usercallback,inputs)}
         linespec       (1,:) char            {drawing.mustBeLineSpec}        = 'k-'
-        args.LineWidth (1,1) double          {mustBePositive}                = 1.5
-        args.LineStyle (1,:) char
-        args.Marker    (1,:) char
-        args.Color                           {drawing.mustBeColor}           = 'k'
+        linewidth        (1,1) double        {mustBePositive}                =  1
+        params.LineWidth (1,1) double        {mustBePositive}                = 1.5
+        params.LineStyle (1,:) char
+        params.Marker    (1,:) char
+        params.Color                         {drawing.mustBeColor}
     end
+    if ~isfield(params,'LineWidth'); params.LineWidth = linewidth; end
+    params = dlines.applyLineSpec(params,linespec);
 end
 
 function mustBeCurveCallback(usercallback,inputs)

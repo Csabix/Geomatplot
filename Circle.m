@@ -27,7 +27,7 @@ function [h,O,r] = Circle(varargin)
 %
 %   See also CirclularArc, POINT, DISTANCE, SEGMENT, INTERSECT
 
-    [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin,'small',2,3);
+    [parent,label,inputs,args] = dlines.parse_inputs(varargin,'small',2,3);
 
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
         c_ = dpoint(parent,parent.getNextLabel('small'),inputs,@equidistpoint);
@@ -41,7 +41,7 @@ function [h,O,r] = Circle(varargin)
         throw(MException('CircularArc:invalidInputPattern','Unsupported input label types or unknown overload.'));
     end
 
-    h_ = dcircle(parent,label,c_,r_,linespec,args);
+    h_ = dcircle(parent,label,c_,r_,args);
 
     if nargout >= 1; h = h_; end
     if nargout >= 2; O = c_; end

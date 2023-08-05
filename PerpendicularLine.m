@@ -22,11 +22,11 @@ function [h,p] = PerpendicularLine(varargin)
     [inputs,varargin] = parent.extractInputs(varargin,2,3);
 
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
-        [linespec,args] = dlines.parse_inputs_(varargin{:});
-        h_ = dlines(parent,label,inputs,linespec,@perpline2segment,args);
+        args= dlines.parse_inputs_(varargin{:});
+        h_ = dlines(parent,label,inputs,@perpline2segment,args);
     elseif drawing.isInputPatternMatching(inputs,{'point_base','point_base'})
-        [linespec,args] = dlines.parse_inputs_(varargin{:});
-        h_ = dlines(parent,label,inputs,linespec,@perpline2point,args);
+        args = dlines.parse_inputs_(varargin{:});
+        h_ = dlines(parent,label,inputs,@perpline2point,args);
     elseif drawing.isInputPatternMatching(inputs,{'point_base','drawing'})
         p_ = ClosestPoint(parent,varargin{1},'LabelVisible','off','MarkerSize',5);
         h_ = Line(parent,label,{varargin{1}{1},p_},varargin{2:end});

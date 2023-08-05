@@ -63,32 +63,38 @@ function h = Point(varargin)
     if nargout == 1; h = h_; end
 end
 
-function args = parse_mpoint(position,color,args)
+function params = parse_mpoint(position,color,markersize,params)
     arguments
-        position        (:,2) double    {mustBeReal}
-        color                           {drawing.mustBeColor}               = 'b'
-        args.MarkerSize (1,1) double    {mustBePositive}                    = 8
-        args.LabelAlpha (1,1) double    {mustBeInRange(args.LabelAlpha,0,1)}= 0
-        args.LabelTextColor             {drawing.mustBeColor}
-        args.LineWidth  (1,1) double    {mustBePositive}
+        position            (1,2) double {mustBeReal}
+        color                            {drawing.mustBeColor}               = 'b'
+        markersize          (1,1) double {mustBePositive}                    = 8
+        params.MarkerSize   (1,1) double {mustBePositive}
+        params.LabelAlpha   (1,1) double {mustBeInRange(params.LabelAlpha,0,1)}= 0
+        params.LabelTextColor            {drawing.mustBeColor}
+        params.LineWidth    (1,1) double {mustBePositive}
+        params.LabelVisible (1,:) char   {mustBeMember(params.LabelVisible,{'on','off','hover'})}
+        params.Visible      (1,:) char   {mustBeMember(params.Visible,{'on','off'})}
     end
-    args.Color = color;
-    if ~isfield(args,'LabelTextColor'); args.LabelTextColor = color; end
-    if ~isempty(position); args.Position = position; end
+    params.Color = color;
+    if ~isfield(params,'LabelTextColor'); params.LabelTextColor = color; end
+    if ~isfield(params,'MarkerSize');     params.MarkerSize = markersize; end
+    if ~isempty(position); params.Position = position; end
 end
 
-function [usercallback,args] = parse_dpoint(inputs,usercallback,color,args)
+function [usercallback,params] = parse_dpoint(inputs,usercallback,color,markersize,params)
     arguments
         inputs          (1,:) cell                                         %#ok<INUSA> 
         usercallback    (1,1) function_handle {mustBePointCallback(usercallback,inputs)}
         color                                 {drawing.mustBeColor}                      = 'k'
-        args.MarkerSize (1,1) double          {mustBePositive}                           = 7
-        args.LabelAlpha (1,1) double          {mustBeInRange(args.LabelAlpha,0,1)}       = 0
-        args.LabelTextColor                   {drawing.mustBeColor}
-        args.LineWidth  (1,1) double          {mustBePositive}
+        markersize          (1,1) double      {mustBePositive}                           = 6
+        params.MarkerSize   (1,1) double      {mustBePositive}
+        params.LabelAlpha   (1,1) double      {mustBeInRange(params.LabelAlpha,0,1)}     = 0
+        params.LabelVisible (1,:) char        {mustBeMember(params.LabelVisible,{'on','off','hover'})}
+        params.Visible      (1,:) char        {mustBeMember(params.Visible,{'on','off'})}
     end
-    args.Color = color;
-    if ~isfield(args,'LabelTextColor'); args.LabelTextColor = color; end
+    params.Color = color;
+    if ~isfield(params,'LabelTextColor'); params.LabelTextColor = color; end
+    if ~isfield(params,'MarkerSize');     params.MarkerSize = markersize; end
 end
 
 function mustBePointCallback(usercallback,inputs)

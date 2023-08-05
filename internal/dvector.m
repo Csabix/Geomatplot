@@ -4,13 +4,13 @@ properties
     pt  = [] %  (1,1) dpoint
 end
 methods
-    function o = dvector(parent,label,inputs,callback,pt,linespec,args)
+    function o = dvector(parent,label,inputs,callback,pt,args)
         o=o@dnumeric(parent,label,inputs,callback);
         if nargin >= 5
             o.pt = pt;
             parent.ax.NextPlot ='add';
             args = namedargs2cell(args);
-            o.fig = quiver(0,0,0,0,1.,linespec,args{:});
+            o.fig = quiver(0,0,0,0,1.,args{:});
             o.update;
             if ~isempty(o.exception); rethrow(o.exception); end
         end

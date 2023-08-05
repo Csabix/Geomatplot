@@ -16,9 +16,9 @@ function h = AngleBisector(varargin)
 %
 %   See also POINT, LINE, SEGMENT, RAY, PerpendicularBisector, INTERSECT
 
-    [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin,'small',3,3);
+    [parent,label,inputs,args] = dlines.parse_inputs(varargin,'small',3,3);
 
-    h_ = dlines(parent,label,inputs,linespec,@angle_bisector,args);
+    h_ = dlines(parent,label,inputs,@angle_bisector,args);
 
     if nargout == 1; h = h_; end
     

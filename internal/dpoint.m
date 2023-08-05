@@ -41,17 +41,20 @@ methods (Static,Hidden)
         params.Label  = label;
     end
     
-    function params = parse_inputs_(color,params)
+    function params = parse_inputs_(color,markersize,params)
         arguments
-            color                           {drawing.mustBeColor}               = 'k'
-            params.MarkerSize (1,1) double    {mustBePositive}                    = 7
-            params.LabelAlpha (1,1) double    {mustBeInRange(params.LabelAlpha,0,1)}= 0
-            params.LabelTextColor             {drawing.mustBeColor}
-            params.LineWidth  (1,1) double    {mustBePositive}
-            params.LabelVisible (1,:) char
+            color                            {drawing.mustBeColor}                  = 'k'
+            markersize          (1,1) double {mustBePositive}                       = 6
+            params.MarkerSize   (1,1) double {mustBePositive}
+            params.LabelAlpha   (1,1) double {mustBeInRange(params.LabelAlpha,0,1)} = 0
+            params.LabelTextColor            {drawing.mustBeColor}
+            params.LineWidth    (1,1) double {mustBePositive}
+            params.LabelVisible (1,:) char   {mustBeMember(params.LabelVisible,{'on','off','hover'})}
+            params.Visible      (1,:) char   {mustBeMember(params.Visible,{'on','off'})}
         end
         params.Color = color;
         if ~isfield(params,'LabelTextColor'); params.LabelTextColor = color; end
+        if ~isfield(params,'MarkerSize');     params.MarkerSize = markersize; end
     end
 
 end

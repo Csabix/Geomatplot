@@ -16,9 +16,9 @@ function h = Ray(varargin)
 %
 %   See also POINT, LINE, SEGMENT, PerpendicularBisector, AngleBisector, INTERSECT
 
-    [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin);
+    [parent,label,inputs,args] = dlines.parse_inputs(varargin);
     callback = @(a,b) a.value+(b.value-a.value).*[0;1;1e4;1e8];
-    h_ = dlines(parent,label,inputs,linespec,callback,args);
+    h_ = dlines(parent,label,inputs,callback,args);
 
     if nargout == 1; h = h_; end
 

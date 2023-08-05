@@ -14,9 +14,9 @@ function h = PerpendicularBisector(varargin)
 %
 %   h = PerpendicularBisector(___)  returns the created handle.
 
-    [parent,label,inputs,linespec,args] = dlines.parse_inputs(varargin);
+    [parent,label,inputs,args] = dlines.parse_inputs(varargin);
 
-    h_ = dlines(parent,label,inputs,linespec,@perpendicular_bisector,args);
+    h_ = dlines(parent,label,inputs,@perpendicular_bisector,args);
 
     if nargout == 1; h = h_; end
     

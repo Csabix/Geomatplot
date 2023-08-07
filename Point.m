@@ -35,7 +35,7 @@ function h = Point(varargin)
     [label,   varargin] = parent.extractLabel(varargin,'capital');
     [position,varargin] = drawing.extractPosition(varargin);
 
-    if isempty(position) && ~isempty(varargin) && iscell(varargin{1})
+    if isempty(position) && ~isempty(varargin) && (iscell(varargin{1})||isa(varargin{1},'drawing'))
         isdependent = true;  % because cannot define function inside an if statement
         [inputs,  varargin] = parent.extractInputs(varargin,0,inf);
         [usercallback,args] = parse_dpoint(inputs,varargin{:});

@@ -1,12 +1,14 @@
 classdef dimage < dependent
 properties
+    Resolution (1,1) double = 256;
     corner0
     corner1
 end
 methods
-    function o = dimage(parent,label,inputs,callback,c0,c1,args)
+    function o = dimage(parent,label,inputs,callback,c0,c1,args,resolution)
+        args = namedargs2cell(args);
         fig = imagesc('XData',[0 1],'YData',[0 1],'CData',0,args{:});
-        uistack(fig,"bottom");
+        uistack(fig,'bottom');
         o = o@dependent(parent,label,fig,inputs,[]);
         o.corner0 = c0;      o.corner1 = c1;
         o.callback = callback;
@@ -17,7 +19,8 @@ methods
             inputs = [inputs {c1}];
         end
         o.addCallbacks(inputs);
-        o.update;
+        o.Resolution = resolution;
+        o.update(1);
         if ~isempty(o.exception); rethrow(o.exception); end
     end
 

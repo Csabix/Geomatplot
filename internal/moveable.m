@@ -27,11 +27,13 @@ methods (Static)
         values = struct2cell(fig.UserData.deps);
         runtime = 0;
         for i = 1:length(values)
-            v = values{i}; v.defined = true;
+            v = values{i};
+            b = true;
             for j = 1:length(v.inputs)
-                v.defined = v.defined & v.inputs{j}.defined;
+                b = b & v.inputs{j}.defined;
             end
-            if v.defined
+            v.defined = true;
+            if b
                 v.update(detail_level);
                 if(v.defined)
                     runtime = runtime + v.runtime;

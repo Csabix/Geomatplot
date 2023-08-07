@@ -33,29 +33,36 @@ function h = Image(varargin)
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);  
     [label,varargin] = parent.extractLabel(varargin,'image');
     [inputs,varargin] = parent.extractInputs(varargin);
-    [usercallback,corner0,corner1]= parse_(inputs,varargin{:});
+    [usercallback,corner0,corner1,params,resolution]= parse_(inputs,varargin{:});
     inputs = parent.getHandlesOfLabels(inputs);
 
     n = abs(nargout(usercallback));
     function varargout = internalcallback(varargin)
-        params = cell(1,nargin-2);
+        args = cell(1,nargin-2);
         for i=3:length(varargin)
-            params{i-2} = varargin{i}.value;
+            args{i-2} = varargin{i}.value;
         end
-        [varargout{1:n}] = usercallback(varargin{1:2},params{:});
+        [varargout{1:n}] = usercallback(varargin{1:2},args{:});
     end
-    h_ = dimage(parent,label,inputs,@internalcallback,corner0,corner1,{});
+    h_ = dimage(parent,label,inputs,@internalcallback,corner0,corner1,params,resolution);
 
     if nargout == 1; h=h_; end
 end
 
-function [usercallback,corner0,corner1] = parse_(inputs,usercallback,corner0,corner1)
+function [usercallback,corner0,corner1,params,resolution] = parse_(inputs,usercallback,corner0,corner1,params,options)
     arguments
-        inputs          (1,:) cell                                            %#ok<INUSA> 
-        usercallback    (1,1) function_handle   {mustBeImageCallback(usercallback,inputs)}
-        corner0                                 {mustBePoint} = [0 0]
-        corner1                                 {mustBePoint} = [1 1]
+        inputs                  (1,:) cell                                          %#ok<INUSA> 
+        usercallback            (1,1) function_handle {mustBeImageCallback(usercallback,inputs)}
+        corner0                                       {mustBePoint} = [0 0]
+        corner1                                       {mustBePoint} = [1 1]
+        params.CDataMapping     (1,:) char   {mustBeMember(params.CDataMapping,{'direct','scaled'})}
+        params.Interpolation    (1,:) char   {mustBeMember(params.Interpolation,{'none','scaled','direct'})}
+        params.MaxRenderedResolution
+        params.AlphaData        (:,:) double
+        params.AlphaDataMapping (1,:) char   {mustBeMember(params.AlphaDataMapping,{'none','scaled','direct'})}
+        options.Resolution      (1,1) double {mustBeInteger,mustBePositive}  = 256
     end
+    resolution = options.Resolution;
 end
 
 function mustBeImageCallback(usercallback,inputs)

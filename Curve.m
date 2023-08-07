@@ -29,34 +29,40 @@ function h = Curve(varargin)
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);   
     [label, varargin] = parent.extractLabel(varargin,'curve');   
     [inputs,varargin] = parent.extractInputs(varargin);
-    [usercallback,args] = parse_(inputs,varargin{:});
+    [usercallback,params,resolution] = parse_(inputs,varargin{:});
     
     n = abs(nargout(usercallback));
     function varargout = internalcallback(varargin)
-        params = cell(1,nargin-1);
+        args = cell(1,nargin-1);
         for i=2:length(varargin)
-            params{i-1} = varargin{i}.value;
+            args{i-1} = varargin{i}.value;
         end
-        [varargout{1:n}] = usercallback(varargin{1},params{:});
+        [varargout{1:n}] = usercallback(varargin{1},args{:});
     end
 
-    h_ = dcurve(parent,label,inputs,@internalcallback,args);
+    h_ = dcurve(parent,label,inputs,@internalcallback,params,resolution);
 
     if nargout == 1; h = h_; end
 end
 
-function [usercallback,params] = parse_(inputs,usercallback,linespec,linewidth,params)
+function [usercallback,params,resolution] = parse_(inputs,usercallback,linespec,lnwidth,params,options)
     arguments
-        inputs         (1,:) cell                                          %#ok<INUSA> 
-        usercallback   (1,1) function_handle {mustBeCurveCallback(usercallback,inputs)}
-        linespec       (1,:) char            {drawing.mustBeLineSpec}        = 'k-'
-        linewidth        (1,1) double        {mustBePositive}                =  1
-        params.LineWidth (1,1) double        {mustBePositive}                = 1.5
-        params.LineStyle (1,:) char
-        params.Marker    (1,:) char
-        params.Color                         {drawing.mustBeColor}
+        inputs       (1,:) cell                                          %#ok<INUSA> 
+        usercallback (1,1) function_handle {mustBeCurveCallback(usercallback,inputs)}
+        linespec     (1,:) char            {drawing.mustBeLineSpec}        = 'k'
+        lnwidth      (1,1) double          {mustBePositive}                =  1
+        params.LineWidth   (1,1) double    {mustBePositive}
+        params.LineStyle   (1,:) char
+        params.Marker      (1,:) char
+        params.Color                       {drawing.mustBeColor}
+        options.Resolution (1,1) double    {mustBeInteger,mustBePositive} = 256
+        options.c          (1,1) double    {mustBePositive} % hack, do not intentionally use this name value arg
+        options.r          (1,1) double    {mustBePositive} % hack, do not intentionally use this name value arg   
     end
-    if ~isfield(params,'LineWidth'); params.LineWidth = linewidth; end
+    if isfield(options,'c'); linespec = 'c'; lnwidth = options.c; end
+    if isfield(options,'r'); linespec = 'r'; lnwidth = options.r; end
+    if isfield(options,'Resolution'); resolution = options.Resolution; end
+    if ~isfield(options,'LineWidth'); params.LineWidth = lnwidth; end
     params = dlines.applyLineSpec(params,linespec);
 end
 

@@ -1,7 +1,6 @@
 classdef dlines < dpointlineseq
 methods
-    function o = dlines(parent,label,inputs,callback,args,varargin)
-
+    function o = dlines(parent,label,inputs,callback,args)
         args = namedargs2cell(args);
         fig = line(parent.ax,0,0,args{:});
         o = o@dpointlineseq(parent,label,fig,inputs,callback);

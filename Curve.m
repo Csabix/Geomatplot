@@ -24,7 +24,7 @@ function h = Curve(varargin)
 %
 %   h = Curve(___)  returns the created handle.
 %
-%   See also Circle, CirclularArc, POINT, DISTANCE, INTERSECT, IMAGE
+%   See also Circle, CircularArc, POINT, DISTANCE, INTERSECT, IMAGE
 
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);   
     [label, varargin] = parent.extractLabel(varargin,'curve');   

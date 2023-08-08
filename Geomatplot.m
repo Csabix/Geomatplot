@@ -67,8 +67,8 @@ methods (Access = public, Hidden)
     end
 
     function [label,args] = extractLabel(o,args,flag)
-        if ~isempty(args) && (size(args{1},1)==1 && ischar(args{1}) || isStringScalar(args{1}) )
-            label = args{1};
+        [label,args] = drawing.extractText(args);
+        if ~isempty(label)
             if ~isvarname(label)
                 eidType = 'extractLabel:notVariableName';
                 msgType = ['Label ''' label ''' is not a valid variable name.'];
@@ -79,7 +79,6 @@ methods (Access = public, Hidden)
                 msgType = ['Label ''' label ''' already exists.'];
                 throwAsCaller(MException(eidType,msgType));
             end
-            args = args(2:end);
         else
             label = o.getNextLabel(flag);
         end
@@ -157,7 +156,27 @@ methods (Access = public, Hidden)
             throwAsCaller(MException('extractInputs:wrongNumberOfInputs','Invalid number of input geomatplot arguments.'));
         end
     end
-
+    
+    % [0,1] or {'A'} or A (point_base)
+    function [position,args] = extractPoint(o,args)
+        % a) const position
+        [position,args] = drawing.extractPosition(args);
+        % b) cell with one label or point handle
+        if isempty(position)
+            if ~isempty(args) && (iscellstr(args{1}) && length(args{1})==1 ...
+                    || iscell(args{1}) && length(args{1})==1 && isstring(args{1}{1}) ...
+                    || isa(args{1},'point_base'))
+                position = args{1};
+                args = args(2:end);
+                if iscell(position)
+                    position = o.getHandle(position{1});
+                end
+            else
+                throw(MException('Text:notPosition','Couldn''t parse position argument'));
+            end
+        end
+    end
+    
     function l = getNextLabel(o,flag)
         function l = convert(index,offset)
             l = char(mod(index,26)+offset);

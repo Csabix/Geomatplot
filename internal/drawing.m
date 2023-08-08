@@ -33,6 +33,15 @@ methods (Access=public,Static,Hidden)
             position = [];
         end
     end
+    
+    function [text,args] = extractText(args)
+        if ~isempty(args) && (size(args{1},1)==1 && ischar(args{1}) || isStringScalar(args{1}) )
+            text = args{1};
+            args = args(2:end);
+        else
+            text = [];
+        end
+    end
 
     function b = isColorName(x)
         shorcolnames = 'rgbcmykw';

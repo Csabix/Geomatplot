@@ -89,6 +89,8 @@ function [usercallback,params] = parse_dpoint(inputs,usercallback,color,markersi
         markersize          (1,1) double      {mustBePositive}                           = 6
         params.MarkerSize   (1,1) double      {mustBePositive}
         params.LabelAlpha   (1,1) double      {mustBeInRange(params.LabelAlpha,0,1)}     = 0
+        params.LabelTextColor                 {drawing.mustBeColor}
+        params.LineWidth    (1,1) double      {mustBePositive}
         params.LabelVisible (1,:) char        {mustBeMember(params.LabelVisible,{'on','off','hover'})}
         params.Visible      (1,:) char        {mustBeMember(params.Visible,{'on','off'})}
     end

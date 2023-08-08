@@ -147,7 +147,7 @@ methods (Access = public, Hidden)
             for i=1:length(args)
                 if ~isa(args{i},'drawing'); i=i-1; break; end %#ok<FXSET> 
                 if args{i}.parent ~= o
-                    throwAsCaller(MException('extractInputs:differentParent','The input has a different Geomatplot then expected.\n(Sometimes it is a one-off, try running your code again)'));
+                    throwAsCaller(MException('extractInputs:differentParent','The input has a different Geomatplot than expected.\n(Sometimes it is a one-off, try running your code again)'));
                 end
             end
             inputs = args(1:i);
@@ -206,12 +206,22 @@ methods (Access = protected)
         end
         labels = fieldnames(o.deps); values = struct2cell(o.deps);
         for i=1:dnum
-            v = values{i};vv = v.value;
+            v = values{i};
+            if isa(v,'dscalar')
+                meanstr = num2str(mean(v.value,1),'%.4f');
+            else
+                if isa(v,'dtext')
+                    vv = v.fig.Position(1:2);
+                else
+                    vv = v.value;
+                end
+                meanstr = num2str(mean(vv,1),'[%.2f %.2f]');
+            end
             ls = cell(1,length(v.inputs));
             for j=1:length(v.inputs)
                 ls{j} = v.inputs{j}.label;
             end
-            str(i+1+mnum,:) = [''''+string(labels{i})+'''', string(class(v)), [num2str(v.runtime*1000,'%.2fms')], num2str(mean(vv,1),'[%.2f %.2f]'),...
+            str(i+1+mnum,:) = [''''+string(labels{i})+'''', string(class(v)), [num2str(v.runtime*1000,'%.2fms')], meanstr,...
                                 join(ls,','), func2str(v.callback)];
         end
         str(:,1) = pad(str(:,1),'left');

@@ -2,7 +2,7 @@ classdef (Abstract) dependent < drawing
 properties
 	inputs    (1,:) cell
 	callback  (1,1)
-    movs
+    movs      (1,1) struct
     exception            = []
 end
 methods

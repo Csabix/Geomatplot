@@ -6,16 +6,27 @@ methods
     function o = dtext(parent,label,inputs,callback,args,offset)
         args = namedargs2cell(args);
         fig = text(0,0,'',args{:});
-        o = o@dependent(parent,label,fig,inputs,callback);
+        o = o@dependent(parent,label,fig,inputs,[]);
         o.offset = offset;
+        o.callback = callback;
+        o.addCallbacks(o.inputs);
+        o.update;
+        if ~isempty(o.exception); rethrow(o.exception); end
     end
     function updatePlot(o,pos,text)
         if o.offset == 0
             o.fig.String = text;
-        elseif ischar(text)
-            o.fig.String = [blanks(o.offset) text];
         else
-            o.fig.String = blanks(o.offset) + text; 
+            if strcmp(o.fig.Interpreter,'latex')
+                padding = ['\hspace{' num2str(o.offset*.3) 'em}'];
+            else
+                padding = blanks(o.offset);
+            end
+            if ischar(text)
+                o.fig.String = [padding text];
+            else
+                o.fig.String = padding + text; 
+            end
         end
         o.fig.Position = pos;
     end

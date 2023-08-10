@@ -55,11 +55,11 @@ function [usercallback,corner0,corner1,params,resolution] = parse_(inputs,userca
         usercallback            (1,1) function_handle {mustBeImageCallback(usercallback,inputs)}
         corner0                                       {mustBePoint} = [0 0]
         corner1                                       {mustBePoint} = [1 1]
+        params.Interpolation    (1,:) char   {mustBeMember(params.Interpolation,{'nearest','bilinear'})} = 'bilinear';
         params.CDataMapping     (1,:) char   {mustBeMember(params.CDataMapping,{'direct','scaled'})}
-        params.Interpolation    (1,:) char   {mustBeMember(params.Interpolation,{'none','scaled','direct'})}
-        params.MaxRenderedResolution
-        params.AlphaData        (:,:) double
         params.AlphaDataMapping (1,:) char   {mustBeMember(params.AlphaDataMapping,{'none','scaled','direct'})}
+        params.AlphaData        (:,:) double
+        params.MaxRenderedResolution
         options.Resolution      (1,1) double {mustBeInteger,mustBePositive}  = 256
     end
     resolution = options.Resolution;

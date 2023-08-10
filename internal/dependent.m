@@ -12,10 +12,7 @@ methods
         o.inputs = inputs;
         o.parent.deps.(label)=o;
         if ~isempty(callback)
-            o.callback = callback;
-            o.addCallbacks(o.inputs);
-            o.update;
-            if ~isempty(o.exception); rethrow(o.exception); end
+            o.setUpdateCallback(callback);
         end
     end
 
@@ -25,6 +22,16 @@ methods
 end
 
 methods (Access = protected)
+    
+    % If you dont want dependent constructor to call update yet,
+    % call this after pasing [] as a callback to the constructor.
+    function setUpdateCallback(o,callback,inputs)
+        if nargin < 3; inputs = o.inputs; end
+        o.addCallbacks(inputs);
+        o.callback = callback;
+        o.update;
+        if ~isempty(o.exception); rethrow(o.exception); end
+    end
 
     function addCallbacks(o,inputs)
         for i = 1:length(inputs)

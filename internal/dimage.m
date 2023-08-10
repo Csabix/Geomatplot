@@ -10,18 +10,11 @@ methods
         fig = imagesc('XData',[0 1],'YData',[0 1],'CData',0,args{:});
         uistack(fig,'bottom');
         o = o@dependent(parent,label,fig,inputs,[]);
-        o.corner0 = c0;      o.corner1 = c1;
-        o.callback = callback;
-        if isa(o.corner0,'point_base')
-            inputs = [inputs {c0}];
-        end
-        if isa(o.corner1,'point_base')
-            inputs = [inputs {c1}];
-        end
-        o.addCallbacks(inputs);
-        o.Resolution = resolution;
-        o.update(1);
-        if ~isempty(o.exception); rethrow(o.exception); end
+        if nargin >= 8; o.Resolution = resolution; end
+        o.corner0 = c0; o.corner1 = c1;
+        if isa(o.corner0,'point_base'); inputs = [inputs {c0}]; end
+        if isa(o.corner1,'point_base'); inputs = [inputs {c1}]; end
+        o.setUpdateCallback(callback,inputs);
     end
 
     function v = value(o)

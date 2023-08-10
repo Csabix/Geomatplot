@@ -8,10 +8,7 @@ methods
         fig = text(0,0,'',args{:});
         o = o@dependent(parent,label,fig,inputs,[]);
         o.offset = offset;
-        o.callback = callback;
-        o.addCallbacks(o.inputs);
-        o.update;
-        if ~isempty(o.exception); rethrow(o.exception); end
+        o.setUpdateCallback(callback);
     end
     function updatePlot(o,pos,text)
         if o.offset == 0

@@ -5,11 +5,8 @@ classdef dcurve < dlines
     methods
         function o = dcurve(parent,label,inputs,callback,params,resolution)
             o = o@dlines(parent,label,inputs,[],params);
-            o.callback = callback;
             if nargin >= 6; o.Resolution = resolution; end
-            o.addCallbacks(inputs);
-            o.update(1);
-            if ~isempty(o.exception); rethrow(o.exception); end
+            o.setUpdateCallback(callback);
         end
         function update(o,detail_level)
             if nargin < 2; detail_level = 1; end

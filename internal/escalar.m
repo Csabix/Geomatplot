@@ -6,6 +6,7 @@ methods
             a   (1,1) {mustBeA(a,["escalar","dscalar","numeric"])}
             b   (1,1) {mustBeA(b,["escalar","dscalar","numeric"])}
         end
+        expression_base.warning_if_unused(nargout);
         [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'+',[1 1]);
         c = escalar(parent,inputs,constants,expression,operator);
     end
@@ -14,6 +15,7 @@ methods
             a   (1,1) {mustBeA(a,["escalar","dscalar","numeric"])}
             b   (1,1) {mustBeA(b,["escalar","dscalar","numeric"])}
         end
+        expression_base.warning_if_unused(nargout);
         [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'-',[1 1]);
         c = escalar(parent,inputs,constants,expression,operator);
     end
@@ -22,6 +24,7 @@ methods
             a   (1,1) {mustBeA(a,["escalar","dscalar","numeric"])}
             b   (1,1) {mustBeA(b,["escalar","dscalar","numeric"])}
         end
+        expression_base.warning_if_unused(nargout);
         [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'*',[1 1]);
         c = escalar(parent,inputs,constants,expression,operator);
     end
@@ -30,6 +33,7 @@ methods
             a   (1,1) {mustBeA(a,["escalar","dscalar","numeric"])}
             b   (1,1) {mustBeA(b,["escalar","dscalar","numeric"])}
         end
+        expression_base.warning_if_unused(nargout);
         [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'/',[1 1]);
         c = escalar(parent,inputs,constants,expression,operator);
     end
@@ -38,6 +42,7 @@ methods
             a   (1,1) {mustBeA(a,["escalar","dscalar","numeric"])}
             b   (1,1) {mustBeA(b,["escalar","dscalar","numeric"])}
         end
+        expression_base.warning_if_unused(nargout);
         [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'^',[1 1]);
         c = escalar(parent,inputs,constants,expression,operator);
     end

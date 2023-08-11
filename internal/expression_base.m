@@ -41,6 +41,13 @@ methods
         v = o.eval;
     end
 end
+methods (Static, Hidden)
+    function warning_if_unused(numargs)
+        if numargs ~= 1
+            warning('Unused expression - if you meant to create a dependent object, call eval() or ()'' on the expression');
+        end
+    end
+end
 methods (Access = protected, Hidden)
     function [inputs,callback] = createCallback(o)
         inputs = struct2cell(o.inputs);

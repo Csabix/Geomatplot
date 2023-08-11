@@ -6,6 +6,7 @@ methods
             a   (1,:) {mustBeA(a,["point_base","epoint","dvector","evector","numeric"])}
             b   (1,:) {mustBeA(b,["point_base","epoint","dvector","evector","numeric"])}
         end
+        expression_base.warning_if_unused(nargout);
         a_is_point = isa(a,'point_base')||isa(a,'epoint');
         b_is_point = isa(b,'point_base')||isa(b,'epoint');
         assert(~a_is_point || ~b_is_point, 'invalid input');
@@ -17,6 +18,7 @@ methods
             a   (1,:) {mustBeA(a,["point_base","epoint","dvector","evector","numeric"])}
             b   (1,:) {mustBeA(b,["point_base","epoint","dvector","evector","numeric"])}
         end
+        expression_base.warning_if_unused(nargout);
         a_is_point = isa(a,'point_base')||isa(a,'epoint');
         b_is_point = isa(b,'point_base')||isa(b,'epoint');
         [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'-',[1 2]);

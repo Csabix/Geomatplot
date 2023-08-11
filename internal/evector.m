@@ -6,6 +6,7 @@ methods
             a   (1,1) {mustBeA(a,["evector","dvector","numeric"])}
             b   (1,1) {mustBeA(b,["evector","dvector","numeric"])}
         end
+        expression_base.warning_if_unused(nargout);
         [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'+',[1 2]);
         c = evector(parent,inputs,constants,expression,operator);
     end
@@ -14,6 +15,7 @@ methods
             a   (1,1) {mustBeA(a,["evector","dvector","numeric"])}
             b   (1,1) {mustBeA(b,["evector","dvector","numeric"])}
         end
+        expression_base.warning_if_unused(nargout);
         [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'-',[1 2]);
         c = evector(parent,inputs,constants,expression,operator);
     end
@@ -22,6 +24,7 @@ methods
             a   (1,1) {mustBeA(a,["evector","dvector","escalar","dscalar","numeric"])}
             b   (1,1) {mustBeA(b,["evector","dvector","escalar","dscalar","numeric"])}
         end
+        expression_base.warning_if_unused(nargout);
         a_is_vector = isa(a,'dvector')||isa(a,'evector');
         b_is_vector = isa(b,'dvector')||isa(b,'evector');
         assert(~a_is_vector || ~b_is_vector,'invalid input');
@@ -33,6 +36,7 @@ methods
             a   (1,1) {mustBeA(a,["evector","dvector","escalar","dscalar","numeric"])}
             b   (1,1) {mustBeA(b,["evector","dvector","escalar","dscalar","numeric"])}
         end
+        expression_base.warning_if_unused(nargout);
         a_is_vector = isa(a,'dvector')||isa(a,'evector');
         b_is_vector = isa(b,'dvector')||isa(b,'evector');
         assert(~a_is_vector || ~b_is_vector,'invalid input');

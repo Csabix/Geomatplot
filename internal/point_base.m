@@ -6,6 +6,7 @@ methods
             a   (1,:) {mustBeA(a,["point_base","epoint","dvector","evector","numeric"])}
             b   (1,:) {mustBeA(b,["point_base","epoint","dvector","evector","numeric"])}
         end
+        expression_base.warning_if_unused(nargout);
         if isa(a,'point_base'); a = epoint.fromDrawing(a);
         elseif isa(b,'point_base'); b = epoint.fromDrawing(b); end
         c = a + b;
@@ -15,6 +16,7 @@ methods
             a   (1,:) {mustBeA(a,["point_base","epoint","dvector","evector","numeric"])}
             b   (1,:) {mustBeA(b,["point_base","epoint","dvector","evector","numeric"])}
         end
+        expression_base.warning_if_unused(nargout);
         if isa(a,'point_base'); a = epoint.fromDrawing(a);
         elseif isa(b,'point_base'); b = epoint.fromDrawing(b); end
         c = a - b;

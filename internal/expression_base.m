@@ -12,7 +12,7 @@ methods
     function o = expression_base(parent, inputs, constants, expression, operator)
         arguments
             parent     (1,1) Geomatplot
-            inputs     (1,:) cell   % TODO check if all of the are drawings and have parent as their parent?
+            inputs     (1,:) cell
             constants  (1,:) cell
             expression (1,:) char
             operator   (1,1) char = '^'
@@ -21,13 +21,25 @@ methods
         o.parent = parent;
         o.inputs = struct;
         for i = 1:length(inputs)
-            o.inputs.(inputs{i}.label) = inputs{i};
+            in = inputs{i};
+            assert(isa(in,'drawing') && in.parent == parent);
+            o.inputs.(in.label) = in;
         end
         o.constants = constants;
         o.expression = expression;
         o.operator = operator;
+    end  
+    function val = eval(o,label)
+        if nargin < 2
+            label = o.parent.getNextLabel('expr');
+        else
+            assert(isvarname(label));
+        end
+        val = o.evalimpl(label);
     end
-    
+    function v = ctranspose(o)
+        v = o.eval;
+    end
 end
 methods (Access = protected, Hidden)
     function [inputs,callback] = createCallback(o)

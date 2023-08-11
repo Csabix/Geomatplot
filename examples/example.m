@@ -66,7 +66,7 @@ f = Polygon([-1 0;1 0;1 1;0.7 0.7;0.3 0.5;0 0.9;-0.5 0.3;-1 0.3],'b');
 
 p0 = Point('p0',[-.8,1.0 ],'r');
 q0 = Point('q0',[.5 ,1.05],'r',5);
-v0 = ((q0-p0)/Distance(p0,q0))'; % Operators: point-point=vector, vector/scalar = vector
+v0 = Eval('v0',(q0-p0)/Distance(p0,q0)); % Operators: point-point=vector, vector/scalar = vector
 Ray(p0,q0,'r',1.5);
 
 p = p0; n=10; % Sphere tracing illustration:

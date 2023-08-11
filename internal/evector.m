@@ -39,9 +39,9 @@ methods
         [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'/',[1 1]);
         c = evector(parent,inputs,constants,expression,operator);
     end
-    function d = ctranspose(o)
+    function d = evalimpl(o,label)
         [inputs,callback] = o.createCallback();
-        d = dvector(o.parent,o.parent.getNextLabel('small'),inputs,callback);
+        d = dvector(o.parent,label,inputs,callback);
     end
 end
 methods (Static)

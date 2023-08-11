@@ -13,7 +13,6 @@ end
 methods (Access = public)
     
     function o = Geomatplot(ax)
-        % todo xlim
         addpath internal\ examples\
         if nargin == 0
             o.ax = gca;
@@ -26,10 +25,15 @@ methods (Access = public)
         elseif isa(ax,'matlab.ui.Axes')
             o.ax = ax;
         end
-        axis(o.ax,'equal'); axis(o.ax,'manual');
-        o.ax.Interactions = [panInteraction zoomInteraction]; % disableDefaultInteractivity(o.ax);
-        o.movs = struct; o.deps = struct;
-        o.ax.UserData = o;
+        if isempty(o.ax.UserData)
+            axis(o.ax,'equal'); axis(o.ax,'manual');
+            o.ax.Interactions = [panInteraction zoomInteraction]; % disableDefaultInteractivity(o.ax);
+            o.movs = struct; o.deps = struct;
+            o.ax.UserData = o;
+        else % workaround hack for matlab wtf
+            assert(isa(o.ax.UserData,'Geomatplot'));
+            o = o.ax.UserData;
+        end
     end
 
     function h = getHandle(o,label)

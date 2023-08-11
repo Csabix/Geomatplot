@@ -34,7 +34,6 @@ function h = Image(varargin)
     [label,varargin] = parent.extractLabel(varargin,'image');
     [inputs,varargin] = parent.extractInputs(varargin);
     [usercallback,corner0,corner1,params,resolution]= parse_(inputs,varargin{:});
-    inputs = parent.getHandlesOfLabels(inputs);
 
     n = abs(nargout(usercallback));
     function varargout = internalcallback(varargin)

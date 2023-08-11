@@ -3,8 +3,8 @@ classdef evector < expression_base
 methods
     function c = plus(a,b)
         arguments
-            a   (1,1) {mustBeA(a,["evector","dvector","numeric"])}
-            b   (1,1) {mustBeA(b,["evector","dvector","numeric"])}
+            a   (1,:) {mustBeA(a,["evector","dvector","numeric"])}
+            b   (1,:) {mustBeA(b,["evector","dvector","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
         [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'+',[1 2]);
@@ -12,8 +12,8 @@ methods
     end
     function c = minus(a,b)
         arguments
-            a   (1,1) {mustBeA(a,["evector","dvector","numeric"])}
-            b   (1,1) {mustBeA(b,["evector","dvector","numeric"])}
+            a   (1,:) {mustBeA(a,["evector","dvector","numeric"])}
+            b   (1,:) {mustBeA(b,["evector","dvector","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
         [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'-',[1 2]);

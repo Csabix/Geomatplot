@@ -145,16 +145,23 @@ methods (Access = public, Hidden)
                         throwAsCaller(MException('extractInputs:labelNotFound',['The input label ''' h ''' does not exist.']));
                     end
                     inputs{i}=o.getHandle(h);
-                elseif ~isa(h,'drawing')
+                elseif ~isa(h,'drawing') && ~isa(h,'expression_base')
                     throwAsCaller(MException('extractInputs:invalidType','The input label is of invalid type or size.'));
                 end
             end
             args = args(2:end);
         else
             for i=1:length(args)
-                if ~isa(args{i},'drawing'); i=i-1; break; end %#ok<FXSET> 
-                if args{i}.parent ~= o
+                ai = args{i};
+                if ~isa(ai,'drawing') && ~isa(ai,'expression_base')
+                    i=i-1;       %#ok<FXSET> 
+                    break;
+                end
+                if ai.parent ~= o
                     throwAsCaller(MException('extractInputs:differentParent','The input has a different Geomatplot than expected.\n(Sometimes it is a one-off, try running your code again)'));
+                end
+                if isa(ai,'expression_base')
+                    args{i} = ai.eval();
                 end
             end
             inputs = args(1:i);
@@ -173,9 +180,12 @@ methods (Access = public, Hidden)
         if isempty(position)
             if ~isempty(args) && (iscellstr(args{1}) && length(args{1})==1 ...
                     || iscell(args{1}) && length(args{1})==1 && isstring(args{1}{1}) ...
-                    || isa(args{1},'point_base'))
+                    || isa(args{1},'point_base') || isa(args{1},'expression_base'))
                 position = args{1};
                 args = args(2:end);
+                if isa(position,'expression_base')
+                    position = position.eval();
+                end
                 if iscell(position)
                     position = o.getHandle(position{1});
                 end

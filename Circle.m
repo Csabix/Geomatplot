@@ -30,7 +30,7 @@ function [h,O,r] = Circle(varargin)
     [parent,label,inputs,args] = dlines.parse_inputs(varargin,'circ',2,3);
 
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
-        c_ = dpoint(parent,parent.getNextLabel('small'),inputs,@equidistpoint);
+        c_ = dpoint(parent,parent.getNextLabel('center'),inputs,@equidistpoint);
         r_ = Distance(parent,{c_,inputs{1}});
     elseif drawing.isInputPatternMatching(inputs,{'point_base','dscalar'})
         c_ = inputs{1}; r_ = inputs{2};

@@ -1,5 +1,5 @@
 function h = Vector(varargin)
-    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
+    [parent,varargin] = Geomatplot.extractGeomatplot(varargin);
     [label, varargin] = parent.extractLabel(varargin,'vec');
     [inputs,varargin] = parent.extractInputs(varargin,2,2);
     args = parse_(varargin{:});

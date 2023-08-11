@@ -1,9 +1,9 @@
 function [h,O,r,alpha,beta] = CircularArc(varargin)
 % CircularArc  draws an circular arc
-%   CircularArc({O,B,C}) draws a circluar arc around A starting from B until it meets the AC line in
+%   CircularArc({O,B,C}) draws a circluar arc around O starting from B until it meets the OC line in
 %       anticlockwise direction.
 %
-%   CircularArc({O,B,alpha}) draws a circluar arc around A starting from B with angle alpha in
+%   CircularArc({O,B,alpha}) draws a circluar arc around O starting from B with angle alpha in
 %       anticlockwise direction.
 %
 %   CircularArc(label,{___})  provides a label for the circle. The label is not drawn.

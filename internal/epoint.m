@@ -29,9 +29,9 @@ methods
             c = epoint(parent,inputs,constants,expression,operator);
         end
     end
-    function d = ctranspose(o)
+    function d = evalimpl(o,label)
         [inputs,callback] = o.createCallback();
-        d = dpoint(o.parent,o.parent.getNextLabel('capital'),inputs,callback);
+        d = dpoint(o.parent,label,inputs,callback);
     end
 end
 methods (Static)

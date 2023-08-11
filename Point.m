@@ -35,11 +35,21 @@ function h = Point(varargin)
     [label,   varargin] = parent.extractLabel(varargin,'capital');
     [position,varargin] = drawing.extractPosition(varargin);
 
-    if isempty(position) && ~isempty(varargin) && (iscell(varargin{1})||isa(varargin{1},'drawing'))
+    if isempty(position) && ~isempty(varargin)
         isdependent = true;  % because cannot define function inside an if statement
-        [inputs,  varargin] = parent.extractInputs(varargin,0,inf);
-        [usercallback,args] = parse_dpoint(inputs,varargin{:});
-        n = abs(nargout(usercallback));
+        if isa(varargin{1}, 'epoint')
+            position = varargin{1};
+            varargin = varargin(2:end);
+            args = parse_dpoint(varargin{:});
+            [inputs,callback] = position.createCallback();
+            assert(parent == position.parent);
+        elseif (iscell(varargin{1})||isa(varargin{1},'drawing'))
+            [inputs,  varargin] = parent.extractInputs(varargin,0,inf);
+            [usercallback,varargin] = parse_callback(inputs,varargin{:});
+            args = parse_dpoint(varargin{:});
+            n = abs(nargout(usercallback));
+            callback = [];
+        end
     else
         isdependent = false;
         args = parse_mpoint(position,varargin{:});
@@ -55,7 +65,10 @@ function h = Point(varargin)
     end
 
     if isdependent
-        h_ = dpoint(parent,label,inputs,@internalcallback,args);
+        if isempty(callback)
+            callback = @internalcallback;
+        end
+        h_ = dpoint(parent,label,inputs,callback,args);
     else
         h_ = mpoint(parent,label,args);
     end
@@ -80,11 +93,17 @@ function params = parse_mpoint(position,color,markersize,params)
     if ~isfield(params,'MarkerSize');     params.MarkerSize = markersize; end
     if ~isempty(position); params.Position = position; end
 end
-
-function [usercallback,params] = parse_dpoint(inputs,usercallback,color,markersize,params)
+function [usercallback,varargin] = parse_callback(inputs,usercallback,varargin)
     arguments
         inputs          (1,:) cell                                         %#ok<INUSA> 
         usercallback    (1,1) function_handle {mustBePointCallback(usercallback,inputs)}
+    end
+    arguments (Repeating)
+        varargin
+    end
+end
+function params = parse_dpoint(color,markersize,params)
+    arguments
         color                                 {drawing.mustBeColor}                      = 'k'
         markersize          (1,1) double      {mustBePositive}                           = 6
         params.MarkerSize   (1,1) double      {mustBePositive}

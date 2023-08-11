@@ -8,7 +8,7 @@ function h = Mirror(varargin)
     [inputs,varargin] = parent.extractInputs(varargin,2,3);
     if isempty(label); label = parent.getNextLabel(inputs{1}.label); end
 
-    if isa(inputs{1},'point_base')  % todo capital point label
+    if isa(inputs{1},'point_base')
         if drawing.isInputPatternMatching(inputs,{'drawing','point_base'})
             callback = @mirror_point2point;
         elseif drawing.isInputPatternMatching(inputs,{'drawing','point_base','point_base'})

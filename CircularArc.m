@@ -28,7 +28,7 @@ function [h,O,r,alpha,beta] = CircularArc(varargin)
 %
 %   See also Circle, POINT, DISTANCE, SEGMENT, INTERSECT
 
-    [parent,label,inputs,args] = dlines.parse_inputs(varargin,'small',3,3);
+    [parent,label,inputs,args] = dlines.parse_inputs(varargin,'carc',3,3);
 
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
     % (center, starting_point, third_point) -- third_point sets the arc angle

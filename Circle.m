@@ -27,7 +27,7 @@ function [h,O,r] = Circle(varargin)
 %
 %   See also CirclularArc, POINT, DISTANCE, SEGMENT, INTERSECT
 
-    [parent,label,inputs,args] = dlines.parse_inputs(varargin,'small',2,3);
+    [parent,label,inputs,args] = dlines.parse_inputs(varargin,'circ',2,3);
 
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
         c_ = dpoint(parent,parent.getNextLabel('small'),inputs,@equidistpoint);

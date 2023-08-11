@@ -4,10 +4,11 @@ function h = Mirror(varargin)
     msgType = 'Cannot mirror for these input types.';
 
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
-    [label, varargin] = parent.extractLabel(varargin,'capital'); % Label capitalness can be wrong!
+    [label, varargin] = parent.extractLabel(varargin,'none');
     [inputs,varargin] = parent.extractInputs(varargin,2,3);
+    if isempty(label); label = parent.getNextLabel(inputs{1}.label); end
 
-    if isa(inputs{1},'point_base')
+    if isa(inputs{1},'point_base')  % todo capital point label
         if drawing.isInputPatternMatching(inputs,{'drawing','point_base'})
             callback = @mirror_point2point;
         elseif drawing.isInputPatternMatching(inputs,{'drawing','point_base','point_base'})
@@ -22,6 +23,7 @@ function h = Mirror(varargin)
             throw(MException(eidType,msgType));
         end
         args = dpoint.parse_inputs_(varargin{:});
+        args.Label = label;
         h_ = dpoint(parent,label,inputs,callback,args);
     elseif isa(inputs{1},'dcircle')
         if drawing.isInputPatternMatching(inputs,{'drawing','point_base'})

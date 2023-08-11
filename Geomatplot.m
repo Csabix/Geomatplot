@@ -80,7 +80,11 @@ methods (Access = public, Hidden)
                 throwAsCaller(MException(eidType,msgType));
             end
         else
-            label = o.getNextLabel(flag);
+            if strcmp(flag,'none')
+                label = [];
+            else
+                label = o.getNextLabel(flag);
+            end
         end
     end
 

@@ -15,7 +15,7 @@ function h = Distance(varargin)
 %   See also CIRCLE
 
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
-    [label,varargin] = parent.extractLabel(varargin,'small');
+    [label,varargin] = parent.extractLabel(varargin,'dist');
     [inputs,varargin] = parent.extractInputs(varargin,2,2);
     if ~isempty(varargin)
         throw(MException('Distance:tooManyArguments','Too many arguments.'));

@@ -16,7 +16,7 @@ function h = AngleBisector(varargin)
 %
 %   See also POINT, LINE, SEGMENT, RAY, PerpendicularBisector, INTERSECT
 
-    [parent,label,inputs,args] = dlines.parse_inputs(varargin,'small',3,3);
+    [parent,label,inputs,args] = dlines.parse_inputs(varargin,'angbi',3,3);
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
         % do nothing
     else

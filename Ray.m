@@ -16,7 +16,7 @@ function h = Ray(varargin)
 %
 %   See also POINT, LINE, SEGMENT, PerpendicularBisector, AngleBisector, INTERSECT
 
-    [parent,label,inputs,args] = dlines.parse_inputs(varargin);
+    [parent,label,inputs,args] = dlines.parse_inputs(varargin,'ray');
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base'})
         callback = @(a,b) a.value+(b.value-a.value).*[0;1;1e4;1e8];
     elseif drawing.isInputPatternMatching(inputs,{'point_base','dvector'})

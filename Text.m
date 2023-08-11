@@ -9,7 +9,7 @@ function h = Text(varargin)
 % Text(pos, A)   --- needs some work (short text for all drawing?)
 
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
-    [label,varargin] = parent.extractLabel(varargin,'Text_');
+    [label,varargin] = parent.extractLabel(varargin,'txt');
     
     [position,varargin] = parent.extractPoint(varargin);
     isConstPos = isnumeric(position);

@@ -18,7 +18,7 @@ function [h,p] = PerpendicularLine(varargin)
     msgType = 'Cannot create perpendicular line for these input types';
 
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);   
-    [label, varargin] = parent.extractLabel(varargin,'small');
+    [label, varargin] = parent.extractLabel(varargin,'perpln');
     [inputs,varargin] = parent.extractInputs(varargin,2,3);
 
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})

@@ -14,7 +14,7 @@ function h = PerpendicularBisector(varargin)
 %
 %   h = PerpendicularBisector(___)  returns the created handle.
 
-    [parent,label,inputs,args] = dlines.parse_inputs(varargin);
+    [parent,label,inputs,args] = dlines.parse_inputs(varargin,'perpbi');
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base'})
         % do nothing
     else

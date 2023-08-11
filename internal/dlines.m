@@ -10,7 +10,7 @@ end
 methods (Static,Hidden)
     function [parent,label,inputs,params] = parse_inputs(args,flag,mina,maxa)
         arguments
-            args (1,:) cell;       flag (1,:) char   = 'small';
+            args (1,:) cell;       flag (1,:) char   = 'lines';
             mina (1,1) double = 2; maxa (1,1) double = 2;
         end
         [parent,  args]   = Geomatplot.extractGeomatplot(args);   

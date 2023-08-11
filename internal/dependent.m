@@ -19,6 +19,34 @@ methods
     function update(o,~)
         o.call;
     end
+
+    function s = string(o,varargin)
+        if isempty(o.exception)
+            s = string@drawing(o,varargin{:});
+        else
+            s = "UNDEFINED";
+        end
+    end
+end
+
+methods (Access = public, Hidden)
+    function s = getCallbackStr(o)
+        s = replace(func2str(o.callback),'.value','');
+        if (isa(o,'dvector') || isa(o,'dpoint')) && length(o.label) > 4 && strcmp(o.label(1:4),'expr')
+            % do nothing
+        else
+            ls = "";
+            for i = 1:length(o.inputs)
+                ls = ls + o.inputs{i}.label;
+                if i < length(o.inputs); ls = ls+','; end
+            end
+            if s(1) ~= '@'
+                s = s + "(" + ls + ")";
+            else
+                s = "f(" + ls + ") f=" + s;
+            end
+        end
+    end
 end
 
 methods (Access = protected)

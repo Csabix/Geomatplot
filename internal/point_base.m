@@ -1,4 +1,4 @@
-classdef (InferiorClasses = {?dscalar, ?dvector}) point_base  < handle
+classdef (InferiorClasses = {?dscalar, ?dvector}) point_base  < drawing
 
 methods
     function c = plus(a,b)

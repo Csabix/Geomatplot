@@ -10,5 +10,8 @@ methods
         o.radius = radius;
         o.center = center;
     end
+    function s = string(o)
+        s = "c=" + string(o.center,2) + " r=" + string(o.radius,2);
+    end
 end
 end

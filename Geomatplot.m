@@ -234,40 +234,32 @@ methods (Access = protected)
         mnum = length(fieldnames(o.movs));
         dnum = length(fieldnames(o.deps));
 
-        str = strings(mnum+dnum+1,6);
+        str = strings(mnum+dnum+1,5);
         labels = fieldnames(o.movs); values = struct2cell(o.movs);
-        str(1,:) = [" label", "type", "runtime", "mean pos", "labels", "callback"];
+        str(1,:) = [" label", "type", "runtime", "mean pos", "callback"];
         for i=1:mnum
             v = values{i};vv = v.value;
-            str(i+1,1:4) = [''''+string(labels{i})+'''', string(class(v)), [num2str(v.runtime*1000,'%.2fms')], num2str(mean(vv,1),'[%.2f %.2f]')];
+            meanstr = string(v);
+            str(i+1,1:4) = [''''+string(labels{i})+'''', string(class(v)), [num2str(v.runtime*1000,'%.2fms')], meanstr];
         end
         labels = fieldnames(o.deps); values = struct2cell(o.deps);
         for i=1:dnum
             v = values{i};
-            if isa(v,'dscalar')
-                meanstr = num2str(mean(v.value,1),'%.4f');
-            else
-                if isa(v,'dtext')
-                    vv = v.fig.Position(1:2);
-                else
-                    vv = v.value;
-                end
-                meanstr = num2str(mean(vv,1),'[%.2f %.2f]');
-            end
+            meanstr = string(v);
             ls = cell(1,length(v.inputs));
             for j=1:length(v.inputs)
                 ls{j} = v.inputs{j}.label;
             end
-            str(i+1+mnum,:) = [''''+string(labels{i})+'''', string(class(v)), [num2str(v.runtime*1000,'%.2fms')], meanstr,...
-                                join(ls,','), func2str(v.callback)];
+            ls = v.getCallbackStr;
+            str(i+1+mnum,:) = [''''+string(labels{i})+'''', string(class(v)), [num2str(v.runtime*1000,'%.2fms')], meanstr, ls];
         end
         str(:,1) = pad(str(:,1),'left');
         str(:,2) = pad(str(:,2),'right');
         str(:,3) = pad(str(:,3),'both');
         str(:,4) = pad(str(:,4),'both');
-        str(:,5) = pad(str(:,5),'left');
-        str(:,6) = pad(str(:,6),'right');
-        str = str(:,1) + ' : ' + str(:,2) + ' ' + str(:,3) + ' ' + str(:,4) + ' | ' + str(:,5) +' : ' + str(:,6);
+        str(:,5) = pad(str(:,5),'right');
+        %str(:,6) = pad(str(:,6),'right');
+        str = str(:,1) + ' : ' + str(:,2) + ' ' + str(:,3) + ' ' + str(:,4) + ' | ' + str(:,5);
         str = join(str,"\n",1);
         str = o.getHeader(mnum,dnum) + str+'\n'+matlab.mixin.CustomDisplay.getDetailedFooter(o);
         fprintf(str);

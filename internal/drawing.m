@@ -9,10 +9,30 @@ end
 
 methods
     function o = drawing(parent,label,fig)
+        if nargin ==0; return; end
         o.parent = parent;
         o.label = label;
         o.fig = fig;
         o.fig.UserData = o;
+    end
+    function s = string(o,r)
+        v = o.value;
+        if isempty(v); s = "[empty]"; return; end
+        [n,m] = size(v);
+        if nargin < 2
+            r = 3 + 7*(m<2);
+        end
+        v = round(mean(v,1),r);
+        v(abs(v)>1e3) = inf.*v(abs(v)>1e3);
+        s = join(string(v),',');
+        flag = '[]';
+        if n == 1; flag = '()'; end
+        if m <  2; flag = '';   end
+        switch flag
+            case '()';s = "(" + s + ")";
+            case '[]';s = "[" + s + "]";
+            case '{}';s = "[" + s + "]";
+        end
     end
 end
 

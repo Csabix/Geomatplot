@@ -25,37 +25,39 @@ methods
     end
     function c = plus(a,b)
         arguments
-            a   (1,:) {mustBeA(a,["dvector","numeric"])}
-            b   (1,:) {mustBeA(b,["dvector","numeric"])}
+            a   (1,:) {mustBeA(a,["evector","dvector","numeric"])}
+            b   (1,:) {mustBeA(b,["evector","dvector","numeric"])}
         end
-        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'+',[1 2]);
-        c = dvector(parent,parent.getNextLabel('small'),inputs,callback);
+        if isa(a,'dvector'); a = evector.fromDrawing(a);
+        elseif isa(b,'dvector'); b = evector.fromDrawing(b); end
+        c = a + b;
     end
     function c = minus(a,b)
         arguments
-            a   (1,:) {mustBeA(a,["dvector","numeric"])}
-            b   (1,:) {mustBeA(b,["dvector","numeric"])}
+            a   (1,:) {mustBeA(a,["evector","dvector","numeric"])}
+            b   (1,:) {mustBeA(b,["evector","dvector","numeric"])}
         end
-        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'-',[1 2]);
-        c = dvector(parent,parent.getNextLabel('small'),inputs,callback);
+        if isa(a,'dvector'); a = evector.fromDrawing(a);
+        elseif isa(b,'dvector'); b = evector.fromDrawing(b); end
+        c = a - b;
     end
     function c = mtimes(a,b)
         arguments
-            a   (1,1) {mustBeA(a,["dvector","dscalar","numeric"])}
-            b   (1,1) {mustBeA(b,["dvector","dscalar","numeric"])}
+            a   (1,1) {mustBeA(a,["evector","dvector","escalar","dscalar","numeric"])}
+            b   (1,1) {mustBeA(b,["evector","dvector","escalar","dscalar","numeric"])}
         end
-        assert(~isa(a,'dvector') || ~isa(b,'dvector'),'invalid input');
-        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'*',[1 1]);
-        c = dvector(parent,parent.getNextLabel('small'),inputs,callback);
+        if isa(a,'dvector'); a = evector.fromDrawing(a);
+        elseif isa(b,'dvector'); b = evector.fromDrawing(b); end
+        c = a * b;
     end
     function c = mrdivide(a,b)
         arguments
-            a   (1,1) {mustBeA(a,["dvector","dscalar","numeric"])}
-            b   (1,1) {mustBeA(b,["dvector","dscalar","numeric"])}
+            a   (1,1) {mustBeA(a,["evector","dvector","escalar","dscalar","numeric"])}
+            b   (1,1) {mustBeA(b,["evector","dvector","escalar","dscalar","numeric"])}
         end
-        assert(~isa(a,'dvector') || ~isa(b,'dvector'),'invalid input');
-        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'/',[1 1]);
-        c = dvector(parent,parent.getNextLabel('small'),inputs,callback);
+        if isa(a,'dvector'); a = evector.fromDrawing(a);
+        elseif isa(b,'dvector'); b = evector.fromDrawing(b); end
+        c = a / b;
     end
 end
 end

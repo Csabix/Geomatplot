@@ -3,25 +3,21 @@ classdef (InferiorClasses = {?dscalar, ?dvector}) point_base  < handle
 methods
     function c = plus(a,b)
         arguments
-            a   (1,:) {mustBeA(a,["point_base","dvector","numeric"])}
-            b   (1,:) {mustBeA(b,["point_base","dvector","numeric"])}
+            a   (1,:) {mustBeA(a,["point_base","epoint","dvector","evector","numeric"])}
+            b   (1,:) {mustBeA(b,["point_base","epoint","dvector","evector","numeric"])}
         end
-        assert(~isa(a,'point_base') || ~isa(b,'point_base'),'invalid input');
-        [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'+',[1 2]);
-        c = dpoint(parent,parent.getNextLabel('capital'),inputs,callback);
+        if isa(a,'point_base'); a = epoint.fromDrawing(a);
+        elseif isa(b,'point_base'); b = epoint.fromDrawing(b); end
+        c = a + b;
     end
     function c = minus(a,b)
         arguments
-            a   (1,:) {mustBeA(a,["point_base","dvector","numeric"])}
-            b   (1,:) {mustBeA(b,["point_base","dvector","numeric"])}
+            a   (1,:) {mustBeA(a,["point_base","epoint","dvector","evector","numeric"])}
+            b   (1,:) {mustBeA(b,["point_base","epoint","dvector","evector","numeric"])}
         end
-        if isa(a,'point_base') && isa(b,'point_base')
-            assert(a.parent==b.parent,'different Geomatplots');
-            c = dvector(a.parent,a.parent.getNextLabel('small'),{a,b},@(a,b) a.value-b.value);
-        else
-            [parent,inputs,callback] = point_base.assembleCallbackOp(a,b,'-',[1 2]);
-            c = dpoint(parent,parent.getNextLabel('capital'),inputs,callback);
-        end
+        if isa(a,'point_base'); a = epoint.fromDrawing(a);
+        elseif isa(b,'point_base'); b = epoint.fromDrawing(b); end
+        c = a - b;
     end
 end
 

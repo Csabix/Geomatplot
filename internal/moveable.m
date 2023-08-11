@@ -2,6 +2,12 @@ classdef (Abstract) moveable < drawing % with ROI
 properties
     deps  % struct mapping label -> dependent class handles
 end
+properties (Hidden)
+    move_total_time (1,1) double = 0;
+    stop_total_time (1,1) double = 0;
+    move_timing_num (1,1) double = 0;
+    stop_timing_num (1,1) double = 0;
+end
 methods
     function o = moveable(parent,label,fig)
         o = o@drawing(parent,label,fig);
@@ -18,29 +24,41 @@ methods
 end
 methods (Static)
     function update(fig,evt)
+        t_total_stamp = tic;
+        o = fig.UserData;
         switch evt.EventName
-            case 'ROIMoved'
-                detail_level = 1;
-            case 'MovingROI'
-                detail_level = 0.25;
+        case 'MovingROI'
+            detail_level = 0.25;
+            time_range = 5:8;
+            o.move_timing_num = o.move_timing_num + 1;
+            rate = 1/o.move_timing_num;
+        case 'ROIMoved'
+            detail_level = 1;
+            time_range = 9:12;
+            o.stop_timing_num = o.stop_timing_num + 1;
+            rate = 1/o.stop_timing_num;
         end
-        values = struct2cell(fig.UserData.deps);
-        runtime = 0;
-        for i = 1:length(values)
-            v = values{i};
+        deps = struct2cell(o.deps);
+        for i = 1:length(deps)
+            h = deps{i}; h.defined = true;
             b = true;
-            for j = 1:length(v.inputs)
-                b = b & v.inputs{j}.defined;
-            end
-            v.defined = true;
-            if b
-                v.update(detail_level);
-                if(v.defined)
-                    runtime = runtime + v.runtime;
-                end
-            end
+            for j = 1:length(h.inputs)
+                b = b & h.inputs{j}.defined;
+            end            
+            if ~b; continue; end
+            ts = tic;                    % (((
+            h.update(detail_level);
+            h.last_total_time = toc(ts); % )))
+            if(~h.defined); continue; end
+            h.runtimes(time_range) = h.runtimes(time_range)*(1-rate) + h.runtimes(1:4)*rate;
         end
-        fig.UserData.runtime = runtime;
+        t_total_time = toc(t_total_stamp);
+        switch evt.EventName
+        case 'MovingROI'
+            o.move_total_time = o.move_total_time*(1-rate) + t_total_time*rate;
+        case 'ROIMoved'
+            o.stop_total_time = o.stop_total_time*(1-rate) + t_total_time*rate;
+        end
     end
 end
 end

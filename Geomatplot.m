@@ -55,6 +55,33 @@ methods (Access = public)
         b = isfield(o.movs,l) || isfield(o.deps,l);
     end
 
+    function [M,D] = getRuntimes(o)
+
+        values = struct2cell(o.movs); labels = fieldnames(o.movs);
+        M = NaN(length(values),2);
+        for i=1:length(values)
+            M(i,:) = [values{i}.move_total_time,values{i}.stop_total_time];
+        end
+        M = num2cell(M*1000,1);
+        vnames = ["move total","stop total"];     
+        M = table(M{:},'RowNames',labels,'VariableNames',vnames);
+        
+        if nargout <2; return; end
+
+        values = struct2cell(o.deps);
+        labels = fieldnames(o.deps);
+        D = NaN(length(values),12);
+        for i=1:length(values)
+            D(i,:) = values{i}.runtimes;
+        end
+        D = num2cell(D*1000,1);
+        vnames = ["last total","last callb","last parse","last plots",...
+                  "move total","move callb","move parse","move plots",...
+                  "stop total","stop callb","stop parse","stop plots"];     
+        D = table(D{:},'RowNames',labels,'VariableNames',vnames);
+
+    end
+
 end % public
 
 methods (Access = public, Hidden)
@@ -127,7 +154,7 @@ methods (Access = public, Hidden)
         end
     end
 
-    function [inputs,args]=extractInputs(o,args,mina,maxa)
+    function [inputs,args] = extractInputs(o,args,mina,maxa)
         arguments
             o (1,1) Geomatplot; args (1,:) cell; mina (1,1) double = 0; maxa (1,1) double = inf;
         end
@@ -236,22 +263,20 @@ methods (Access = protected)
 
         str = strings(mnum+dnum+1,5);
         labels = fieldnames(o.movs); values = struct2cell(o.movs);
-        str(1,:) = [" label", "type", "runtime", "mean pos", "callback"];
+        str(1,:) = [" label", "type", "move/stop time", "mean pos", "callback"];
         for i=1:mnum
-            v = values{i};vv = v.value;
+            v = values{i};
             meanstr = string(v);
-            str(i+1,1:4) = [''''+string(labels{i})+'''', string(class(v)), [num2str(v.runtime*1000,'%.2fms')], meanstr];
+            timestr = num2str([v.move_total_time,v.stop_total_time]*1000,'%.2fms/%.2fms');
+            str(i+1,1:4) = [''''+string(labels{i})+'''', string(class(v)), timestr, meanstr];
         end
         labels = fieldnames(o.deps); values = struct2cell(o.deps);
         for i=1:dnum
             v = values{i};
             meanstr = string(v);
-            ls = cell(1,length(v.inputs));
-            for j=1:length(v.inputs)
-                ls{j} = v.inputs{j}.label;
-            end
+            timestr = num2str([v.move_total_time,v.stop_total_time]*1000,'%.2fms/%.2fms');
             ls = v.getCallbackStr;
-            str(i+1+mnum,:) = [''''+string(labels{i})+'''', string(class(v)), [num2str(v.runtime*1000,'%.2fms')], meanstr, ls];
+            str(i+1+mnum,:) = [''''+string(labels{i})+'''', string(class(v)), timestr , meanstr, ls];
         end
         str(:,1) = pad(str(:,1),'left');
         str(:,2) = pad(str(:,2),'right');

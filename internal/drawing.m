@@ -3,9 +3,9 @@ properties
 	parent  (1,1) Geomatplot
 	label	(1,:) char           % indetifier
 	fig                          % plot handle to ROI or matlab plot
-    runtime (1,1) double  = 0
     defined (1,1) logical = true
 end
+
 
 methods
     function o = drawing(parent,label,fig)

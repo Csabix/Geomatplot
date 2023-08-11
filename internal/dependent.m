@@ -5,8 +5,51 @@ properties
     movs      (1,1) struct
     exception            = []
 end
-methods
+properties (Hidden)
+    runtimes (1,12) double = zeros(1,12);
+end
+properties (Hidden, Dependent)
+    last_total_time      (1,1) double;
+    last_callb_time      (1,1) double;
+    last_parse_time      (1,1) double;
+    last_plots_time      (1,1) double;
+    move_total_time (1,1) double;
+    move_callb_time (1,1) double;
+    move_parse_time (1,1) double;
+    move_plots_time (1,1) double;
+    stop_total_time (1,1) double;
+    stop_callb_time (1,1) double;
+    stop_parse_time (1,1) double;
+    stop_plots_time (1,1) double;
+end
+methods % get/set
+    function v = get.last_total_time(o); v = o.runtimes( 1);     end
+    function v = get.last_callb_time(o); v = o.runtimes( 2);     end
+    function v = get.last_parse_time(o); v = o.runtimes( 3);     end
+    function v = get.last_plots_time(o); v = o.runtimes( 4);     end
+    function v = get.move_total_time(o); v = o.runtimes( 5);     end
+    function v = get.move_callb_time(o); v = o.runtimes( 6);     end
+    function v = get.move_parse_time(o); v = o.runtimes( 7);     end
+    function v = get.move_plots_time(o); v = o.runtimes( 8);     end
+    function v = get.stop_total_time(o); v = o.runtimes( 9);     end
+    function v = get.stop_callb_time(o); v = o.runtimes(10);     end
+    function v = get.stop_parse_time(o); v = o.runtimes(11);     end
+    function v = get.stop_plots_time(o); v = o.runtimes(12);     end
+    function     set.last_total_time(o,v);   o.runtimes( 1) = v; end
+    function     set.last_callb_time(o,v);   o.runtimes( 2) = v; end
+    function     set.last_parse_time(o,v);   o.runtimes( 3) = v; end
+    function     set.last_plots_time(o,v);   o.runtimes( 4) = v; end
+%   function     set.move_total_time(o,v);   o.runtimes( 5) = v; end
+%   function     set.move_callb_time(o,v);   o.runtimes( 6) = v; end
+%   function     set.move_parse_time(o,v);   o.runtimes( 7) = v; end
+%   function     set.move_plots_time(o,v);   o.runtimes( 8) = v; end
+%   function     set.stop_total_time(o,v);   o.runtimes( 9) = v; end
+%   function     set.stop_callb_time(o,v);   o.runtimes(10) = v; end
+%   function     set.stop_parse_time(o,v);   o.runtimes(11) = v; end
+%   function     set.stop_plots_time(o,v);   o.runtimes(12) = v; end
+end
 
+methods
     function o = dependent(parent,label,fig,inputs,callback)
         o = o@drawing(parent,label,fig);
         o.inputs = inputs;
@@ -27,6 +70,7 @@ methods
             s = "UNDEFINED";
         end
     end
+
 end
 
 methods (Access = public, Hidden)
@@ -80,21 +124,25 @@ methods (Access = protected)
     end
 
     function call(o,varargin)
-        tic; o.defined = true;
+        o.defined = true;
+        outs = cell(1,abs(nargout(o.callback)));
+        ts = tic;                        % (((
         try
-            outs = cell(1,abs(nargout(o.callback)));
             [outs{:}] = o.callback(varargin{:},o.inputs{:});
         catch ME
             o.defined = false;
             o.exception = ME;
         end
+        o.last_callb_time = toc(ts);     % )))
         if o.defined
+            ts = tic;                    % (((
             ret = o.parseOutputs(outs);
+            o.last_parse_time = toc(ts); % )))
+            ts = tic;                    % (((
             o.updatePlot(ret{:});
-            o.runtime = 0.5*(toc+o.runtime);
+            o.last_plots_time = toc(ts); % )))
             o.fig.Visible = 'on';
         else
-            [~] = toc;
             o.fig.Visible = 'off';
         end
     end

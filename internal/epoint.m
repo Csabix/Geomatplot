@@ -23,6 +23,7 @@ methods
         if a_is_point && b_is_point
             c = evector(parent,inputs,constants,expression,operator);
         else
+            assert(~b_is_point,'invalid operation');
             c = epoint(parent,inputs,constants,expression,operator);
         end
     end

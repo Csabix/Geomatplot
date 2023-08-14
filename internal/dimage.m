@@ -24,19 +24,24 @@ methods
 
     function update(o,detail_level)
         if nargin < 2; detail_level = 1; end
-        [x,y] = o.getMeshgrid(256*detail_level);
-        o.call(x,y);
+        [xr,yr,xn,yn] = o.getRanges(detail_level);
+        o.call(xr,xn,yr,yn);
     end
 
     function updatePlot(o,C)
+        if isgpuarray(C)
         o.fig.CData = C;
+        else
+        o.fig.CData = gather(C);
+        end
         [o.fig.XData,o.fig.YData] = o.getRanges;
     end
     
 end
 methods (Access=private)
     
-    function [xrange,yrange] = getRanges(o)
+    function [xrange,yrange,xn,yn] = getRanges(o,detail_level)
+        if nargin < 2; detail_level = 1; end
         if isa(o.corner0,'point_base')
             c0 = o.corner0.value;
         else
@@ -51,15 +56,13 @@ methods (Access=private)
         if xrange(1)>xrange(2); xrange = xrange([2 1]); end
         yrange = [c0(2) c1(2)];
         if yrange(1)>yrange(2); yrange = yrange([2 1]); end
+        if nargout > 2
+            xl = diff(xrange);  yl = diff(yrange);
+            xn = round(detail_level*o.Resolution*xl/(xl+yl));
+            yn = round(detail_level*o.Resolution*yl/(xl+yl));
+        end
     end
-    
-    function [x,y] = getMeshgrid(o,res)
-        [xr,yr] = o.getRanges;
-        xl = xr(2) - xr(1); yl = yr(2) - yr(1);
-        x = linspace(xr(1),xr(2),res*xl/(xl+yl));
-        y = linspace(yr(1),yr(2),res*yl/(xl+yl));
-        [x,y] = meshgrid(x,y);
-    end
+
 end
 methods (Static)
     function outs = parseOutputs(args)

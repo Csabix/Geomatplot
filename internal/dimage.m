@@ -5,16 +5,24 @@ properties
     corner1
 end
 methods
-    function o = dimage(parent,label,inputs,callback,c0,c1,args,resolution)
+    function o = dimage(parent,label,inputs,callback,c0,c1,args,options)
         args = namedargs2cell(args);
         fig = imagesc('XData',[0 1],'YData',[0 1],'CData',0,args{:});
         uistack(fig,'bottom');
         o = o@dependent(parent,label,fig,inputs,[]);
-        if nargin >= 8; o.Resolution = resolution; end
+        if nargin >= 8; o.Resolution = options.Resolution; end
         o.corner0 = c0; o.corner1 = c1;
         if isa(o.corner0,'point_base'); inputs = [inputs {c0}]; end
         if isa(o.corner1,'point_base'); inputs = [inputs {c1}]; end
         o.setUpdateCallback(callback,inputs);
+        if options.Verbose
+            s = "Created Image drawing of " + num2str(options.Resolution.^2/1000.^2,2) + " megapixels with " + options.Type;
+            if options.Complex; s = s + " complex"; else; s = s + " real"; end
+            if options.ArrayFun; s = s + " vectorized"; else; s = s + " matrix"; end
+            s = s + " input running on the ";
+            if options.gpuArray; s = s + "GPU."; else; s = s + "CPU."; end
+            disp(s);
+        end
     end
 
     function v = value(o)
@@ -30,10 +38,12 @@ methods
 
     function updatePlot(o,C)
         if isgpuarray(C)
-        o.fig.CData = gather(C);
-        else
-        o.fig.CData = C;
+            C = gather(C);
         end
+        if isa(C,'half')
+            C = cast(C,'single');
+        end
+        o.fig.CData = C;
         [o.fig.XData,o.fig.YData] = o.getRanges;
     end
     

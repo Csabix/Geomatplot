@@ -80,14 +80,15 @@ b2 = Point('b2',[0.9 0.2],'r');
 bt = @(t,b0,b1,b2)  b0.*(1-t).^2 + 2*b1.*t.*(1-t) + b2.*t.^2;
 b = Curve(b0,b1,b2,bt,'r',2); % A red quadratic Bézier curve
 
-iscplx = false;
-isgpua = false;
-isafun = false;
+iscplx = true;
+isgpua = true;
+isafun = true;
 fun = getDist2bezierFun(iscplx,isafun);
 
-Image(b0,b1,b2,fun,'gpuArray',isgpua,'ArrayFun',isafun);
+Image(b0,b1,b2,fun,'Device','GPU','CallbackType','vectorized','Res',1024*2,'Type','single','Rep','complex');
 colorbar;
-% where 'dist2bezier' is a (x,y,b0,b1,b2) -> real function
+% where 'dist2bezier' is a (x,y,b0,b1,b2) -> real function b0=[x y]
+% where 'dist2bezier' is a (z,b0,b1,b2) -> real function b0 = x+1i*y
 
 %P = Point('P',[.5 .4],'y');
 %Circle(P,b,'y');
@@ -95,6 +96,7 @@ colorbar;
 %% dist2bezier
 
 function fun = getDist2bezierFun(iscplx,isafun)
+
     function res = dist2bezier_matrix(pos,A,B,C)
     % adapted from https://iquilezles.org/articles/distfunctions2d/
         function c = gdot(a,b)
@@ -122,8 +124,10 @@ function fun = getDist2bezierFun(iscplx,isafun)
         mask = h>=0;
         % if mask
             h = realsqrt(h(mask));
-            uv1 = nthroot(.5*( h-q(mask)),3);     
-            uv2 = nthroot(.5*(-h-q(mask)),3);     
+            q1 = .5*( h-q(mask));
+            q2 = .5*(-h-q(mask));
+            uv1 = sign(q1).*abs(q1).^(1./3);
+            uv2 = sign(q2).*abs(q2).^(1./3); 
             t   = clamp( uv1+uv2-kx, 0, 1 );
             res(mask) = gdot2((c + b.*t).*t + d(mask));
         % else

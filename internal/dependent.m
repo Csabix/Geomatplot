@@ -39,14 +39,6 @@ methods % get/set
     function     set.last_callb_time(o,v);   o.runtimes( 2) = v; end
     function     set.last_parse_time(o,v);   o.runtimes( 3) = v; end
     function     set.last_plots_time(o,v);   o.runtimes( 4) = v; end
-%   function     set.move_total_time(o,v);   o.runtimes( 5) = v; end
-%   function     set.move_callb_time(o,v);   o.runtimes( 6) = v; end
-%   function     set.move_parse_time(o,v);   o.runtimes( 7) = v; end
-%   function     set.move_plots_time(o,v);   o.runtimes( 8) = v; end
-%   function     set.stop_total_time(o,v);   o.runtimes( 9) = v; end
-%   function     set.stop_callb_time(o,v);   o.runtimes(10) = v; end
-%   function     set.stop_parse_time(o,v);   o.runtimes(11) = v; end
-%   function     set.stop_plots_time(o,v);   o.runtimes(12) = v; end
 end
 
 methods

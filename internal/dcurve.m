@@ -1,6 +1,6 @@
 classdef dcurve < dlines
     properties
-        Resolution (1,1) double = 256;
+        Resolution (1,1) double = 512;
     end
     methods
         function o = dcurve(parent,label,inputs,callback,params,resolution)

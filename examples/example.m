@@ -31,25 +31,6 @@ Segment(M,K,'r')
 
 ylim([-0.2 0.6]); xlim([-.1 1.1]);
 
-%% Image
-clf; disp Image
-b0 = Point('b0',[0.1 0.2],'r'); % draggable control points
-b1 = Point('b1',[0.7 0.9],'r'); % with given labels
-b2 = Point('b2',[0.9 0.2],'r');
-c1 = Point('c1',[-.5 0],'k','MarkerSize',5); % adjustable corner
-c2 = Point('c2',[1.5 1],'k','MarkerSize',5); %   for the image
-
-% parametric callback with t in [0,1] and dependent variables:
-bt = @(t,b0,b1,b2)  b0.*(1-t).^2 + 2*b1.*t.*(1-t) + b2.*t.^2;
-b = Curve(b0,b1,b2,bt,'r',2); % A red quadratic Bézier curve
-
-Image(b0,b1,b2,@dist2bezierComplex,c1,c2,'gpuArray',true);
-colorbar;
-% where 'dist2bezier' is a (x,y,b0,b1,b2) -> real function
-
-P = Point('P',[.5 .4],'y');
-Circle(P,b,'y');
-
 %% Intersect
 clf; disp Intersect
 A = Point([0 1]); 
@@ -87,17 +68,129 @@ end
 
 xlim([-1.5 1.3]); ylim([0 1.7]); 
 
-%% GPU
-clf; disp gpu
-A = Point([.3,.3]);
-B = Point([.6,.6]);
-f = @(X,Y,A,B) min(sqrt((X-A(1)).^2 + (Y-A(2)).^2),sqrt((X-B(1)).^2 + (Y-B(2)).^2));
-fc= @(z,A,B) min(abs(z-A),abs(z-B)); 
-Image(A,B,f);
+%% Image
+clf; disp Image
+b0 = Point('b0',[0.1 0.2],'r'); % draggable control points
+b1 = Point('b1',[0.7 0.9],'r'); % with given labels
+b2 = Point('b2',[0.9 0.2],'r');
+%c1 = Point('c1',[-.5 0],'k','MarkerSize',5); % adjustable corner
+%c2 = Point('c2',[1.5 1],'k','MarkerSize',5); %   for the image
 
-% dist2bezier
+% parametric callback with t in [0,1] and dependent variables:
+bt = @(t,b0,b1,b2)  b0.*(1-t).^2 + 2*b1.*t.*(1-t) + b2.*t.^2;
+b = Curve(b0,b1,b2,bt,'r',2); % A red quadratic Bézier curve
 
-% function v = dist2bezier(x,y,b0,b1,b2)
+iscplx = false;
+isgpua = false;
+isafun = false;
+fun = getDist2bezierFun(iscplx,isafun);
+
+Image(b0,b1,b2,fun,'gpuArray',isgpua,'ArrayFun',isafun);
+colorbar;
+% where 'dist2bezier' is a (x,y,b0,b1,b2) -> real function
+
+%P = Point('P',[.5 .4],'y');
+%Circle(P,b,'y');
+
+%% dist2bezier
+
+function fun = getDist2bezierFun(iscplx,isafun)
+    function res = dist2bezier_matrix(pos,A,B,C)
+    % adapted from https://iquilezles.org/articles/distfunctions2d/
+        function c = gdot(a,b)
+            c = real(conj(a).*b);
+        end
+        function c = gdot2(a)
+            c = gdot(a,a);
+        end
+        function v = clamp(x,a,b)
+            v = min(max(x,a),b);
+        end
+	    a = B - A;
+        b = A - 2.0*B + C;                     
+        c = a * 2.0;                           
+        d = A - pos;                           
+        kk = 1.0./gdot(b,b);                   
+        kx = kk.*gdot(a,b);                    
+        ky = kk.*(2.0*gdot(a,a)+gdot(d,b))/3.0;
+        kz = kk.*gdot(d,a);                    
+        p = ky - kx.*kx;                       
+        p3 = p.*p.*p;                          
+        q = kx.*(2*kx.*kx-3*ky) + kz;          
+        h = q.*q + 4*p3;                       
+        res = 0*ky+1;
+        mask = h>=0;
+        % if mask
+            h = realsqrt(h(mask));
+            uv1 = nthroot(.5*( h-q(mask)),3);     
+            uv2 = nthroot(.5*(-h-q(mask)),3);     
+            t   = clamp( uv1+uv2-kx, 0, 1 );
+            res(mask) = gdot2((c + b.*t).*t + d(mask));
+        % else
+            z  = realsqrt(-p(~mask));               
+            v  = acos( q(~mask)./(p(~mask).*z.*2) ) / 3;   
+            m  = cos(v);                     
+            n  = sin(v)*sqrt(3);             
+            t1 = clamp( (m+m).*z-kx,0,1);    
+            t2 = clamp(-(n+m).*z-kx,0,1);    
+            q1 = (c+b.*t1).*t1 + d(~mask);          
+            q2 = (c+b.*t2).*t2 + d(~mask);          
+            res(~mask) = min( gdot2(q1), gdot2(q2) );
+        % end
+        res = realsqrt(res);                        %chk(res,[N,M],true );
+    end
+    function res = dist2bezier_arrayfun(pos,A,B,C)
+    % adapted from https://iquilezles.org/articles/distfunctions2d/
+        function c = gdot(a,b)
+            c = real(conj(a).*b);
+        end
+        function c = gdot2(a)
+            c = gdot(a,a);
+        end
+        function v = clamp(x,a,b)
+            v = min(max(x,a),b);
+        end
+	    a = B - A;                              
+        b = A - 2.0*B + C;                      
+        c = a * 2.0;                            
+        d = A - pos;                            
+        kk = 1.0./gdot(b,b);                    
+        kx = kk.*gdot(a,b);                     
+        ky = kk.*(2.0*gdot(a,a)+gdot(d,b))/3.0; 
+        kz = kk.*gdot(d,a);                     
+        p = ky - kx.*kx;                        
+        p3 = p.*p.*p;                           
+        q = kx.*(2*kx.*kx-3*ky) + kz;           
+        h = q.*q + 4*p3;                        
+        res = 0; %#ok<NASGU> 
+        if h >= 0.0
+            h   = realsqrt(h);                  
+            uv1 = nthroot(.5*( h-q),3);         
+            uv2 = nthroot(.5*(-h-q),3);         
+            t   = clamp( uv1+uv2-kx, 0, 1 );    
+            res = gdot2((c + b.*t).*t + d);     
+        else
+            z   = realsqrt(-p);               
+            v   = acos( q./(p.*z.*2) ) / 3;   
+            m   = cos(v);                     
+            n   = sin(v)*sqrt(3);             
+            t1  = clamp( (m+m).*z-kx,0,1);    
+            t2  = clamp(-(n+m).*z-kx,0,1);    
+            q1  = (c+b.*t1).*t1 + d;          
+            q2  = (c+b.*t2).*t2 + d;          
+            res = min( gdot2(q1), gdot2(q2) );
+        end
+        res = realsqrt(res);                    
+    end
+    
+    if isafun; fun = @dist2bezier_arrayfun;
+    else;      fun = @dist2bezier_matrix;   end
+    if ~iscplx
+        fun = @(x,y,A,B,C) fun(complex(x,y),complex(A(1),A(2)),complex(B(1),B(2)),complex(C(1),C(2)));
+    end
+end
+
+% function v = dist2bezierOld(x,y,b0,b1,b2)
 %     function v = gdot(a,b)
 %         v = dot(a,b,2);
 %     end
@@ -123,46 +216,3 @@ Image(A,B,f);
 %     %v=v+0.2*sin(100*x).*sin(100*y);
 % end
 %
-
-function res = dist2bezierComplex(pos,A,B,C)
-% adapted from https://iquilezles.org/articles/distfunctions2d/
-    function c = gdot(a,b)
-        c = real(conj(a)*b);
-    end
-    function c = gdot2(a)
-        c = gdot(a,a);
-    end
-    function v = clamp(x,a,b)
-        v = min(max(x,a),b);
-    end
-    a = B - A;
-    b = A - 2.0*B + C;
-    c = a * 2.0;
-    d = A - pos;
-    kk = 1.0/gdot(b,b);
-    kx = kk * gdot(a,b);
-    ky = kk * (2.0*gdot(a,a)+gdot(d,b)) / 3.0;
-    kz = kk * gdot(d,a);
-    p = ky - kx*kx;
-    p3 = p*p*p;
-    q = kx*(2.0*kx*kx-3.0*ky) + kz;
-    h = q*q + 4.0*p3;
-    if h >= 0.0 
-        h = realsqrt(h);
-        x1 = .5*( h-q);
-        x2 = .5*(-h-q);
-        uv1 = sign(x1)*nthroot(abs(x1),3);
-        uv2 = sign(x2)*nthroot(abs(x2),3);
-        t = clamp( uv1+uv2-kx, 0, 1 );
-        res = gdot2(d + (c + b*t)*t);
-    else
-        z = realsqrt(-p);
-        v = acos( q/(p*z*2.0) ) / 3.0;
-        m = cos(v);
-        n = sin(v)*1.732050808;
-        t1 = clamp( (n+m)*z-kx,0,1);
-        t2 = clamp(-(n+m)*z-kx,0,1);
-        res = min( gdot2(d+(c+b*t1)*t1), gdot2(d+(c+b*t2)*t2) );
-    end
-    res = realsqrt( res );
-end

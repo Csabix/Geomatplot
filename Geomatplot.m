@@ -63,7 +63,7 @@ methods (Access = public)
             M(i,:) = [values{i}.move_total_time,values{i}.stop_total_time];
         end
         M = num2cell(M*1000,1);
-        vnames = ["move total","stop total"];     
+        vnames = ["move_total","stop_total"];     
         M = table(M{:},'RowNames',labels,'VariableNames',vnames);
         
         if nargout <2; return; end
@@ -75,9 +75,9 @@ methods (Access = public)
             D(i,:) = values{i}.runtimes;
         end
         D = num2cell(D*1000,1);
-        vnames = ["last total","last callb","last parse","last plots",...
-                  "move total","move callb","move parse","move plots",...
-                  "stop total","stop callb","stop parse","stop plots"];     
+        vnames = ["last_total","last_callb","last_parse","last_plots",...
+                  "move_total","move_callb","move_parse","move_plots",...
+                  "stop_total","stop_callb","stop_parse","stop_plots"];     
         D = table(D{:},'RowNames',labels,'VariableNames',vnames);
 
     end

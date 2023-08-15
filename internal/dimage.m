@@ -1,6 +1,6 @@
 classdef dimage < dependent
 properties
-    Resolution (1,1) double = 256;
+    Resolution (1,1) double = 1024;
     corner0
     corner1
 end
@@ -30,9 +30,9 @@ methods
 
     function updatePlot(o,C)
         if isgpuarray(C)
-        o.fig.CData = C;
-        else
         o.fig.CData = gather(C);
+        else
+        o.fig.CData = C;
         end
         [o.fig.XData,o.fig.YData] = o.getRanges;
     end
@@ -58,8 +58,8 @@ methods (Access=private)
         if yrange(1)>yrange(2); yrange = yrange([2 1]); end
         if nargout > 2
             xl = diff(xrange);  yl = diff(yrange);
-            xn = round(detail_level*o.Resolution*xl/(xl+yl));
-            yn = round(detail_level*o.Resolution*yl/(xl+yl));
+            xn = round(2*detail_level*o.Resolution*xl/(xl+yl));
+            yn = round(2*detail_level*o.Resolution*yl/(xl+yl));
         end
     end
 

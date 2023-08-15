@@ -30,13 +30,13 @@ methods (Static)
         case 'MovingROI'
             detail_level = 0.25;
             time_range = 5:8;
-            o.move_timing_num = o.move_timing_num + 1;
-            rate = 1/o.move_timing_num;
+            rate = 1/(1+o.move_timing_num);
+            o.move_timing_num = 0.75*o.move_timing_num + 1;
         case 'ROIMoved'
             detail_level = 1;
             time_range = 9:12;
-            o.stop_timing_num = o.stop_timing_num + 1;
-            rate = 1/o.stop_timing_num;
+            rate = 1/(1+o.stop_timing_num);
+            o.stop_timing_num = 0.75*o.stop_timing_num + 1;
         end
         deps = struct2cell(o.deps);
         for i = 1:length(deps)

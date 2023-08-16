@@ -16,7 +16,7 @@ methods
         if isa(o.corner1,'point_base'); inputs = [inputs {c1}]; end
         o.setUpdateCallback(callback,inputs);
         if options.Verbose
-            s = "Created Image drawing of " + num2str(options.Resolution.^2/1000.^2,2) + " megapixels with " + options.Type;
+            s = "Created Image drawing of " + num2str(options.Resolution.^2/1000.^2,2) + " megapixels with " + options.Precision;
             if options.Complex; s = s + " complex"; else; s = s + " real"; end
             if options.ArrayFun; s = s + " vectorized"; else; s = s + " matrix"; end
             s = s + " input running on the ";

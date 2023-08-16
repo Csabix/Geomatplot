@@ -29,9 +29,7 @@ function h = Midpoint(varargin)
         for i = 1:length(inputs)
             l = inputs{i};
             if isa(l,'dcurve') || isa(l,'dimage') || isa(l,'dnumeric')
-                eidType = 'Midpoint:invalidInput';
-                msgType = 'The input cannot be of this type.';
-                throw(MException(eidType,msgType));
+                throw(MException('Midpoint:invalidInput','The input cannot be of this type.'));
             end
         end
         h_ = dpoint(parent,label,inputs,@midpoint_,args);

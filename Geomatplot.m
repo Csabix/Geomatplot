@@ -55,8 +55,11 @@ methods (Access = public)
         b = isfield(o.movs,l) || isfield(o.deps,l);
     end
 
-    function [M,D] = getRuntimes(o)
+end % public
 
+methods(Access = public, Static)
+    function [M,D] = Runtimes(o)
+        if nargin ==0; o = Geomatplot.findCurrentGeomatplot; end
         values = struct2cell(o.movs); labels = fieldnames(o.movs);
         M = NaN(length(values),2);
         for i=1:length(values)
@@ -79,10 +82,8 @@ methods (Access = public)
                   "move_total","move_callb","move_parse","move_plots",...
                   "stop_total","stop_callb","stop_parse","stop_plots"];     
         D = table(D{:},'RowNames',labels,'VariableNames',vnames);
-
     end
-
-end % public
+end
 
 methods (Access = public, Hidden)
 
@@ -295,7 +296,7 @@ end
 methods (Static, Access = public, Hidden)
 
     function parent = findCurrentGeomatplot(parent)
-        if isempty(parent); parent = gca; end
+        if nargin == 0 || isempty(parent); parent = gca; end
         if isa(parent,'matlab.ui.Figure')
             if isempty(parent.Children)
                 parent = axes(parent);
@@ -306,7 +307,6 @@ methods (Static, Access = public, Hidden)
         if isa(parent,'matlab.graphics.axis.Axes')
             parent = parent.UserData;
         end
-        if isempty(parent); parent = Geomatplot; end
     end
 
     function [parent, args] = extractGeomatplot(args)
@@ -317,6 +317,7 @@ methods (Static, Access = public, Hidden)
             parent = [];
         end
         parent = Geomatplot.findCurrentGeomatplot(parent);
+        if isempty(parent); parent = Geomatplot; end
         if ~isa(parent,'Geomatplot')
             eidType = 'extractGeomatplot:noGeomatplot';
             msgType = 'Geomatplot not found, probably wrong argument.';

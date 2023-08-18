@@ -34,7 +34,7 @@ function C = setprod(varargin)
     for i = 2:length(varargin)
         [~,m] = size(C);
         [A,B] = meshgrid(C,varargin{i});
-        C = [reshape(A,[],m),B(1:end/m)'];
+        C = [reshape(A,[],m),reshape(B(1:end/m),[],1)];
     end
 end
 

@@ -2,10 +2,21 @@ classdef expression_base
     
 properties
 	parent     (1,1) Geomatplot
+    % only expressions with the same parent can be combined
 	inputs     (1,1) struct
+    % handles for drawings (scalar, point, vector)
+    % `label -> handle` map, for easy merging
     constants  (1,:) cell
+    % the constants used in the expression
+    % for easy renaming, the constants are named `c@i@`, where i is
+    %   the index in the array (so for example `c@1@` `c@2@` `c@3@` ...)
+    % when combining two temps into a new expression, the constants
+    %   need to be renamed in the expression string
     expression (1,:) char
-    operator   (1,1) char % top level operator in the expression
+    % the string of the built expression
+    operator   (1,1) char
+    % top level operator in the expression
+    % helps minimizing the amount of parentheses
 end
 
 methods
@@ -48,15 +59,15 @@ methods (Static, Hidden)
         end
     end
 end
-methods (Access = protected, Hidden)
+methods (Hidden)
     function [inputs,callback] = createCallback(o)
         inputs = struct2cell(o.inputs);
         f = fieldnames(o.inputs);
         args = join(f,',');
         args = args{1};
         exp = o.expression;
-        exp = replace(exp, f, f + ".value");
         exp = expression_base.substituteConstants(exp, o.constants);
+        exp = replace(exp, f, f + ".value");
         callbackStr = ['@(' args ')' exp];
         callback = eval(callbackStr);
     end
@@ -98,7 +109,6 @@ methods (Access = protected, Static, Hidden)
                 throw('wrong constant');
             end
         end
-            disp(constants);
         vals = cellfun(@writeConst,constants,'UniformOutput',false);
         exp = replace(exp, names, vals);
     end

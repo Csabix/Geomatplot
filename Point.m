@@ -19,7 +19,7 @@ function h = Point(varargin)
 %   Point(label,___)  provides a label for the point.
 %
 %   Point(parent,___)  draws onto the given geomatplot, axes, or figure instead of
-%       the current one. This must preceed the label argument if that is given also.
+%       the current one. This must preceed the label argument if that is also given.
 %
 %   Point(___,color)  specifies the color of the point and its label, the default is 'b'. This may
 %       be a colorname or a three element vector.

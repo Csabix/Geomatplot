@@ -155,9 +155,13 @@ methods (Access = public, Hidden)
         end
     end
 
-    function [inputs,args] = extractInputs(o,args,mina,maxa)
+    function [inputs,args] = extractInputs(o,args,mina,maxa,evalExpressions)
         arguments
-            o (1,1) Geomatplot; args (1,:) cell; mina (1,1) double = 0; maxa (1,1) double = inf;
+            o (1,1) Geomatplot
+            args (1,:) cell
+            mina (1,1) double = 0
+            maxa (1,1) double = inf
+            evalExpressions (1,1) logical = true
         end
         if isempty(args); inputs = {}; return; end
         if isa(args{1},'cell')
@@ -188,7 +192,7 @@ methods (Access = public, Hidden)
                 if ai.parent ~= o
                     throwAsCaller(MException('extractInputs:differentParent','The input has a different Geomatplot than expected.\n(Sometimes it is a one-off, try running your code again)'));
                 end
-                if isa(ai,'expression_base')
+                if evalExpressions && isa(ai,'expression_base')
                     args{i} = ai.eval();
                 end
             end

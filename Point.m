@@ -37,22 +37,28 @@ function h = Point(varargin)
 
     if isempty(position) && ~isempty(varargin)
         isdependent = true;  % because cannot define function inside an if statement
-        if isa(varargin{1}, 'epoint')
-            position = varargin{1};
-            varargin = varargin(2:end);
+        [inputs,  varargin] = parent.extractInputs(varargin,0,inf,false);
+        if length(inputs) == 1 && isa(inputs{1}, 'epoint') && (isempty(varargin) || ~isa(varargin{1},'function_handle'))
+            position = inputs{1};
             args = parse_dpoint(varargin{:});
             [inputs,callback] = position.createCallback();
             assert(parent == position.parent);
-        elseif (iscell(varargin{1})||isa(varargin{1},'drawing'))
-            [inputs,  varargin] = parent.extractInputs(varargin,0,inf);
+        elseif ~isempty(varargin) && isa(varargin{1},'function_handle')
+            for j = 1:length(inputs)
+                if isa(inputs{j},'expression_base'); inputs{j} = inputs{j}.eval(); end
+            end
             [usercallback,varargin] = parse_callback(inputs,varargin{:});
             args = parse_dpoint(varargin{:});
             n = abs(nargout(usercallback));
             callback = [];
+        else
+            throw(MException('Point:invalidInputPattern','Unknown overload.'))
         end
     else
         isdependent = false;
-        args = parse_mpoint(position,varargin{:});
+        if ~isempty(position)
+            args = parse_mpoint(position,varargin{:});
+        end
     end
     args.Label = label;
     

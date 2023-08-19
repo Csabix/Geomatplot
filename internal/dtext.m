@@ -30,6 +30,13 @@ methods
     function text = value(o)
         text = o.fig.String;
     end
+    function s = string(o)
+        str = o.fig.String;
+        if size(str,1) > 1
+            str = [str{1} '...'];
+        end
+        s = ['"' str '"'];
+    end
 end
 methods (Static)
     function args = parseOutputs(args)

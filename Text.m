@@ -26,6 +26,9 @@ function h = Text(varargin)
         if isempty(varargin) || ~isa(varargin{1},'function_handle')
             textType = 'drawing';
             [args,offset] = parse_text_const(position,varargin{:});
+            if isempty(inputs)
+                inputs = {position};
+            end
         else
             textType = 'callback';
             [usercallback,args,offset] = parse_text_callback(position,inputs,varargin{:});
@@ -48,7 +51,7 @@ function h = Text(varargin)
         p = position;
         t = strings(length(varargin),1);
         for i=1:length(varargin)
-            t(i) = num2str(round(mean(varargin{i}.value, 1), 4));
+            t(i) = varargin{i}.string;
         end
     end
     function [p,t] = text_varPos_constStr(pos)
@@ -67,7 +70,7 @@ function h = Text(varargin)
         p = pos.value;
         t = strings(length(varargin),1);
         for i=1:length(varargin)
-            t(i) = num2str(round(mean(varargin{i}.value, 1), 4));
+            t(i) = varargin{i}.string;
         end
     end
     

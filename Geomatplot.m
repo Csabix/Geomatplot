@@ -268,7 +268,7 @@ methods (Access = protected)
 
         str = strings(mnum+dnum+1,5);
         labels = fieldnames(o.movs); values = struct2cell(o.movs);
-        str(1,:) = [" label", "type", "move/stop time", "mean pos", "callback"];
+        str(1,:) = [" label", "type", "move/stop time", "value/mean pos", "callback"];
         for i=1:mnum
             v = values{i};
             meanstr = string(v);

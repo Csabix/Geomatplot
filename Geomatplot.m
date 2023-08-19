@@ -58,7 +58,13 @@ methods (Access = public)
 end % public
 
 methods(Access = public, Static)
-    function [M,D] = Runtimes(o)
+    
+    function summary(o)
+        if nargin == 0; o = Geomatplot.findCurrentGeomatplot; end
+        disp(o);
+    end
+
+    function [M,D] = runtimes(o)
         if nargin ==0; o = Geomatplot.findCurrentGeomatplot; end
         values = struct2cell(o.movs); labels = fieldnames(o.movs);
         M = NaN(length(values),2);

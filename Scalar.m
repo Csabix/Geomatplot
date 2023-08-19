@@ -1,7 +1,8 @@
 function h = Scalar(varargin)
 % Scalar creates a dependent scalar value obejct
 %   Scalar({A,B..},callback) creates a dependent scalar with a given
-%       callback of the form:   callback(A,B,...) -> s
+%       callback of the form
+%           callback(A,B,...) -> s
 %       where A,B,... are n>=1 number of any Geomaplot handles, and their
 %       values will be passed to the given callback. For example, if A is a
 %       point, then its position vector [x y] will be  given to the

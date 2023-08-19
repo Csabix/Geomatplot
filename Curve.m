@@ -24,6 +24,12 @@ function h = Curve(varargin)
 %
 %   h = Curve(___)  returns the created handle.
 %
+%   Name-Value Arguments
+%
+%       Resolution - 512 (default) | positive integer
+%           The Curve will consist of Resolution-1 number of line segments when drawn. When someting
+%           is being moved the resolution is decreased to increase responsiveness.
+%
 %   See also Circle, CircularArc, POINT, DISTANCE, INTERSECT, IMAGE
 
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);   

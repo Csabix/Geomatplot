@@ -26,13 +26,27 @@ function h = Polygon(varargin)
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
     [label,varargin] = parent.extractLabel(varargin,'poly');
     [position,varargin] = drawing.extractPosition(varargin,inf);
-    args = parse_(position,varargin{:});
-    h_ = mpolygon(parent,label,args);
     
-    if nargout == 1; h=h_; end
+    if isempty(position) && ~isempty(varargin)
+        [inputs,varargin] = parent.extractInputs(varargin,0,inf,false);
+        args = parse_dpolygon(varargin{:}); % todo check inputs
+        h_ = dpolygon(parent,label,inputs,@dpoly_callback,args);
+    else
+        args = parse_mpolygon(position,varargin{:});
+        h_ = mpolygon(parent,label,args);
+    end
+
+    if nargout == 1; h = h_; end
 end
 
-function args = parse_(position,color,args)
+function xy = dpoly_callback(varargin)
+    xy = []; % todo preallocate?
+    for i = 1:length(varargin)
+        xy = vertcat(xy,varargin{i}.value);
+    end
+end
+
+function args = parse_mpolygon(position,color,args) % todo linespec!
     arguments
         position        (:,2) double    {mustBeReal}
         color                           {drawing.mustBeColor}               = 'b'
@@ -47,4 +61,19 @@ function args = parse_(position,color,args)
     args.Color = color;
     if ~isfield(args,'LabelTextColor'); args.LabelTextColor = color; end
     if ~isempty(position); args.Position = position; end
+end
+
+function params = parse_dpolygon(linespec,linewidth,params) % todo more functionality!
+    arguments
+        linespec          (1,:) char   {drawing.mustBeLineSpec}              = 'k'
+        linewidth         (1,1) double {mustBePositive}                      =  1
+        params.MarkerSize (1,1) double {mustBePositive}                      = 7
+        params.LineWidth  (1,1) double {mustBePositive}
+        params.FaceAlpha  (1,1) double {mustBeInRange(params.FaceAlpha,0,1)} = 0.15
+        params.LineStyle  (1,:) char
+        params.Marker     (1,:) char
+        params.Color                   {drawing.mustBeColor}
+    end
+    if ~isfield(params,'LineWidth'); params.LineWidth = linewidth; end
+    params = dlines.applyLineSpec(params,linespec);
 end

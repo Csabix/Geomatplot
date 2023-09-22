@@ -13,7 +13,9 @@ end
 methods (Access = public)
     
     function o = Geomatplot(ax)
-        addpath internal\ examples\
+        folder = mfilename('fullpath');
+        folder = folder(1:end-length(mfilename));
+        addpath([folder '/internal/'], [folder '/examples/']);
         if nargin == 0
             o.ax = gca;
         elseif isa(ax,'matlab.ui.Figure')

@@ -125,7 +125,9 @@ function params = parse_dpoint(color,markersize,params)
 end
 
 function mustBePointCallback(usercallback,inputs)
-    if nargin(usercallback) ~= length(inputs)
+    nin = nargin(usercallback);
+    need = length(inputs);
+    if nin<0 && abs(nin)>need+1 || nin>=0 && nin~=need
         eidType = 'Point:callbackWrongNumberOfArguments';
         msgType = ['Callback needs ' int2str(length(inputs)) ' number of arguments.'];
         throw(MException(eidType,msgType));

@@ -72,8 +72,10 @@ function [usercallback,params,resolution] = parse_(inputs,usercallback,linespec,
     params = dlines.applyLineSpec(params,linespec);
 end
 
-function mustBeCurveCallback(usercallback,inputs)
-    if nargin(usercallback) ~= length(inputs)+1
+function mustBeCurveCallback(usercallback,inputs)    
+    nin = nargin(usercallback);
+    need = length(inputs)+1;
+    if nin<0 && abs(nin)>need+1 || nin>=0 && nin~=need
         msgType = ['Callback needs ' int2str(length(inputs)+1) ' number of arguments with the\n first one being a column vector of sample points (t).'];
         throw(MException('Curve:callbackWrongNumberOfArguments',msgType));
     end

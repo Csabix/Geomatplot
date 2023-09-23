@@ -63,7 +63,9 @@ function [usercallback,varargin] = parse_callback(inputs,usercallback,varargin)
     end
 end
 function mustBeScalarCallback(usercallback,inputs)
-    if nargin(usercallback) ~= length(inputs)
+    nin = nargin(usercallback);
+    need = length(inputs);
+    if (nin<0 && abs(nin)>need+1)|| nin >= 0 && nin ~= need
         eidType = 'Scalar:callbackWrongNumberOfArguments';
         msgType = ['Callback needs ' int2str(length(inputs)) ' number of arguments.'];
         throw(MException(eidType,msgType));

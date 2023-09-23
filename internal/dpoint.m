@@ -13,7 +13,11 @@ methods
         v = o.fig.Position;
     end
     function updatePlot(o,pos)
-        o.fig.Position = pos;
+        if ~any(isnan(pos))
+            o.fig.Position = pos;
+        else
+            o.defined = false;
+        end
     end
 end
 methods (Static)

@@ -5,6 +5,7 @@ methods
         h = drawpolygon(args{:});
         o = o@moveable(parent,label,h);
     end
+% TODO .value not consistent with dpolygon
     function v = value(o)
         v = o.fig.Position([1:end,1],:);
     end

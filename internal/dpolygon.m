@@ -9,6 +9,9 @@ methods
         o = o@dpointlineseq(parent,label,fig,inputs,callback);
     end
 end
+
+% TODO .value not consistent with mpolygon
+
 methods (Static,Hidden)
     
 end

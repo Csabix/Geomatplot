@@ -118,6 +118,7 @@ function [params,offset] = parse_text_const(pos,params,options)
         params.Units                (1,:) char     {mustBeMember(params.Units,{'data','normalized','inches','centimeters','characters','points','pixels'})}
         params.Interpreter          (1,:) char     {mustBeMember(params.Interpreter,{'tex','latex','none'})}
         params.Margin               (1,1) double                                     = 7
+        params.Visible              (1,:) char     {mustBeMember(params.Visible,{'on','off'})} = 'on'
         options.Offset              (1,1) double   {mustBeInteger,mustBeNonnegative} = ~isnumeric(pos)*3
     end
     offset = options.Offset;
@@ -137,6 +138,7 @@ function [usercallback, params, offset] = parse_text_callback(pos,inputs,usercal
         params.Units                (1,:) char     {mustBeMember(params.Units,{'data','normalized','inches','centimeters','characters','points','pixels'})}
         params.Interpreter          (1,:) char     {mustBeMember(params.Interpreter,{'tex','latex','none'})}
         params.Margin               (1,1) double                                     = 7
+        params.Visible              (1,:) char     {mustBeMember(params.Visible,{'on','off'})} = 'on'
         options.Offset              (1,1) double   {mustBeInteger,mustBeNonnegative} = ~isnumeric(pos)*3
     end
     offset = options.Offset;

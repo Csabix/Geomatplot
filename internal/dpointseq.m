@@ -1,10 +1,10 @@
 classdef dpointseq < dpointlineseq
 methods
-    function o = dpointseq(parent,label,labels,callback,s)
+    function o = dpointseq(parent,label,labels,callback,s,hidden)
         parent.ax.NextPlot ='add';
         args = {'MarkerEdgeColor',s.SMarkerEdgeColor,'MarkerFaceColor',s.SMarkerFaceColor,'LineWidth',s.SLineWidth};
         fig = scatter(parent.ax,0,0,s.SMarkerSize,s.SMarkerColor,args{:});
-        o = o@dpointlineseq(parent,label,fig,labels,callback);
+        o = o@dpointlineseq(parent,label,fig,labels,callback,hidden);
     end
     function v = value(o,i)
         if nargin == 2

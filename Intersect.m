@@ -50,7 +50,8 @@ function [h,g] = Intersect(varargin)
     end
 
     l = parent.getNextLabel('ptseq');
-    g_ = dpointseq(parent,l,inputs,callback,s);
+    hidden = strcmp(args.Visible,'off');
+    g_ = dpointseq(parent,l,inputs,callback,s,hidden);
     drawing.mustBeOfLength(inputs,2);
     
     for i = 1:length(labels)
@@ -128,6 +129,7 @@ function [args,s] = parse_(color,args,s)
         args.LabelAlpha (1,1) double    {mustBeInRange(args.LabelAlpha,0,1)}= 0
         args.LabelTextColor             {drawing.mustBeColor}
         args.LineWidth  (1,1) double    {mustBePositive}
+        args.Visible    (1,:) char      {mustBeMember(args.Visible,{'on','off'})} = 'on'
         s.SMarkerEdgeColor              {drawing.mustBeColor}               = [.7 .7 .7]
         s.SMarkerFaceColor              {drawing.mustBeColor}               = [.4 .4 .4]
         s.SLineWidth    (1,1) double    {mustBePositive}                    = 0.5

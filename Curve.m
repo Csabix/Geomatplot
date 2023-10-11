@@ -61,6 +61,7 @@ function [usercallback,params,resolution] = parse_(inputs,usercallback,linespec,
         params.LineStyle   (1,:) char
         params.Marker      (1,:) char
         params.Color                       {drawing.mustBeColor}
+        params.Visible     (1,:) char      {mustBeMember(params.Visible,{'on','off'})} = 'on'
         options.Resolution (1,1) double    {mustBeInteger,mustBePositive} = 512
         options.c          (1,1) double    {mustBePositive} % hack, do not intentionally use this name value arg
         options.r          (1,1) double    {mustBePositive} % hack, do not intentionally use this name value arg   

@@ -92,7 +92,7 @@ function params = parse_mpoint(position,color,markersize,params)
         params.LabelTextColor            {drawing.mustBeColor}
         params.LineWidth    (1,1) double {mustBePositive}
         params.LabelVisible (1,:) char   {mustBeMember(params.LabelVisible,{'on','off','hover'})}
-        params.Visible      (1,:) char   {mustBeMember(params.Visible,{'on','off'})}
+        params.Visible      (1,:) char   {mustBeMember(params.Visible,{'on','off'})} = 'on'
     end
     params.Color = color;
     if ~isfield(params,'LabelTextColor'); params.LabelTextColor = color; end
@@ -117,7 +117,7 @@ function params = parse_dpoint(color,markersize,params)
         params.LabelTextColor                 {drawing.mustBeColor}
         params.LineWidth    (1,1) double      {mustBePositive}
         params.LabelVisible (1,:) char        {mustBeMember(params.LabelVisible,{'on','off','hover'})}
-        params.Visible      (1,:) char        {mustBeMember(params.Visible,{'on','off'})}
+        params.Visible      (1,:) char        {mustBeMember(params.Visible,{'on','off'})} = 'on'
     end
     params.Color = color;
     if ~isfield(params,'LabelTextColor'); params.LabelTextColor = color; end

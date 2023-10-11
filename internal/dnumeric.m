@@ -3,8 +3,11 @@ properties (Abstract)
     val (:,:) double
 end
 methods
-    function o=dnumeric(parent,label,inputs,callback)
-        o@dependent(parent,label,struct,inputs,callback);
+    function o=dnumeric(parent,label,inputs,callback,hidden)
+        if nargin < 5
+            hidden = false;
+        end
+        o@dependent(parent,label,struct,inputs,callback,hidden);
     end
     function v = value(o)
         v = o.val;

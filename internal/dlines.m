@@ -1,9 +1,10 @@
 classdef dlines < dpointlineseq
 methods
     function o = dlines(parent,label,inputs,callback,args)
+        hidden = strcmp(args.Visible,'off');
         args = namedargs2cell(args);
         fig = line(parent.ax,0,0,args{:});
-        o = o@dpointlineseq(parent,label,fig,inputs,callback);
+        o = o@dpointlineseq(parent,label,fig,inputs,callback,hidden);
     end
 end
 
@@ -27,6 +28,7 @@ methods (Static,Hidden)
             params.LineStyle (1,:) char
             params.Marker    (1,:) char
             params.Color                      {drawing.mustBeColor}
+            params.Visible   (1,:) char       {mustBeMember(params.Visible,{'on','off'})} = 'on'
         end
         if ~isfield(params,'LineWidth'); params.LineWidth = linewidth; end
         params = dlines.applyLineSpec(params,linespec);

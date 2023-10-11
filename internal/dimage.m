@@ -9,7 +9,7 @@ methods
         args = namedargs2cell(args);
         fig = imagesc('XData',[0 1],'YData',[0 1],'CData',0,args{:});
         uistack(fig,'bottom');
-        o = o@dependent(parent,label,fig,inputs,[]);
+        o = o@dependent(parent,label,fig,inputs,[],false);
         if nargin >= 8; o.Resolution = options.Resolution; end
         o.corner0 = c0; o.corner1 = c1;
         if isa(o.corner0,'point_base'); inputs = [inputs {c0}]; end

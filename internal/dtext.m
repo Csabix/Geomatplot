@@ -4,9 +4,10 @@ classdef dtext < dependent
     end
 methods
     function o = dtext(parent,label,inputs,callback,args,offset)
+        hidden = strcmp(args.Visible,'off');
         args = namedargs2cell(args);
         fig = text(0,0,'',args{:});
-        o = o@dependent(parent,label,fig,inputs,[]);
+        o = o@dependent(parent,label,fig,inputs,[],hidden);
         o.offset = offset;
         o.setUpdateCallback(callback);
     end

@@ -4,6 +4,7 @@ properties
 	callback  (1,1)
     movs      (1,1) struct
     exception            = []
+    hidden    (1,1) logical = false % sets fig.Visible = 'off' on update
 end
 properties (Hidden)
     runtimes (1,12) double = zeros(1,12);
@@ -42,10 +43,11 @@ methods % get/set
 end
 
 methods
-    function o = dependent(parent,label,fig,inputs,callback)
+    function o = dependent(parent,label,fig,inputs,callback,hidden)
         o = o@drawing(parent,label,fig);
         o.inputs = inputs;
         o.parent.deps.(label)=o;
+        o.hidden = hidden;
         if ~isempty(callback)
             o.setUpdateCallback(callback);
         end
@@ -133,6 +135,8 @@ methods (Access = protected)
             ts = tic;                    % (((
             o.updatePlot(ret{:});
             o.last_plots_time = toc(ts); % )))
+        end
+        if o.defined && ~o.hidden
             o.fig.Visible = 'on';
         else
             o.fig.Visible = 'off';

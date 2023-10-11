@@ -3,11 +3,12 @@ methods
     function o = dpoint(parent,label,inputs,callback,args)
         if nargin < 5
             args.Color='k'; args.MarkerSize=5; args.LabelAlpha=0; args.LabelTextColor='k';
-            args.Label=label; args.LabelVisible ='hover';
+            args.Label=label; args.LabelVisible ='hover'; args.Visible='on';
         end
+        hidden = strcmp(args.Visible,'off');
         args = namedargs2cell(args);
         fig = drawpoint('InteractionsAllowed','none',args{:},'Position',[0 0]);
-        o = o@dependent(parent,label,fig,inputs,callback);
+        o = o@dependent(parent,label,fig,inputs,callback,hidden);
     end
     function v = value(o)
         v = o.fig.Position;
@@ -54,7 +55,7 @@ methods (Static,Hidden)
             params.LabelTextColor            {drawing.mustBeColor}
             params.LineWidth    (1,1) double {mustBePositive}
             params.LabelVisible (1,:) char   {mustBeMember(params.LabelVisible,{'on','off','hover'})}
-            params.Visible      (1,:) char   {mustBeMember(params.Visible,{'on','off'})}
+            params.Visible      (1,:) char   {mustBeMember(params.Visible,{'on','off'})} = 'on'
         end
         params.Color = color;
         if ~isfield(params,'LabelTextColor'); params.LabelTextColor = color; end

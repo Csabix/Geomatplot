@@ -40,17 +40,24 @@ methods (Static)
         end
         deps = struct2cell(o.deps);
         for i = 1:length(deps)
-            h = deps{i}; h.defined = true;
+            h = deps{i};
             b = true;
             for j = 1:length(h.inputs)
                 b = b & h.inputs{j}.defined;
-            end            
-            if ~b; continue; end
-            ts = tic;                    % (((
+            end           
+            
+            h.defined = b;
+            if b
+                ts = tic;                    % (((
+            end
+
             h.update(detail_level);
-            h.last_total_time = toc(ts); % )))
-            if(~h.defined); continue; end
-            h.runtimes(time_range) = h.runtimes(time_range)*(1-rate) + h.runtimes(1:4)*rate;
+
+            if b
+                h.last_total_time = toc(ts); % )))
+                h.runtimes(time_range) = h.runtimes(time_range)*(1-rate) + h.runtimes(1:4)*rate;
+            end
+            
         end
         t_total_time = toc(t_total_stamp);
         switch evt.EventName

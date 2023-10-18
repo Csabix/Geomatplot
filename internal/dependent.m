@@ -118,23 +118,24 @@ methods (Access = protected)
     end
 
     function call(o,varargin)
-        o.defined = true;
-        outs = cell(1,abs(nargout(o.callback)));
-        ts = tic;                        % (((
-        try
-            [outs{:}] = o.callback(varargin{:},o.inputs{:});
-        catch ME
-            o.defined = false;
-            o.exception = ME;
-        end
-        o.last_callb_time = toc(ts);     % )))
-        if o.defined
-            ts = tic;                    % (((
-            ret = o.parseOutputs(outs);
-            o.last_parse_time = toc(ts); % )))
-            ts = tic;                    % (((
-            o.updatePlot(ret{:});
-            o.last_plots_time = toc(ts); % )))
+        if o.defined % only false if inputs were undefined
+            outs = cell(1,abs(nargout(o.callback)));
+            ts = tic;                        % (((
+            try
+                [outs{:}] = o.callback(varargin{:},o.inputs{:});
+            catch ME
+                o.defined = false;
+                o.exception = ME;
+            end
+            o.last_callb_time = toc(ts);     % )))
+            if o.defined
+                ts = tic;                    % (((
+                ret = o.parseOutputs(outs);
+                o.last_parse_time = toc(ts); % )))
+                ts = tic;                    % (((
+                o.updatePlot(ret{:});
+                o.last_plots_time = toc(ts); % )))
+            end
         end
         if o.defined && ~o.hidden
             o.fig.Visible = 'on';

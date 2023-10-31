@@ -1,5 +1,5 @@
 function h = Point(varargin)
-% Point  places a moveable point on the canvas
+% Point  places a moveable or dependent point on the canvas
 %   Point() awaits user to click on the current figure to draw the point onto. Afterwards, the
 %       execution resumes and the point remains a moveable. It will also update any Geomatplot
 %       drawings that depend on it when moved.
@@ -7,7 +7,7 @@ function h = Point(varargin)
 %   Point([x y]) specifies starting position of the point, thus no user input is needed after the
 %       call.
 %
-%   Point({A,B..},callback) creates a dependent point with a given callback of the form
+%   Point(A,B...,callback) creates a dependent point with a given callback of the form
 %           callback(A,B,...) -> [x y]
 %       where A,B,... are n>=1 number of any Geomaplot handles, and their values will be passed to
 %       the given callback. For example, if A is a point, then its position vector [x y] will be
@@ -23,6 +23,8 @@ function h = Point(varargin)
 %
 %   Point(___,color)  specifies the color of the point and its label, the default is 'b'. This may
 %       be a colorname or a three element vector.
+%
+%   Point(___,color,markersize) also specifies the marker size for the point.
 %
 %   Point(___,Name,Value)  specifies additional properties using one or more Name,
 %       Value pairs arguments.

@@ -21,6 +21,8 @@ function [h,g] = Intersect(varargin)
 %   INTERSECT(___,color)  specifies the color of the intersection, the default is 'k'. This may
 %       be a colorname or a three element vector.
 %
+%   INTERSECT(___,color,markersize) also specifies the marker size for the intersection(s).
+%
 %   INTERSECT(___,Name,Value)  specifies additional properties using one or more Name,
 %       Value pairs arguments.
 %
@@ -122,10 +124,11 @@ function v = intersect_circle2circle(c0,c1)
     end
 end
 
-function [args,s] = parse_(color,args,s)
+function [args,s] = parse_(color,markersize,args,s)
     arguments
         color                           {drawing.mustBeColor}               = 'k'
-        args.MarkerSize (1,1) double    {mustBePositive}                    = 7
+        markersize      (1,1) double    {mustBePositive}                    = 7
+        args.MarkerSize (1,1) double    {mustBePositive}
         args.LabelAlpha (1,1) double    {mustBeInRange(args.LabelAlpha,0,1)}= 0
         args.LabelTextColor             {drawing.mustBeColor}
         args.LineWidth  (1,1) double    {mustBePositive}
@@ -136,7 +139,14 @@ function [args,s] = parse_(color,args,s)
         s.SMarkerSize   (1,1) double    {mustBePositive}                    = 18
         s.SMarkerColor                  {drawing.mustBeColor}               = 'k'
         s.SMarkerSymbol (1,:) char      {mustBeMember(s.SMarkerSymbol,{'o','+','*','x','_','|','^','v','>','<','square','diamond','pentagram','hexagram'})}='o'
+        s.SColorVariable
     end
     args.Color = color;
+    if ~isfield(args,'MarkerSize');   args.MarkerSize = markersize; end
     if ~isfield(args,'LabelTextColor'); args.LabelTextColor = color; end
+    fnames = fieldnames(s); values = struct2cell(s);
+    s = struct; % removing 'S' prefix from all fields in s
+    for i = 1:length(fnames)
+        s.(fnames{i}(2:end)) = values{i};
+    end
 end

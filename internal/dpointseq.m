@@ -2,8 +2,9 @@ classdef dpointseq < dpointlineseq
 methods
     function o = dpointseq(parent,label,labels,callback,s,hidden)
         parent.ax.NextPlot ='add';
-        args = {'MarkerEdgeColor',s.SMarkerEdgeColor,'MarkerFaceColor',s.SMarkerFaceColor,'LineWidth',s.SLineWidth};
-        fig = scatter(parent.ax,0,0,s.SMarkerSize,s.SMarkerColor,args{:});
+        sz = s.MarkerSize; c = s.MarkerColor; mkr = s.MarkerSymbol;
+        args = namedargs2cell(rmfield(s,{'MarkerSize','MarkerColor','MarkerSymbol'}));
+        fig = scatter(parent.ax,0,0,sz,c,mkr,args{:});
         o = o@dpointlineseq(parent,label,fig,labels,callback,hidden);
     end
     function v = value(o,i)

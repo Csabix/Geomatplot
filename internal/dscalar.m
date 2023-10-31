@@ -1,7 +1,4 @@
 classdef dscalar < dnumeric
-properties
-    val % (1,1) double
-end
 methods
     function c = plus(a,b)
         arguments

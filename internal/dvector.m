@@ -1,6 +1,6 @@
 classdef (InferiorClasses = {?dscalar}) dvector < dnumeric
 properties
-    val % (1,2) double
+    % val  (1,2) double
     pt  = [] %  (1,1) dpoint
 end
 methods

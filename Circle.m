@@ -1,13 +1,13 @@
 function [h,O,r] = Circle(varargin)
 % Circle  draws a circle
-%   Circle({A,B,C}) draws a circumscribed circle going throuh Geomatplot points A, B, and C.
+%   Circle(A,B,C) draws a circumscribed circle going throuh Geomatplot points A, B, and C.
 %
-%   Circle({A,B}) draws a circle around point A extending to point B.
+%   Circle(A,B) draws a circle around point A extending to point B.
 %
-%   Circle({A,r}) draws a circle around point A with radius r which is a Geomaplot scalar value.
+%   Circle(A,r) draws a circle around point A with radius r which is a Geomaplot scalar value.
 %
-%   Circle({A,c}) draws a circle around point A  touching the Geomatplot drawing c. Equivalent to
-%       the call Circle({A,Distance({A,c})).
+%   Circle(A,c) draws a circle around point A  touching the Geomatplot drawing c. Equivalent to
+%       the call Circle({A,Distance(A,c)).
 %
 %   Circle(label,{___})  provides a label for the circle which is not drawn.
 %
@@ -15,6 +15,8 @@ function [h,O,r] = Circle(varargin)
 %       the current one. Thus must preceed the label argument if that is given also.
 %
 %   Circle(___,linespec)  specifies line style, the default is 'k-'.
+%
+%   Circle(___,linespec,linewidth) also specifies the line thichness.
 %
 %   Circle(___,Name,Value)  specifies additional properties using one or more Name,
 %       Value pairs arguments.

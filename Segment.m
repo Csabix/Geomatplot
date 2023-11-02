@@ -1,13 +1,15 @@
 function h = Segment(varargin)
 % SEGMENT  draws a straight segment between two Geomatplot points.
-%   SEGMENT({A,B}) draws a line segment between point A and point B.
+%   SEGMENT(A,B) draws a line segment between point A and point B.
 %
-%   SEGMENT(label,{A,B})  provides a label for the line. The label is not drawn.
+%   SEGMENT(label,A,B)  provides a label for the line. The label is not drawn.
 %
 %   SEGMENT(parent,___)  draws onto the given geomatplot, axes, or figure instead of
 %       the current one.
 %
 %   SEGMENT(___,linespec)  specifies line style, the default is 'k-'.
+%
+%   SEGMENT(___,linespec,linewidth) also specifies the line thichness.
 %
 %   SEGMENT(___,Name,Value)  specifies additional properties using one or more Name,
 %       Value pairs arguments.

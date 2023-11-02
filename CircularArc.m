@@ -1,9 +1,9 @@
 function [h,O,r,alpha,beta] = CircularArc(varargin)
 % CircularArc  draws an circular arc
-%   CircularArc({O,B,C}) draws a circluar arc around O starting from B until it meets the OC line in
+%   CircularArc(O,B,C) draws a circluar arc around O starting from B until it meets the OC line in
 %       anticlockwise direction.
 %
-%   CircularArc({O,B,alpha}) draws a circluar arc around O starting from B with angle alpha in
+%   CircularArc(O,B,alpha) draws a circluar arc around O starting from B with angle alpha in
 %       anticlockwise direction.
 %
 %   CircularArc(label,{___})  provides a label for the circle. The label is not drawn.
@@ -12,6 +12,8 @@ function [h,O,r,alpha,beta] = CircularArc(varargin)
 %       the current one. Thus must preceed the label argument if that is given also.
 %
 %   CircularArc(___,linespec)  specifies line style, the default is 'k-'.
+%
+%   CircularArc(___,linespec,linewidth) also specifies the line thichness.
 %
 %   CircularArc(___,Name,Value)  specifies additional properties using one or more Name,
 %       Value pairs arguments.

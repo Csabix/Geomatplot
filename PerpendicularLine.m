@@ -1,6 +1,11 @@
 function [h,p] = PerpendicularLine(varargin)
 % PerpendicularLine  draws a perpendicular line.
-%   PerpendicularLine({...}) TODO
+%   PerpendicularLine(A,B,C) draws a prependicular line from A to BC
+%
+%   PerpendicularLine(A,B) draws a prependicular line from A to AB
+%
+%   PerpendicularLine(A,a) draws a prependicular line from A to any curve or lines by drawing a
+%       line to the closest point. Note that expected behaviour may differ.
 %
 %   PerpendicularLine(label,{...})  provides a label for the line. The label is not drawn.
 %
@@ -8,6 +13,8 @@ function [h,p] = PerpendicularLine(varargin)
 %       the current one.
 %
 %   PerpendicularLine(___,linespec)  specifies line style, the default is 'k-'.
+%
+%   PerpendicularLine(___,linespec,linewidth) also specifies the line thichness.
 %
 %   PerpendicularLine(___,Name,Value)  specifies additional properties using one or more Name,
 %       Value pairs arguments.

@@ -1,5 +1,5 @@
 function [h] = PointSequence(varargin)
-% PointSequence  places a moveable point on the canvas
+% PointSequence  places a dependent point sequence on the canvas
 %   Polygon(A,B,...) creates a dependent polygon with A,B,... vertices where the inputs can be
 %       points, a point sequence, or another polygon. Then, the input points are simply concatenated
 %       and connected.
@@ -9,7 +9,7 @@ function [h] = PointSequence(varargin)
 %       where A,B,... are n>=1 number of any Geomaplot handles, and their values will be passed to
 %       the given callback. For example, if A is a point, then its position vector [x y] will be
 %       given to the callback to calculate with. The output is expected to be a pair two vector of
-%           x and y coordinates.
+%       x and y coordinates.
 %       Note that if the callback throws any error, the excecution does not stop, the point sequence
 %       goes into the 'undefined' state and it will not be drawn.
 %
@@ -28,7 +28,7 @@ function [h] = PointSequence(varargin)
 %
 %   h = PointSequence(___)  returns the created handle.
 %
-%   See also GEOMATPLOT, SEGMENT, CIRCLE, MIDPOINT, POLYGON
+%   See also GEOMATPLOT, SEGMENT, SegmentSequence, POLYGON
 
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);    
     [label, varargin] = parent.extractLabel(varargin,'seq');
@@ -99,7 +99,7 @@ function mustBePointCallback(usercallback,inputs)
     nin = nargin(usercallback);
     need = length(inputs);
     if nin<0 && abs(nin)>need+1 || nin>=0 && nin~=need
-        eidType = 'Point:callbackWrongNumberOfArguments';
+        eidType = 'PointSequence:callbackWrongNumberOfArguments';
         msgType = ['Callback needs ' int2str(length(inputs)) ' number of arguments.'];
         throw(MException(eidType,msgType));
     end

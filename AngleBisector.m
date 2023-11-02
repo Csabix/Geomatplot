@@ -1,16 +1,18 @@
 function h = AngleBisector(varargin)
 % AngleBisector  draws an angular bisector.
-%   AngleBisector({A,B,C}) draws the angular bisector line through B and between A and C. Outer
+%   AngleBisector(A,B,C) draws the angular bisector line through B and between A and C. Outer
 %       bisector is not drawn. To draw both, use AngleBisector({A,B,C,D}) version.
 %
-%   AngleBisector({A,B,C,D}) draws the two angular bisectors of the lines AB and CD.
+%   AngleBisector(A,B,C,D) draws the two angular bisectors of the lines AB and CD.
 %
-%   AngleBisector(label,{A,B,C})  provides a label for the line. The label is not drawn.
+%   AngleBisector(label,A,B,C)  provides a label for the line. The label is not drawn.
 %
 %   AngleBisector(parent,___)  draws onto the given geomatplot, axes, or figure instead of
 %       the current one.
 %
 %   AngleBisector(___,linespec)  specifies line style, the default is 'k-'.
+%
+%   AngleBisector(___,linespec,linewidth) also specifies the line thichness.
 %
 %   AngleBisector(___,Name,Value)  specifies additional properties using one or more Name,
 %       Value pairs arguments.

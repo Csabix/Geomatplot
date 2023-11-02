@@ -1,6 +1,6 @@
 function h = Curve(varargin)
 % Curve  draws a curve with the given callback function
-%   Curve({A,B,...},callback) draws a curve using the given parametric function handle of the form
+%   Curve(A,B,...,callback) draws a curve using the given parametric function handle of the form
 %           callback(t,A,B,...) -> [x y]
 %       where A,B,... are n >= 1 number of any Geomaplot handles, and their values will be passed to
 %       the given callback. For example, if A is a point, then its position vector [x y] will be
@@ -10,7 +10,7 @@ function h = Curve(varargin)
 %       Note that if the callback throws any error, the excecution does not stop, the curve goes
 %       into the 'undefined' state and it will not be drawn.
 %       For example, the follwoing draws a quadratic Bézier curve after putting down three points:
-%           Curve({Point,Point,Point},@(t,b0,b1,b2) b0.*(1-t).^2 + 2*b1.*t.*(1-t) + b2.*t.^2)
+%           Curve(Point,Point,Point,@(t,b0,b1,b2) b0.*(1-t).^2 + 2*b1.*t.*(1-t) + b2.*t.^2)
 %
 %   Curve(label,{___})  provides a label for the curve. The label is not drawn.
 %
@@ -18,6 +18,8 @@ function h = Curve(varargin)
 %       the current one. Thus must preceed the label argument if that is given also.
 %
 %   Curve(___,linespec)  specifies line style, the default is 'k-'.
+%
+%   Curve(___,linespec,linewidth) also specifies the line thichness.
 %
 %   Curve(___,Name,Value)  specifies additional properties using one or more Name,
 %       Value pairs arguments.
@@ -64,12 +66,14 @@ function [usercallback,params,resolution] = parse_(inputs,usercallback,linespec,
         params.Visible     (1,:) char      {mustBeMember(params.Visible,{'on','off'})} = 'on'
         options.Resolution (1,1) double    {mustBeInteger,mustBePositive} = 512
         options.c          (1,1) double    {mustBePositive} % hack, do not intentionally use this name value arg
+        options.m          (1,1) double    {mustBePositive} % hack, do not intentionally use this name value arg
         options.r          (1,1) double    {mustBePositive} % hack, do not intentionally use this name value arg   
     end
     if isfield(options,'c'); linespec = 'c'; lnwidth = options.c; end
+    if isfield(options,'m'); linespec = 'm'; lnwidth = options.m; end
     if isfield(options,'r'); linespec = 'r'; lnwidth = options.r; end
     if isfield(options,'Resolution'); resolution = options.Resolution; end
-    if ~isfield(options,'LineWidth'); params.LineWidth = lnwidth; end
+    if ~isfield(params,'LineWidth'); params.LineWidth = lnwidth; end
     params = dlines.applyLineSpec(params,linespec);
 end
 

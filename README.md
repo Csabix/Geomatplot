@@ -103,6 +103,39 @@ colorbar; xlim([-.25 1.25]); ylim([0 1])
 ```
 ![Interactive Image Plot](examples/image.png "Interactive Image Plot")
 
+## Sequences and CustomValue example with Delaunay triangulation
+Note that you can use any of your existing Matlab funtction and add its output into a custom dependent value inside Geomatplot. Then, you can define Geomatplot objects that depend on it.
+
+```matlab
+clf; disp 'Voronoi and Delaunay triangulation'
+n = 30; % number of points
+pts = cell(1,n); rng(0);
+for i = 1:n
+    pts{i} = Point(rand(1,2)); % draw draggable points at random
+end
+pts = PointSequence(pts); % make single pointlist
+
+% Create a dependent delaunay triangulation structure
+DT = CustomValue(pts,@delaunayTriangulation);
+
+% Let us draw the triangulation edges
+% the edges(dt) function returns a n x 2 index matrix we need to transpose for the right ordering
+SegmentSequence(DT,@(dt) dt.Points(edges(dt)',:),'c',3);
+
+% Circumcenters of each triangle in the DT triangulation
+PointSequence(DT,@(dt) circumcenter(dt));
+
+% Does not draw boundarys of unbounded regions
+SegmentSequence(DT,@drawVoronoi,0,'m',2);
+
+function xy = drawVoronoi(dt)
+    [C,r] = voronoiDiagram(dt); % kinda stupid but returns inf for all unbounded region vertices
+    r = cellfun(@(x) [x 1],r,'UniformOutput',false);
+    xy = C(horzcat(r{:}),:);
+end
+```
+![Triangulation plot](examples/triangulation.png "Triangulation plot")
+
 ## Query data (WIP)
 
 From the previous example, `disp(g)` produces the output below. Dependent objects (they start with a 'd') measure their own callback excecution time, while the movable points measure the time to execute all objects that depend on it. While dragging, render resolutions are lowered to increase responsiveness.

@@ -18,6 +18,7 @@ methods
     function s = string(o,r)
         v = o.value;
         if isempty(v); s = "[empty]"; return; end
+        if any(isnan(v)); s = "[has NaN]"; return; end
         [n,m] = size(v);
         if nargin < 2
             r = 3 + 7*(m<2);

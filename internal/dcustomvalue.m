@@ -15,6 +15,10 @@ methods
     function updatePlot(o,val)
         o.val = val;
     end
+    function s = string(o,r)
+        v = o.value;
+        s = "custom value";
+    end
 end
 methods (Static)
     function args = parseOutputs(args)

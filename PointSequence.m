@@ -77,10 +77,10 @@ function [usercallback,varargin] = parse_callback(inputs,usercallback,varargin)
     end
 end
 
-function params = parse_(color,markersize,params)
+function params = parse_(color,markersize,params,options)
     arguments
         color                                 {drawing.mustBeColor}                      = 'k'
-        markersize          (1,1) double      {mustBePositive}                           = 20
+        markersize          (1,1) double      {mustBePositive}                           = 2
         params.MarkerEdgeColor              {drawing.mustBeColor}
         params.MarkerFaceColor              {drawing.mustBeColor}
         params.LineWidth    (1,1) double    {mustBePositive}                    = 0.5
@@ -88,11 +88,16 @@ function params = parse_(color,markersize,params)
         params.MarkerColor                  {drawing.mustBeColor}               = 'k'
         params.MarkerSymbol (1,:) char      {mustBeMember(params.MarkerSymbol,{'o','+','*','x','_','|','^','v','>','<','square','diamond','pentagram','hexagram'})}='o'
         params.ColorVariable
+        options.c
+        options.m
     end
+    if isfield(options,'c'); color = 'c'; markersize = options.c; end
+    if isfield(options,'m'); color = 'm'; markersize = options.m; end
     %if ~isfield(params,'MarkerEdgeColor'); params.MarkerEdgeColor = color; end
-    %if ~isfield(params,'MarkerFaceColor'); params.MarkerFaceColor = color; end
+    if ~isfield(params,'MarkerFaceColor'); params.MarkerFaceColor = color; end
     if ~isfield(params,'MarkerColor');     params.MarkerColor     = color; end
     if ~isfield(params,'MarkerSize');      params.MarkerSize = markersize; end
+    params.MarkerSize = 16 * params.MarkerSize;
 end
 
 function mustBePointCallback(usercallback,inputs)

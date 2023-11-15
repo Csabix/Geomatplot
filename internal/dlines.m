@@ -32,10 +32,9 @@ methods (Static,Hidden)
             options.c          (1,1) double    {mustBePositive} % hack, do not intentionally use this name value arg
             options.m          (1,1) double    {mustBePositive} % hack, do not intentionally use this name value arg   
         end
-        if isfield(options,'c'); linespec = 'c'; lnwidth = options.c; end
-        if isfield(options,'m'); linespec = 'm'; lnwidth = options.m; end
+        if isfield(options,'c'); linespec = 'c'; linewidth = options.c; end
+        if isfield(options,'m'); linespec = 'm'; linewidth = options.m; end
         if ~isfield(params,'LineWidth'); params.LineWidth = linewidth; end
-        if ~isfield(params,'LineWidth'); params.LineWidth = lnwidth; end
         params = dlines.applyLineSpec(params,linespec);
     end
 

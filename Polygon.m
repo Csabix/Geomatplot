@@ -76,7 +76,7 @@ function params = parse_dpolygon(linespec,linewidth,params) % todo more function
         params.FaceAlpha  (1,1) double {mustBeInRange(params.FaceAlpha,0,1)} = 0.15
         params.LineStyle  (1,:) char
         params.Marker     (1,:) char
-        params.Color                   {drawing.mustBeColor}
+        params.Color                   %{drawing.mustBeColor}
     end
     if ~isfield(params,'LineWidth'); params.LineWidth = linewidth; end
     params = dlines.applyLineSpec(params,linespec);

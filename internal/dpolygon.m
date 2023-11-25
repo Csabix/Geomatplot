@@ -6,7 +6,8 @@ methods
         args = namedargs2cell(args);
         parent.ax.NextPlot ='add';
         fig = fill(parent.ax,0,0,C,args{:});
-        o = o@dpointlineseq(parent,label,fig,inputs,callback);
+        hidden = false;
+        o = o@dpointlineseq(parent,label,fig,inputs,callback,hidden);
     end
 end
 

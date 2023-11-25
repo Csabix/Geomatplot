@@ -96,7 +96,10 @@ methods (Access = protected)
         o.addCallbacks(inputs);
         o.callback = callback;
         o.update;
-        if ~isempty(o.exception); rethrow(o.exception); end
+        if ~isempty(o.exception)
+            warning(o.exception.message);
+            % rethrow(o.exception);
+        end
     end
 
     function addCallbacks(o,inputs)

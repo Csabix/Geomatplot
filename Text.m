@@ -109,11 +109,11 @@ end
 function [params,offset] = parse_text_const(pos,params,options)
     arguments
         pos                                                                 %#ok<INUSA> 
-        params.FontSize             (1,1) double   {mustBePositive}                  = 11
+        params.FontSize             (1,1) double   {mustBePositive}                  = 18
         params.FontWeight           (1,:) char     {mustBeMember(params.FontWeight,{'normal','bold'})}
         params.FontAngle            (1,:) char     {mustBeMember(params.FontAngle,{'normal','italic'})}
         params.FontName             (1,:) char
-        params.Color                (1,:) char     {drawing.mustBeColor}
+        params.Color                (1,:)          {drawing.mustBeColor}
         params.HorizontalAlignment  (1,:) char     {mustBeMember(params.HorizontalAlignment,{'left','center','right'})}
         params.Units                (1,:) char     {mustBeMember(params.Units,{'data','normalized','inches','centimeters','characters','points','pixels'})}
         params.Interpreter          (1,:) char     {mustBeMember(params.Interpreter,{'tex','latex','none'})}
@@ -129,11 +129,11 @@ function [usercallback, params, offset] = parse_text_callback(pos,inputs,usercal
         pos                                                                 %#ok<INUSA> 
         inputs            (1,:) cell                                        %#ok<INUSA> 
         usercallback      (1,1) function_handle {mustBeTextCallback(usercallback,inputs)}
-        params.FontSize             (1,1) double   {mustBePositive}                  = 11
+        params.FontSize             (1,1) double   {mustBePositive}                  = 18
         params.FontWeight           (1,:) char     {mustBeMember(params.FontWeight,{'normal','bold'})}
         params.FontAngle            (1,:) char     {mustBeMember(params.FontAngle,{'normal','italic'})}
         params.FontName             (1,:) char
-        params.Color                (1,:) char     {drawing.mustBeColor}
+        params.Color                (1,:)          {drawing.mustBeColor}
         params.HorizontalAlignment  (1,:) char     {mustBeMember(params.HorizontalAlignment,{'left','center','right'})}
         params.Units                (1,:) char     {mustBeMember(params.Units,{'data','normalized','inches','centimeters','characters','points','pixels'})}
         params.Interpreter          (1,:) char     {mustBeMember(params.Interpreter,{'tex','latex','none'})}

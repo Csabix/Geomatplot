@@ -20,6 +20,9 @@ methods
         elseif isa(b,'dscalar'); b = escalar.fromDrawing(b); end
         c = a - b;
     end
+    function c = times(a,b)
+        c = mtimes(a,b);
+    end
     function c = mtimes(a,b)
         arguments
             a   (1,1) {mustBeA(a,["escalar","dscalar","numeric"])}
@@ -39,6 +42,9 @@ methods
         if isa(a,'dscalar'); a = escalar.fromDrawing(a);
         elseif isa(b,'dscalar'); b = escalar.fromDrawing(b); end
         c = a / b;
+    end
+    function c = power(a,b)
+        c = mpower(a,b);
     end
     function c = mpower(a,b)
         arguments

@@ -24,11 +24,12 @@ methods (Access = public)
             else
                 o.ax = ax.Children(1);
             end
-        elseif isa(ax,'matlab.ui.Axes')
+        elseif isa(ax,'matlab.graphics.axis.Axes')
             o.ax = ax;
         end
         if isempty(o.ax.UserData)
-            axis(o.ax,'equal'); axis(o.ax,'manual');
+            if isa(o.ax, 'matlab.ui.control.UIAxes'); pbaspect(o.ax, [1 1 1]);
+            else; axis(o.ax,'equal'); axis(o.ax,'manual'); end
             o.ax.Interactions = [panInteraction zoomInteraction]; % disableDefaultInteractivity(o.ax);
             o.movs = struct; o.deps = struct;
             o.ax.UserData = o;
@@ -313,7 +314,7 @@ methods (Static, Access = public, Hidden)
             if isempty(parent.Children)
                 parent = axes(parent);
             else
-                parent = parent.Chilren(1);
+                parent = parent.Children(1);
             end
         end
         if isa(parent,'matlab.graphics.axis.Axes')
@@ -328,8 +329,9 @@ methods (Static, Access = public, Hidden)
         else
             parent = [];
         end
-        parent = Geomatplot.findCurrentGeomatplot(parent);
-        if isempty(parent); parent = Geomatplot; end
+        current = Geomatplot.findCurrentGeomatplot(parent);
+        if isempty(current); parent = Geomatplot(parent);
+        else; parent = current; end
         if ~isa(parent,'Geomatplot')
             eidType = 'extractGeomatplot:noGeomatplot';
             msgType = 'Geomatplot not found, probably wrong argument.';

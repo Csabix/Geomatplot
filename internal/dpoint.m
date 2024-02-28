@@ -7,7 +7,7 @@ methods
         end
         hidden = strcmp(args.Visible,'off');
         args = namedargs2cell(args);
-        fig = drawpoint('InteractionsAllowed','none',args{:},'Position',[0 0]);
+        fig = drawpoint(parent.ax,'InteractionsAllowed','none',args{:},'Position',[0 0]);
         o = o@dependent(parent,label,fig,inputs,callback,hidden);
     end
     function v = value(o)

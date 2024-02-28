@@ -330,8 +330,12 @@ methods (Static, Access = public, Hidden)
             parent = [];
         end
         current = Geomatplot.findCurrentGeomatplot(parent);
-        if isempty(current); parent = Geomatplot(parent);
-        else; parent = current; end
+        if isempty(current)
+            if isempty(parent); parent = Geomatplot;
+            else; parent = Geomatplot(parent); end
+        else
+            parent = current;
+        end
         if ~isa(parent,'Geomatplot')
             eidType = 'extractGeomatplot:noGeomatplot';
             msgType = 'Geomatplot not found, probably wrong argument.';

@@ -1,50 +1,76 @@
-function type = TypeMatcher(plot)
+function svgLine = TypeMatcher(plotData, scale)
+    
+    disp(plotData.type);
 
-    pFig = plot.fig;
-    pClass = class(plot);
-
-    switch pClass
+    switch plotData.type
         case 'mpoint'
             
-            cx = pFig.Position(1) * 1000;
-            cy = pFig.Position(2) * 1000;
+            cx = plotData.Position(1) * scale + 250;
+            cy = 500 - (plotData.Position(2) * scale);
             
-            r = fix(256 * pFig.Color(1));
-            g = fix(256 * pFig.Color(2));
-            b = fix(256 * pFig.Color(3));
+            r = fix(256 * plotData.Color(1));
+            g = fix(256 * plotData.Color(2));
+            b = fix(256 * plotData.Color(3));
             
-            type = strcat('<circle r="5" cx="', string(cx), '" cy="', string(cy));
-            type = strcat(type, '" fill="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
+            svgLine = strcat('<circle class="', plotData.title,'" r="5" cx="', string(cx), '" cy="', string(cy));
+            svgLine = strcat(svgLine, '" fill="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
         
         case 'dpoint'
             
-            cx = pFig.Position(1) * 1000;
-            cy = pFig.Position(2) * 1000;
+            cx = plotData.Position(1) * scale + 250;
+            cy = 500 - (plotData.Position(2) * scale);
             
-            r = fix(256 * pFig.Color(1));
-            g = fix(256 * pFig.Color(2));
-            b = fix(256 * pFig.Color(3));
+            r = fix(256 * plotData.Color(1));
+            g = fix(256 * plotData.Color(2));
+            b = fix(256 * plotData.Color(3));
             
-            type = strcat('<circle r="5" cx="', string(cx), '" cy="', string(cy));
-            type = strcat(type, '" fill="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
+            svgLine = strcat('<circle class="', plotData.title,'" r="5" cx="', string(cx), '" cy="', string(cy));
+            svgLine = strcat(svgLine, '" fill="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
         
         case 'dlines'
-            
-            x1 = plot.fig.XData(1) * 1000;
-            y1 = plot.fig.YData(1) * 1000;
 
-            x2 = plot.fig.XData(2) * 1000;
-            y2 = plot.fig.YData(2) * 1000;
+            if isequal(size(plotData.XData, 2), 2) & isequal(size(plotData.XData), size(plotData.YData))
+    
+                x1 = plotData.XData(1) * scale + 250;
+                y1 = 500 - (plotData.YData(1) * scale);
+    
+                x2 = plotData.XData(2) * scale + 250;
+                y2 = 500 - (plotData.YData(2) * scale);
+    
+                r = fix(256 * plotData.Color(1));
+                g = fix(256 * plotData.Color(2));
+                b = fix(256 * plotData.Color(3));
+                
+                svgLine = strcat('<line class="', plotData.title,'" x1="', string(x1), '" y1="', string(y1), '" x2="', string(x2), '" y2="', string(y2), '"');
+                svgLine = strcat(svgLine, ' style="stroke:rgb(', string(r), ', ', string(g), ', ', string(b), ');stroke-width:2" />');
 
-            r = fix(256 * pFig.Color(1));
-            g = fix(256 * pFig.Color(2));
-            b = fix(256 * pFig.Color(3));
+            elseif isequal(mod(size(plotData.XData, 2), 2), 0) & isequal(size(plotData.XData), size(plotData.YData))
+
+                svgLine = "";
+
+                disp("Multiple lines here, Line:");
+
+                for i=1:(size(plotData.XData, 2) - 1)
+                    disp(i);
+                    x1 = plotData.XData(i) * scale + 250;
+                    y1 = 500 - (plotData.YData(i) * scale);
+        
+                    x2 = plotData.XData(i + 1) * scale + 250;
+                    y2 = 500 - (plotData.YData(i + 1) * scale);
+        
+                    r = fix(256 * plotData.Color(1));
+                    g = fix(256 * plotData.Color(2));
+                    b = fix(256 * plotData.Color(3));
+                    
+                    svgLine = strcat(svgLine, '<line class="', plotData.title,'" x1="', string(x1), '" y1="', string(y1), '" x2="', string(x2), '" y2="', string(y2), '"');
+                    svgLine = strcat(svgLine, ' style="stroke:rgb(', string(r), ', ', string(g), ', ', string(b), ');stroke-width:2" />');
+                end
+           end
+
             
-            type = strcat('<line x1="', string(x1), '" y1="', string(y1), '" x2="', string(x2), '" y2="', string(y2), '"');
-            type = strcat(type, ' style="stroke:rgb(', string(r), ', ', string(g), ', ', string(b), ');stroke-width:2" />');
        
         otherwise
-            type = "";
+            svgLine = "";
     end
 end
 

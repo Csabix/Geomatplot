@@ -67,7 +67,19 @@ function svgLine = TypeMatcher(plotData, scale)
                 end
            end
 
-            
+        case 'dcircle'
+
+            cx = plotData.center(1) * scale + 250;
+            cy = 500 - (plotData.center(2) * scale);
+    
+            radius = plotData.radius * scale;
+    
+            r = fix(256 * plotData.Color(1));
+            g = fix(256 * plotData.Color(2));
+            b = fix(256 * plotData.Color(3));
+
+            svgLine = strcat('<circle class="', plotData.title,'" r="', string(radius),'" cx="', string(cx), '" cy="', string(cy));
+            svgLine = strcat(svgLine, '" fill="none" stroke-width="2" stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
        
         otherwise
             svgLine = "";

@@ -32,19 +32,12 @@ function elementDataStruct = DepDataCollector(FieldBuffer, FieldID)
             elementDataStruct.type = "dlines";
             elementDataStruct.title = FieldID;
 
-            % For now it will just take the first and last of the
-            %   X and Y data, so instead of drawing the line with parts
-            %   of lines it will just draw one long one, that most
-            %   likely will be off, this will be tested and fixed if
-            %   needed later
-            
-            elementXData = FieldBuffer.fig.XData;
-            elementYData = FieldBuffer.fig.YData;
-            elementColor = FieldBuffer.fig.Color;
+            elementDataStruct.XData = FieldBuffer.fig.XData;
+            elementDataStruct.YData = FieldBuffer.fig.YData;
 
-            elementDataStruct.XData = elementXData;
-            elementDataStruct.YData = elementYData;
-            elementDataStruct.Color = elementColor;
+            elementDataStruct.Color = FieldBuffer.fig.Color;
+            elementDataStruct.LineStyle = FieldBuffer.fig.LineStyle;
+            elementDataStruct.LineWidth = FieldBuffer.fig.LineWidth;
 
         case "dvector"
 

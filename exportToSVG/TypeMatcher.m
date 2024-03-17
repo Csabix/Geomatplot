@@ -29,6 +29,9 @@ function svgLine = TypeMatcher(plotData, scale)
         
         case 'dlines'
 
+            width = plotData.LineWidth;
+            style = LineStyleMatcher(plotData.LineStyle);
+
             if isequal(size(plotData.XData, 2), 2) & isequal(size(plotData.XData), size(plotData.YData))
     
                 x1 = plotData.XData(1) * scale + 250;
@@ -36,13 +39,15 @@ function svgLine = TypeMatcher(plotData, scale)
     
                 x2 = plotData.XData(2) * scale + 250;
                 y2 = 500 - (plotData.YData(2) * scale);
+
+                
     
                 r = fix(256 * plotData.Color(1));
                 g = fix(256 * plotData.Color(2));
                 b = fix(256 * plotData.Color(3));
                 
                 svgLine = strcat('<line class="', plotData.title,'" x1="', string(x1), '" y1="', string(y1), '" x2="', string(x2), '" y2="', string(y2), '"');
-                svgLine = strcat(svgLine, ' style="stroke:rgb(', string(r), ', ', string(g), ', ', string(b), ');stroke-width:2" />');
+                svgLine = strcat(svgLine, ' stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" stroke-width="', string(width),'" ',style,' />');
 
             elseif isequal(mod(size(plotData.XData, 2), 2), 0) & isequal(size(plotData.XData), size(plotData.YData))
 
@@ -63,7 +68,7 @@ function svgLine = TypeMatcher(plotData, scale)
                     b = fix(256 * plotData.Color(3));
                     
                     svgLine = strcat(svgLine, '<line class="', plotData.title,'" x1="', string(x1), '" y1="', string(y1), '" x2="', string(x2), '" y2="', string(y2), '"');
-                    svgLine = strcat(svgLine, ' style="stroke:rgb(', string(r), ', ', string(g), ', ', string(b), ');stroke-width:2" />');
+                    svgLine = strcat(svgLine, ' stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" stroke-width="', string(width),'" ',style,' />');
                 end
            end
 

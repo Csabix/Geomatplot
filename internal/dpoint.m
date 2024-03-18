@@ -7,8 +7,11 @@ methods
         end
         hidden = strcmp(args.Visible,'off');
         args = namedargs2cell(args);
-        fig = drawpoint(parent.ax,'InteractionsAllowed','none',args{:},'Position',[0 0]);
+        fig = drawpoint(parent.ax,args{:},'Position',[0 0]);
         o = o@dependent(parent,label,fig,inputs,callback,hidden);
+        addlistener(o.fig,'ROIMoved'  ,@dpoint.move);
+        addlistener(o.fig,'MovingROI' ,@dpoint.move);
+        addlistener(o.fig,'ROIClicked',@dpoint.hit);
     end
     function v = value(o)
         v = o.fig.Position;
@@ -22,6 +25,15 @@ methods
     end
 end
 methods (Static)
+    function hit(fig,~)
+        o = fig.UserData;
+        o.parent.addStateData(o);
+    end
+    
+    function move(fig,evt)
+        fig.Position = evt.PreviousPosition;
+    end
+
     function outs = parseOutputs(args)
         if length(args)==1
             outs{1} = args{1}(:)';

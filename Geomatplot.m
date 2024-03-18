@@ -3,6 +3,7 @@ properties
 	ax (1,1) %matlab.ui.Axes;
 	movs % struct mapping label -> movable class handles
 	deps % struct mapping label -> dependent class handles 
+    state % current state containing all important data
 end
 properties (Hidden)
     nextCapitalLabel (1,1) int32  = 0;      % 65 = 'A' = 'Z'-25
@@ -28,11 +29,16 @@ methods (Access = public)
             o.ax = ax;
         end
         if isempty(o.ax.UserData)
-            if isa(o.ax, 'matlab.ui.control.UIAxes'); pbaspect(o.ax, [1 1 1]);
-            else; axis(o.ax,'equal'); axis(o.ax,'manual'); end
+            if isa(o.ax, 'matlab.ui.control.UIAxes')
+                pbaspect(o.ax, [1 1 1]);
+                o.ax.XLimMode = 'manual';
+                o.ax.YLimMode = 'manual';
+            else; axis(o.ax,'equal'); axis(o.ax,'manual'); 
+            end
             o.ax.Interactions = [panInteraction zoomInteraction]; % disableDefaultInteractivity(o.ax);
             o.movs = struct; o.deps = struct;
             o.ax.UserData = o;
+            addlistener(o.ax,'Hit',@o.emptySpace);
         else % workaround hack for matlab wtf
             assert(isa(o.ax.UserData,'Geomatplot'));
             o = o.ax.UserData;
@@ -58,6 +64,26 @@ methods (Access = public)
         b = isfield(o.movs,l) || isfield(o.deps,l);
     end
 
+    function setState(o,newState,requiredPoints,callback)
+        %TODO: Proper argument type checking
+        o.state.type = newState;
+        o.state.reqp = requiredPoints;
+        o.state.remaining = requiredPoints;
+        o.state.data = [];
+        o.state.callback = callback;
+    end
+
+    function addStateData(o,data)
+        if isempty(o.state); return; end
+        o.state.data = [o.state.data, {data}];
+        o.state.remaining = o.state.remaining - 1;
+        if o.state.remaining == 0
+            assert(numel(o.state.data) == o.state.reqp);
+            o.state.callback(o.state.type,o.state.data);
+            o.state.remaining = o.state.reqp;
+            o.state.data = [];
+        end
+    end
 end % public
 
 methods(Access = public, Static)
@@ -263,6 +289,20 @@ methods (Access = public, Hidden)
 end % public hidden
 
 methods (Access = protected)
+    function emptySpace(o,~,evt)
+            if isempty(o.state); return; end
+            raw.x = evt.IntersectionPoint(1);
+            raw.y = evt.IntersectionPoint(2);
+            switch o.state.type
+                case 'select'
+                    %Doesnt care about raw point data
+                case 'point'
+                    o.addStateData(raw);
+                otherwise
+                    %TODO: Create new point here
+            end
+            
+    end
     function head = getHeader(o,mnum,dnum)
         if nargin == 1
             mnum = length(fieldnames(o.movs));

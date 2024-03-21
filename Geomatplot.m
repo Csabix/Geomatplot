@@ -3,7 +3,9 @@ properties
 	ax (1,1) %matlab.ui.Axes;
 	movs % struct mapping label -> movable class handles
 	deps % struct mapping label -> dependent class handles 
-    state % current state containing all important data
+    clickData % contains the clicked objects
+    acceptFcn % accept function callback
+    drawFcn % draw function callback
 end
 properties (Hidden)
     nextCapitalLabel (1,1) int32  = 0;      % 65 = 'A' = 'Z'-25
@@ -64,24 +66,22 @@ methods (Access = public)
         b = isfield(o.movs,l) || isfield(o.deps,l);
     end
 
-    function setState(o,newState,requiredPoints,callback)
-        %TODO: Proper argument type checking
-        o.state.type = newState;
-        o.state.reqp = requiredPoints;
-        o.state.remaining = requiredPoints;
-        o.state.data = [];
-        o.state.callback = callback;
+    function addHandlerFcns(o,acceptFcn,drawFcn)
+        o.acceptFcn = acceptFcn;
+        o.drawFcn = drawFcn;
+        o.clickData = [];
     end
 
-    function addStateData(o,data)
-        if isempty(o.state); return; end
-        o.state.data = [o.state.data, {data}];
-        o.state.remaining = o.state.remaining - 1;
-        if o.state.remaining == 0
-            assert(numel(o.state.data) == o.state.reqp);
-            o.state.callback(o.state.type,o.state.data);
-            o.state.remaining = o.state.reqp;
-            o.state.data = [];
+    function pushData(o,value)
+        if isempty(o.acceptFcn); return; end
+        o.clickData = [o.clickData, {value}];
+        switch o.acceptFcn(o.clickData)
+            case 1 %Accept state
+                o.drawFcn(o.clickData);
+                o.clickData = [];
+            case -1 %Error state
+                disp("Error handling is not implemented yet!");
+                o.clickData = [];
         end
     end
 end % public
@@ -290,18 +290,9 @@ end % public hidden
 
 methods (Access = protected)
     function emptySpace(o,~,evt)
-            if isempty(o.state); return; end
             raw.x = evt.IntersectionPoint(1);
             raw.y = evt.IntersectionPoint(2);
-            switch o.state.type
-                case 'select'
-                    %Doesnt care about raw point data
-                case 'point'
-                    o.addStateData(raw);
-                otherwise
-                    %TODO: Create new point here
-            end
-            
+            o.pushData(raw);
     end
     function head = getHeader(o,mnum,dnum)
         if nargin == 1

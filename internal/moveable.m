@@ -26,7 +26,7 @@ end
 methods (Static)
     function hit(fig,~)
         o = fig.UserData;
-        o.parent.addStateData(o);
+        o.parent.pushData(o);
     end
     function update(fig,evt)
         t_total_stamp = tic;

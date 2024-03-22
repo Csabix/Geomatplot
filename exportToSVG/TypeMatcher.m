@@ -12,7 +12,7 @@ function svgLine = TypeMatcher(plotData, scale)
             g = fix(256 * plotData.Color(2));
             b = fix(256 * plotData.Color(3));
             
-            svgLine = strcat('<circle class="', plotData.title,'" r="5" cx="', string(cx), '" cy="', string(cy));
+            svgLine = strcat('<circle id="', plotData.title,'" r="5" cx="', string(cx), '" cy="', string(cy));
             svgLine = strcat(svgLine, '" fill="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
         
         case 'dpoint'
@@ -24,7 +24,7 @@ function svgLine = TypeMatcher(plotData, scale)
             g = fix(256 * plotData.Color(2));
             b = fix(256 * plotData.Color(3));
             
-            svgLine = strcat('<circle class="', plotData.title,'" r="5" cx="', string(cx), '" cy="', string(cy));
+            svgLine = strcat('<circle id="', plotData.title,'" r="5" cx="', string(cx), '" cy="', string(cy));
             svgLine = strcat(svgLine, '" fill="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
         
         case 'dlines'
@@ -46,7 +46,7 @@ function svgLine = TypeMatcher(plotData, scale)
                 g = fix(256 * plotData.Color(2));
                 b = fix(256 * plotData.Color(3));
                 
-                svgLine = strcat('<line class="', plotData.title,'" x1="', string(x1), '" y1="', string(y1), '" x2="', string(x2), '" y2="', string(y2), '"');
+                svgLine = strcat('<line id="', plotData.title,'" x1="', string(x1), '" y1="', string(y1), '" x2="', string(x2), '" y2="', string(y2), '"');
                 svgLine = strcat(svgLine, ' stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" stroke-width="', string(width),'" ',style,' />');
 
             elseif isequal(mod(size(plotData.XData, 2), 2), 0) & isequal(size(plotData.XData), size(plotData.YData))
@@ -67,7 +67,7 @@ function svgLine = TypeMatcher(plotData, scale)
                     g = fix(256 * plotData.Color(2));
                     b = fix(256 * plotData.Color(3));
                     
-                    svgLine = strcat(svgLine, '<line class="', plotData.title,'" x1="', string(x1), '" y1="', string(y1), '" x2="', string(x2), '" y2="', string(y2), '"');
+                    svgLine = strcat(svgLine, '<line id="', plotData.title, string(i),'" x1="', string(x1), '" y1="', string(y1), '" x2="', string(x2), '" y2="', string(y2), '"');
                     svgLine = strcat(svgLine, ' stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" stroke-width="', string(width),'" ',style,' />');
                 end
            end
@@ -83,7 +83,7 @@ function svgLine = TypeMatcher(plotData, scale)
             g = fix(256 * plotData.Color(2));
             b = fix(256 * plotData.Color(3));
 
-            svgLine = strcat('<circle class="', plotData.title,'" r="', string(radius),'" cx="', string(cx), '" cy="', string(cy));
+            svgLine = strcat('<circle id="', plotData.title,'" r="', string(radius),'" cx="', string(cx), '" cy="', string(cy));
             svgLine = strcat(svgLine, '" fill="none" stroke-width="2" stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
        
         otherwise

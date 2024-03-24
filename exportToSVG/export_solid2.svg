@@ -43,11 +43,17 @@
 <circle id="A" r="5" cx="250" cy="500" fill="rgb(0,0,256)" />
 <circle id="B" r="5" cx="875" cy="500" fill="rgb(0,0,256)" />
 <circle id="C" r="5" cx="625" cy="156.25" fill="rgb(0,0,256)" />
-
-
+<script type="text/javascript" href="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"/>
 <script type="text/javascript"><![CDATA[
 
 <!-- --------------------------------------------------------------------- -->
+
+const matrix = math.matrix([[7, 1], [-2, 3]]) // Matrix
+const vector = [1, 1]
+console.log(math.multiply(vector, 0));
+console.log(math.multiply(vector, 1));
+console.log(matrix);
+console.log(math.sqrt(-4).toString()) // 2i
 
 const A = document.getElementById("A");
 console.log(A);
@@ -108,6 +114,8 @@ function makeDraggable(evt) {
             var coord = getMousePosition(evt);
             selectedElement.setAttributeNS(null, "cx", coord.x - offset.x);
             selectedElement.setAttributeNS(null, "cy", coord.y - offset.y);
+
+            moveDeps(coord.x - offset.x, coord.y - offset.y, selectedElement.getAttributeNS(null, "id"));
         }
     }
     function endDrag(evt) {
@@ -115,14 +123,26 @@ function makeDraggable(evt) {
     }
 
     function getMousePosition(evt) {
-    let CTM = svg.getScreenCTM();
-    return {
-        x: (evt.clientX - CTM.e) / CTM.a,
-        y: (evt.clientY - CTM.f) / CTM.d
-    };
-}
+        let CTM = svg.getScreenCTM();
+        return {
+            x: (evt.clientX - CTM.e) / CTM.a,
+            y: (evt.clientY - CTM.f) / CTM.d
+        };
+    }
 }
 
+
+function moveDeps(x, y, id){
+    console.log(id);
+    if(id === 'C'){
+        let seg2 = document.getElementById("seg2");
+        let seg3 = document.getElementById("seg3");
+        seg2.setAttributeNS(null, 'x2', x);
+        seg2.setAttributeNS(null, 'y2', y);
+        seg3.setAttributeNS(null, 'x1', x);
+        seg3.setAttributeNS(null, 'y1', y);
+    }
+}
 
 
 ]]></script>

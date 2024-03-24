@@ -2,6 +2,7 @@
 - [x] Moveable objektumok utsónak legyenek rajzolva
 - [x] Drag
 - [ ] callbackek (késöbb több pont lesz ez)
+    1. seg1 (háromszöges példa) interaktív (hogyan csináljak mátrixokat, azok elemeit hogyan rendeljem aztán dolgokhoz)
 
 ## script save
 ```

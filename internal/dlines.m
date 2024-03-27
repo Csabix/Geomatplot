@@ -12,8 +12,7 @@ end
 methods (Static,Hidden)
     function hit(fig,~)
         o = fig.UserData;
-        disp('Not implemented yet!');
-        %o.parent.addStateData(o);
+        o.parent.pushData(o);
     end
     
     function [parent,label,inputs,params] = parse_inputs(args,flag,mina,maxa)

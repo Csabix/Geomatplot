@@ -87,36 +87,60 @@ classdef acceptTypes
         end
 
         function accepted = acceptIntersection(data)
-            accepted = acceptTypes.acceptGeometryByPatterns(data,{{'dcircle','dcircle'}});
+            patterns = {
+                {'dcircle','dcircle'}
+                };
+            accepted = acceptTypes.acceptGeometryByPatterns(data,patterns);
+        end
+
+        function accepted = acceptMirror(data)
+            patterns = {
+                {'point_base',{'point_base','dpointseq','dcircle','dlines','mpolygon'}}
+                {'dcircle','point_base'}
+                {'dlines','point_base'}
+                };
+            accepted = acceptTypes.acceptGeometryByPatterns(data,patterns);
+        end
+
+        function accepted = acceptClosestPoint(data)
+            pattern = {'point_base',{'point_base','dpointseq','dcircle','dlines','mpolygon'}};
+            accepted = acceptTypes.acceptGeometryByPattern(data,pattern);
         end
     end
 
     methods(Access = private,Static)
         function accepted = acceptGeometryByPattern(data,pattern)
-            if acceptTypes.checkForDuplicates(data) || ~acceptTypes.checkInputPattern(data,pattern)
-                acceptTypes.resetDataSelection(data);
-                accepted = -1; 
-                return;
-            end
-
+            accepted = 1;
             acceptTypes.setSelected(data{end},true);
-            accepted = numel(data) == length(pattern);
-            if accepted; acceptTypes.resetDataSelection(data); end            
+
+            if numel(data) ~= length(pattern); accepted = 0;
+            elseif acceptTypes.checkForDuplicates(data) || ~acceptTypes.checkInputPattern(data,pattern); accepted = -1; end
+
+            if accepted ~= 0; acceptTypes.resetDataSelection(data); end            
         end
 
-        function accepted = acceptGeometryByPatterns(input,patterns)
+        function accepted = acceptGeometryByPatterns(data,patterns)
+            acceptTypes.setSelected(data{end},true);
+
             for i = 1:length(patterns)
                 pattern = patterns{i};
-                accepted = acceptTypes.acceptGeometryByPattern(input,pattern);
-                if accepted ~= 0; return; end
+                accepted = 1;
+
+                if numel(data) ~= length(pattern); accepted = 0;
+                elseif acceptTypes.checkForDuplicates(data) || ~acceptTypes.checkInputPattern(data,pattern); accepted = -1;
+                else; break; 
+                end
             end
+
+            if accepted ~= 0; acceptTypes.resetDataSelection(data); end
+
         end
 
-        function match = checkInputPattern(input,pattern)
+        function match = checkInputPattern(data,pattern)
             match = true;
-            for i = 1:length(input)
+            for i = 1:length(data)
                 pat = pattern{i};
-                in = input{i};
+                in = data{i};
                 if iscell(pat)
                     cmatch = false;
                     for j=1:length(pat)

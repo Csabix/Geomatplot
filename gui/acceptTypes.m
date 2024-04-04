@@ -1,18 +1,18 @@
-classdef acceptTypes
+classdef AcceptTypes
     % Contains the functions for accepting different geometries
 
     methods (Access = public,Static)
         function selectGeometry(elem)
-            acceptTypes.setSelected(elem,true);
+            AcceptTypes.setSelected(elem,true);
         end
 
         function deselectGeometry(elem)
-            acceptTypes.setSelected(elem,false);
+            AcceptTypes.setSelected(elem,false);
         end
 
         function resetDataSelection(list)
             for i = 1:numel(list)
-                acceptTypes.setSelected(list{i},false);
+                AcceptTypes.setSelected(list{i},false);
             end
         end
         
@@ -27,70 +27,70 @@ classdef acceptTypes
         end
 
         function accepted = acceptSegmentorLine(data)
-            accepted = acceptTypes.acceptGeometryByPattern(data,{'point_base',{'point_base','dvector'}});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base',{'point_base','dvector'}});
         end
 
         function accepted = acceptCircle3(data)
-            accepted = acceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base'});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base'});
         end
 
         function accepted = acceptCircle2(data)
-            accepted = acceptTypes.acceptGeometryByPattern(data,{'point_base','point_base'});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base'});
         end
 
         function accepted = acceptMidpoint2(data)
-            accepted = acceptTypes.acceptGeometryByPattern(data,{'point_base','point_base'});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base'});
         end
 
         function accepted = acceptPerpendicularBisector(data)
-            accepted = acceptTypes.acceptGeometryByPattern(data,{'point_base','point_base'});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base'});
         end
 
         function accepted = acceptAngleBisector3(data)
-            accepted = acceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base'});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base'});
         end
 
         function accepted = acceptPolygon(data)
-            if acceptTypes.checkForDuplicates(data(1:end-1)) || ~all(cellfun(@(x) isa(x, 'point_base'), data))
-                acceptTypes.resetDataSelection(data);
+            if AcceptTypes.checkForDuplicates(data(1:end-1)) || ~all(cellfun(@(x) isa(x, 'point_base'), data))
+                AcceptTypes.resetDataSelection(data);
                 accepted = -1; 
                 return;
             end
 
-            acceptTypes.setSelected(data{end},true);
+            AcceptTypes.setSelected(data{end},true);
             accepted = numel(data) >= 4 && data{1} == data{end};
-            if accepted; acceptTypes.resetDataSelection(data); end    
+            if accepted; AcceptTypes.resetDataSelection(data); end    
         end
 
         function accepted = acceptAngleBisector4(data)
-            accepted = acceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base','point_base'});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base','point_base'});
         end
 
         function accepted = acceptCircularArc(data)
-            accepted = acceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base'});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base'});
         end
 
         function accepted = acceptPerpendicularLine3(data)
-            accepted = acceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base'});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base'});
         end
 
         function accepted = acceptPerpendicularLine2(data)
-            accepted = acceptTypes.acceptGeometryByPattern(data,{'point_base',{'point_base','drawing'}});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base',{'point_base','drawing'}});
         end
 
         function accepted = acceptRay(data)
-            accepted = acceptTypes.acceptGeometryByPattern(data,{'point_base',{'point_base','dvector'}});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base',{'point_base','dvector'}});
         end
 
         function accepted = acceptVector(data)
-            accepted = acceptTypes.acceptGeometryByPattern(data,{'point_base','point_base'});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base'});
         end
 
         function accepted = acceptIntersection(data)
             patterns = {
                 {'dcircle','dcircle'}
                 };
-            accepted = acceptTypes.acceptGeometryByPatterns(data,patterns);
+            accepted = AcceptTypes.acceptGeometryByPatterns(data,patterns);
         end
 
         function accepted = acceptMirror(data)
@@ -99,40 +99,40 @@ classdef acceptTypes
                 {'dcircle','point_base'}
                 {'dlines','point_base'}
                 };
-            accepted = acceptTypes.acceptGeometryByPatterns(data,patterns);
+            accepted = AcceptTypes.acceptGeometryByPatterns(data,patterns);
         end
 
         function accepted = acceptClosestPoint(data)
             pattern = {'point_base',{'point_base','dpointseq','dcircle','dlines','mpolygon'}};
-            accepted = acceptTypes.acceptGeometryByPattern(data,pattern);
+            accepted = AcceptTypes.acceptGeometryByPattern(data,pattern);
         end
     end
 
     methods(Access = private,Static)
         function accepted = acceptGeometryByPattern(data,pattern)
             accepted = 1;
-            acceptTypes.setSelected(data{end},true);
+            AcceptTypes.setSelected(data{end},true);
 
             if numel(data) ~= length(pattern); accepted = 0;
-            elseif acceptTypes.checkForDuplicates(data) || ~acceptTypes.checkInputPattern(data,pattern); accepted = -1; end
+            elseif AcceptTypes.checkForDuplicates(data) || ~AcceptTypes.checkInputPattern(data,pattern); accepted = -1; end
 
-            if accepted ~= 0; acceptTypes.resetDataSelection(data); end            
+            if accepted ~= 0; AcceptTypes.resetDataSelection(data); end            
         end
 
         function accepted = acceptGeometryByPatterns(data,patterns)
-            acceptTypes.setSelected(data{end},true);
+            AcceptTypes.setSelected(data{end},true);
 
             for i = 1:length(patterns)
                 pattern = patterns{i};
                 accepted = 1;
 
                 if numel(data) ~= length(pattern); accepted = 0;
-                elseif acceptTypes.checkForDuplicates(data) || ~acceptTypes.checkInputPattern(data,pattern); accepted = -1;
+                elseif AcceptTypes.checkForDuplicates(data) || ~AcceptTypes.checkInputPattern(data,pattern); accepted = -1;
                 else; break; 
                 end
             end
 
-            if accepted ~= 0; acceptTypes.resetDataSelection(data); end
+            if accepted ~= 0; AcceptTypes.resetDataSelection(data); end
 
         end
 

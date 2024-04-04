@@ -27,7 +27,7 @@ function h = Ray(varargin)
         throw(MException('Ray:invalidInputPattern','Unknown overload.')); 
     end
 
-    h_ = dlines(parent,label,inputs,callback,args);
+    h_ = dlines(parent,label,inputs,callback,4,args);
 
     if nargout == 1; h = h_; end
 

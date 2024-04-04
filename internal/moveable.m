@@ -14,12 +14,13 @@ methods
         o.parent.movs.(label) = o;
         o.fig.UserData = o;
         o.deps = struct;
-        addlistener(o.fig,'ROIMoved' ,@moveable.update); % todo @update ?
-        addlistener(o.fig,'MovingROI',@moveable.update);
+        addlistener(o.fig,'Moved' ,@moveable.update);
+        %addlistener(o.fig,'ROIMoved' ,@moveable.update); % todo @update ?
+        %addlistener(o.fig,'MovingROI',@moveable.update);
     end
     function addCallback(o,dep)
         o.deps.(dep.label) = dep;
-        o.fig.bringToFront;
+        %o.fig.bringToFront;
     end
 end
 methods (Static)
@@ -37,6 +38,11 @@ methods (Static)
             time_range = 9:12;
             rate = 1/(1+o.stop_timing_num);
             o.stop_timing_num = 0.75*o.stop_timing_num + 1;
+        case 'Moved'
+            detail_level = 0.25;
+            time_range = 5:8;
+            rate = 1/(1+o.move_timing_num);
+            o.move_timing_num = 0.75*o.move_timing_num + 1;
         end
         deps = struct2cell(o.deps);
         for i = 1:length(deps)
@@ -50,7 +56,7 @@ methods (Static)
             if b
                 ts = tic;                    % (((
             end
-
+            
             h.update(detail_level);
 
             if b

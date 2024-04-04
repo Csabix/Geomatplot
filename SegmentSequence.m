@@ -115,7 +115,7 @@ function h = SegmentSequence(varargin)
         end
     end
 
-    h_ = dlines(parent,label,inputs,callback,args);
+    h_ = dlines(parent,label,inputs,callback,4,args);
 
     if nargout == 1; h = h_; end
 end

@@ -26,7 +26,7 @@ function h = Segment(varargin)
     else
         throw(MException('Segment:invalidInputPattern','Unknown overload.')); 
     end
-    h_ = dlines(parent,label,inputs,callback,args);
+    h_ = dlines(parent,label,inputs,callback,2,args);
 
     if nargout == 1; h = h_; end
     

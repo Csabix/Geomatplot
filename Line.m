@@ -26,7 +26,7 @@ function h = Line(varargin)
     else
         throw(MException('Line:invalidInputPattern','Unknown overload.')); 
     end
-    h_ = dlines(parent,label,inputs,callback,args);
+    h_ = dlines(parent,label,inputs,callback,6,args);
 
     if nargout == 1; h = h_; end
     

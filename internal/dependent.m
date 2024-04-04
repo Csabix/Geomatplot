@@ -141,9 +141,9 @@ methods (Access = protected)
             end
         end
         if o.defined && ~o.hidden
-            o.fig.Visible = 'on';
+            %o.fig.Visible = 'on';
         else
-            o.fig.Visible = 'off';
+            %o.fig.Visible = 'off';
         end
     end
     

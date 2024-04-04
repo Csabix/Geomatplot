@@ -1,4 +1,4 @@
-classdef Geomatplot < handle & matlab.mixin.CustomDisplay
+classdef Geomatplot < handle %& matlab.mixin.CustomDisplay
 properties
 	ax (1,1) %matlab.ui.Axes;
 	movs % struct mapping label -> movable class handles
@@ -15,21 +15,12 @@ methods (Access = public)
     function o = Geomatplot(ax)
         folder = mfilename('fullpath');
         folder = folder(1:end-length(mfilename));
-        addpath([folder '/internal/'], [folder '/examples/']);
+        %addpath([folder '/internal/'], [folder '/examples/']);
+        addpath(genpath([folder '/internal/']), [folder '/examples/']);
         if nargin == 0
-            o.ax = gca;
-        elseif isa(ax,'matlab.ui.Figure')
-            if isempty(ax.Children)
-                o.ax = axes(ax);
-            else
-                o.ax = ax.Children(1);
-            end
-        elseif isa(ax,'matlab.ui.Axes')
-            o.ax = ax;
+            o.ax = cplt;
         end
         if isempty(o.ax.UserData)
-            axis(o.ax,'equal'); axis(o.ax,'manual');
-            o.ax.Interactions = [panInteraction zoomInteraction]; % disableDefaultInteractivity(o.ax);
             o.movs = struct; o.deps = struct;
             o.ax.UserData = o;
         else % workaround hack for matlab wtf
@@ -308,15 +299,8 @@ end
 methods (Static, Access = public, Hidden)
 
     function parent = findCurrentGeomatplot(parent)
-        if nargin == 0 || isempty(parent); parent = gca; end
-        if isa(parent,'matlab.ui.Figure')
-            if isempty(parent.Children)
-                parent = axes(parent);
-            else
-                parent = parent.Chilren(1);
-            end
-        end
-        if isa(parent,'matlab.graphics.axis.Axes')
+        if nargin == 0 || isempty(parent); parent = cplt; end
+        if isa(parent,'Plot')
             parent = parent.UserData;
         end
     end
@@ -329,7 +313,9 @@ methods (Static, Access = public, Hidden)
             parent = [];
         end
         parent = Geomatplot.findCurrentGeomatplot(parent);
-        if isempty(parent); parent = Geomatplot; end
+        if isempty(parent) 
+            parent = Geomatplot; 
+        end
         if ~isa(parent,'Geomatplot')
             eidType = 'extractGeomatplot:noGeomatplot';
             msgType = 'Geomatplot not found, probably wrong argument.';

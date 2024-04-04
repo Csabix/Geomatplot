@@ -12,16 +12,16 @@ function retFunc = GetDraggableFunction()
             retFunc = retFunc + "\t\t\tif (evt.target.classList.contains('draggable')) {\n";
                 retFunc = retFunc + "\t\t\t\tselectedElement = evt.target;\n";
                 retFunc = retFunc + "\t\t\t\toffset = getMousePosition(evt);\n";
-                retFunc = retFunc + "\t\t\t\toffset.x -= parseFloat(selectedElement.getAttributeNS(null, ''cx''));\n";
-                retFunc = retFunc + "\t\t\t\toffset.y -= parseFloat(selectedElement.getAttributeNS(null, ''cy''));\n";
+                retFunc = retFunc + "\t\t\t\toffset.x -= parseFloat(selectedElement.getAttributeNS(null, 'cx'));\n";
+                retFunc = retFunc + "\t\t\t\toffset.y -= parseFloat(selectedElement.getAttributeNS(null, 'cy'));\n";
             retFunc = retFunc + "\t\t\t}\n";
         retFunc = retFunc + "\t\t}\n";
         retFunc = retFunc + "\t\tfunction drag(evt) {\n";
             retFunc = retFunc + "\t\t\tif (selectedElement) {\n";
                 retFunc = retFunc + "\t\t\t\tevt.preventDefault();\n";
                 retFunc = retFunc + "\t\t\t\tvar coord = getMousePosition(evt);\n";
-                retFunc = retFunc + "\t\t\t\tselectedElement.setAttributeNS(null, *''*cx*''*, coord.x - offset.x);\n";
-                retFunc = retFunc + "\t\t\t\tselectedElement.setAttributeNS(null, *''*cy*''*, coord.y - offset.y);\n";
+                retFunc = retFunc + "\t\t\t\tselectedElement.setAttributeNS(null, 'cx', coord.x - offset.x);\n";
+                retFunc = retFunc + "\t\t\t\tselectedElement.setAttributeNS(null, 'cy', coord.y - offset.y);\n";
     
             retFunc = retFunc + "\t\t\t}\n";
         retFunc = retFunc + "\t\t}\n";

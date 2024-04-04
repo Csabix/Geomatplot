@@ -7,7 +7,7 @@ function exp = exportToSvg(g)
     
     outFile = fopen('export.svg','w');
     
-    fprintf(outFile, '<svg xmlns="http://www.w3.org/2000/svg">');
+    fprintf(outFile, '<svg xmlns="http://www.w3.org/2000/svg"> onload="makeDraggable(evt)"\n');
 
     xWidth = g.XLim(2) - g.XLim(1);
     yWidth = g.YLim(2) - g.YLim(1);
@@ -21,6 +21,8 @@ function exp = exportToSvg(g)
         fprintf(outFile, "%s\n", TypeMatcher(rawData{i}, 500 / minWidth));
         
     end
+
+    ExportScript(userData, outFile);
 
     fprintf(outFile, '</svg>');
     fclose(outFile);

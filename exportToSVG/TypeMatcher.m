@@ -12,7 +12,7 @@ function svgLine = TypeMatcher(plotData, scale)
             g = fix(256 * plotData.Color(2));
             b = fix(256 * plotData.Color(3));
             
-            svgLine = strcat('<circle id="', plotData.title,'" r="5" cx="', string(cx), '" cy="', string(cy));
+            svgLine = strcat('<circle id="', plotData.title,'" class="draggable" r="5" cx="', string(cx), '" cy="', string(cy));
             svgLine = strcat(svgLine, '" fill="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
         
         case 'dpoint'

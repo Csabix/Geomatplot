@@ -22,6 +22,7 @@ classdef Panels
             colorDropdown.Layout.Column = gridPos(2);
             colorDropdown.Items = repmat({''}, numel(colors), 1);
             colorDropdown.ItemsData = colors;
+            colorDropdown.Tooltip = "Color";
             for i = 1:numel(colors)
                 style = uistyle('BackgroundColor',colors{i});
                 addStyle(colorDropdown,style,"item",i);
@@ -31,26 +32,34 @@ classdef Panels
             colorDropdown.Value = geometry.fig.Color;
         end
 
-        function grid = createContainerGrid(panel,size,squareSize,padding)
+        function grid = createContainerGrid(panel,size,padding)
             grid = uigridlayout(panel);
-            grid.ColumnWidth = repmat({squareSize},1,size(1));
-            grid.RowHeight = repmat({squareSize},1,size(2));
+            grid.RowHeight = size{1};
+            grid.ColumnWidth = size{2};
             grid.Padding = padding;
         end
 
         function propPanel = createPointPanel(figure,position,geometry)
             propPanel = uipanel(figure);
-            propPanel.Position = [position + [10 -50], 35, 35];
+            propPanel.Position = [position + [10 -50], 80, 35];
 
-            grid = Panels.createContainerGrid(propPanel,[1 1],25,[5 5 5 5]);
+            grid = Panels.createContainerGrid(propPanel,{{25}, {25 35}},[5 5 5 5]);
             Panels.createColorDropdown(grid,geometry,[1 1]);
+
+            % Create EditField
+            editField = uieditfield(grid, 'text');
+            editField.Layout.Row = 1;
+            editField.Layout.Column = 2;
+            editField.Tooltip = "Label";
+            editField.Value = geometry.label;
+            editField.ValueChangedFcn = @(src,evt) Panels.setLabel(src,evt,geometry);
         end
 
         function propPanel = createLinePanel(figure,position,geometry)
             propPanel = uipanel(figure);
             propPanel.Position = [position + [10 -50], 70, 35];
 
-            grid = Panels.createContainerGrid(propPanel,[2 1],25,[5 5 5 5]);
+            grid = Panels.createContainerGrid(propPanel,{{25}, {25 25}},[5 5 5 5]);
             Panels.createColorDropdown(grid,geometry,[1 1]);  
 
             styles = {'-','--',':','-.'};
@@ -65,6 +74,7 @@ classdef Panels
             styleDropdown.Layout.Column = 2;
             styleDropdown.Items = repmat({''}, numel(styles), 1);
             styleDropdown.ItemsData = styles;
+            styleDropdown.Tooltip = "Linestyle";
             for i = 1:numel(styles)
                 style = uistyle('Icon',icons{i});
                 addStyle(styleDropdown,style,"item",i);
@@ -72,12 +82,25 @@ classdef Panels
             styleDropdown.Value = geometry.fig.LineStyle;
         end
 
-        function setColor(src,evt,geometry)
+        function setColor(~,evt,geometry)
             geometry.fig.Color = evt.Value;
         end
 
-        function setLinestyle(src,evt,geometry)
+        function setLinestyle(~,evt,geometry)
             geometry.fig.LineStyle = evt.Value;
+        end
+
+        function setLabel(~,evt,geometry)
+            label = evt.Value;
+            go = geometry.parent;
+            if go.isLabel(label)
+                %Needs better response
+                disp("Label already exists!");
+            else
+                %Currently disabled, needs proper solution
+                %geometry.fig.Label = label;
+                %geometry.label = label;
+            end
         end
     end
 end

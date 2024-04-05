@@ -89,6 +89,9 @@ classdef AcceptTypes
         function accepted = acceptIntersection(data)
             patterns = {
                 {'dcircle','dcircle'}
+                {'dcircle',{'dlines','mpolygon'}}
+                {{'dlines','mpolygon'},'dcircle'}
+                {{'dlines','mpolygon'},{'dlines','mpolygon'}}
                 };
             accepted = AcceptTypes.acceptGeometryByPatterns(data,patterns);
         end

@@ -13,8 +13,6 @@ function exp = exportToSvg(g)
     yWidth = g.YLim(2) - g.YLim(1);
 
     minWidth = min([xWidth, yWidth]);
-
-    disp(minWidth);
     
     for i=1:rawDataSize(2)
 

@@ -19,7 +19,7 @@ function retFunc = GetDraggableFunction()
         retFunc = retFunc + "\t\tfunction drag(evt) {\n";
             retFunc = retFunc + "\t\t\tif (selectedElement) {\n";
                 retFunc = retFunc + "\t\t\t\tevt.preventDefault();\n";
-                retFunc = retFunc + "\t\t\t\tvar coord = getMousePosition(evt);\n";
+                retFunc = retFunc + "\t\t\t\tlet coord = getMousePosition(evt);\n";
                 retFunc = retFunc + "\t\t\t\tselectedElement.setAttributeNS(null, 'cx', coord.x - offset.x);\n";
                 retFunc = retFunc + "\t\t\t\tselectedElement.setAttributeNS(null, 'cy', coord.y - offset.y);\n";
     

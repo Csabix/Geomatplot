@@ -1,6 +1,4 @@
 function svgLine = TypeMatcher(plotData, scale)
-    
-    disp(plotData.type);
 
     switch plotData.type
         case 'mpoint'

@@ -52,11 +52,11 @@ public class PlotTest {
             //l1.x[0]--;
             //plot.callEvent(new UpdateLine(plot,l1.getID()));
             //plot.callEvent(new UpdateEvent(plot,l1));
-            plot.updateDrawable(l1);
+            //plot.updateDrawable(l1);
         }catch (Exception e) {
 
         }
-        gLine l2 = new gLine(new float[]{0f,1f},new float[]{0f,1f},new float[][]{{0f, 1f, 0f, 1f},{0f,0f,1f,1f}});
+        gLine l2 = new gLine(new float[]{0f,1f,2f},new float[]{0f,1f,2f},new float[]{0f, 1f, 0f, 1f});
         //plot.callEvent(new CreateLine(plot,l2));
         plot.addDrawable(l2);
         try {

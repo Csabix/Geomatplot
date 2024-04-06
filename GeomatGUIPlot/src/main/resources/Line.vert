@@ -18,7 +18,7 @@ layout(std430, binding = 1) readonly buffer skeleton {
 };
 
 //uniform float w = 640f;
-const float width = 20.0f;
+const float width = 60.0f;
 
 layout(location=0) out vec4 color;
 layout(location=1) out float dist;
@@ -36,20 +36,17 @@ void main() {
 
     vec2 a = normalize((lines[i-1].p - position));
     vec2 b = normalize((lines[i+1].p - position));
-    float x = (width/wh.x) / ((sqrt( (1.0 - dot(a,b)) / 2.0)));
-    //float x = width / ((sqrt( (1.0 - dot(a,b)) / 2.0)));
+    float x = (width) / ((sqrt( (1.0 - dot(a,b)) / 2.0)));
 
     a = vec2(-a.y,a.x);
     b = vec2(b.y,-b.x);
 
-    vec2 c = normalize((a + b));
-
-    vec2 v = x * c;
-    float asd = dot(v,normalize((lines[i-1].p - position))) * scale.y;
-    v.y *= aspect;
+    vec2 v = (x * normalize((a + b)) / scale / wh );
     if (gl_VertexID % 2 == 1) v = -v;
 
-    gl_Position = vec4((position - translate) * scale - v,0.1,1.0);
+    vec2 p = position - v;
+
+    gl_Position = vec4((p - translate) * scale,0.1,1.0);
 
     color = lines[i].c;
     dist = gl_VertexID % 2 == 1 ? -1.0f : 1.0f;

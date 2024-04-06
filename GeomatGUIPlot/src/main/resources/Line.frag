@@ -11,6 +11,6 @@ void main() {
     float alpha = smoothstep( 0.0, 1.0, min( 1.1 - abs(dist), abs(0.5 - fract(len * 10.)) / 0.3 - 0.2 ));
     color = vec4(color_in.rgb,color_in.a * alpha);
 
-    color = vec4(color_in.rgb,color_in.a * smoothstep( 0.0, 1.0, (1.0 - abs(dist)) + 0.1 ) );
+    //color = vec4(color_in.rgb,color_in.a * smoothstep( 0.0, 1.0, (1.0 - abs(dist)) + 0.1 ) );
     id = -1;
 }

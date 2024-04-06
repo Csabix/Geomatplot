@@ -33,15 +33,15 @@ public class LineDrawer extends Drawer{
     private int indPosition;
     private int nextIndex;
     public LineDrawer(GL4 gl) {
-        gl.glEnable(GL_PRIMITIVE_RESTART);
-        gl.glPrimitiveRestartIndex(-1);
+        //gl.glEnable(GL_PRIMITIVE_RESTART);
+        //gl.glPrimitiveRestartIndex(-1);
 
         drawableList = new ArrayList<>();
 
         shader = new ProgramObjectBuilder(gl)
                 .vertex("/Line.vert")
                 .fragment("/Line.frag")
-                .geometry("/Line.geom")
+                //.geometry("/Line.geom")
                 .build();
 
         gl.glUniformBlockBinding(shader.ID,0,0);
@@ -86,7 +86,8 @@ public class LineDrawer extends Drawer{
         int indSize = 0;
         for (int i = lineCount; i < drawableList.size(); i++) {
             size += drawableList.get(i).bytes();
-            indSize += (((gLine)drawableList.get(i)).x.length * 2) + 1;
+            //indSize += (((gLine)drawableList.get(i)).x.length * 2) + 1;
+            indSize += ((((gLine)drawableList.get(i)).x.length - 1) * 6);
         }
 
         if (position + size > capacity) {
@@ -106,7 +107,7 @@ public class LineDrawer extends Drawer{
         bBuffer = gl.glMapNamedBufferRange(veo,(long)indPosition * Integer.BYTES, (long)indSize * Integer.BYTES, GL_MAP_WRITE_BIT);
         IntBuffer iBuffer = bBuffer.asIntBuffer();
 
-        for (int i = lineCount; i < drawableList.size(); i++) {
+        /*for (int i = lineCount; i < drawableList.size(); i++) {
             nextIndex += 2;
             gLine current = (gLine)drawableList.get(i);
             int[] indices = new int[(current.x.length * 2) + 1];
@@ -117,6 +118,18 @@ public class LineDrawer extends Drawer{
             indices[current.x.length * 2] = -1;
             nextIndex += 2;
             iBuffer.put(indices);
+        }*/
+        final int[] steps = new int[]{1,1,0,-1,2,-1};
+        for (int i = lineCount; i < drawableList.size(); ++i) {
+            nextIndex += 2;
+            gLine current = (gLine)drawableList.get(i);
+            int[] indices = new int[(current.x.length - 1) * 6];
+            for (int j = 0; j < (current.x.length - 1) * 6; j++) {
+                indices[j] = nextIndex;
+                nextIndex += steps[j%6];
+            }
+            iBuffer.put(indices);
+            nextIndex += 4;
         }
 
         gl.glUnmapNamedBuffer(veo);
@@ -129,6 +142,6 @@ public class LineDrawer extends Drawer{
     protected void drawInner(GL4 gl) {
         shader.use(gl);
         gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,veo);
-        gl.glDrawElements(GL_TRIANGLE_STRIP,indPosition,GL_UNSIGNED_INT, 0);
+        gl.glDrawElements(GL_TRIANGLES,indPosition,GL_UNSIGNED_INT, 0);
     }
 }

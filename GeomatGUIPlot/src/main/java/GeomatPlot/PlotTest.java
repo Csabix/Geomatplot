@@ -24,7 +24,7 @@ public class PlotTest {
             System.out.println(v.x + " " + v.y);
         }*/
         Plot plot = new Plot();
-        gPoint p0 = new gPoint(new float[]{0f,0f,1f,1f,0f,0f,0f,1f});
+        gPoint p0 = new gPoint(new float[]{-1f,0f,1f,1f,0f,0f,0f,1f});
         gPoint p1 = new gPoint(new float[]{5f,20f,1f,1f,0f,0f,0f,1f});
         plot.addDrawable(p0);
         plot.addDrawable(p1);
@@ -42,7 +42,7 @@ public class PlotTest {
             }
         }
 
-        gLine l1 = new gLine(new float[]{-1f,5f,10f,15f,20f,25f},new float[]{0f,20f,0f,20f,0f,20f},new float[]{0f,0f,0f,1f});
+        gLine l1 = new gLine(new float[]{-1f,5f,10f,15f,20f,25f},new float[]{0f,20f,0f,20f,0f,20f},new float[]{0f,0f,0f,1f},true);
         plot.addDrawable(l1);
         try {
             Thread.sleep(1000);
@@ -56,9 +56,10 @@ public class PlotTest {
         }catch (Exception e) {
 
         }
-        gLine l2 = new gLine(new float[]{0f,1f,2f},new float[]{0f,1f,2f},new float[]{0f, 1f, 0f, 1f});
-        //plot.callEvent(new CreateLine(plot,l2));
+        gLine l2 = new gLine(new float[]{0f,1f,2f},new float[]{0f,1f,2f},new float[]{0f, 1f, 0f, 1f},false);
         plot.addDrawable(l2);
+        gLine l3 = new gLine(new float[]{2f,3f},new float[]{0f,1f},new float[]{0f, 1f, 0f, 1f},true);
+        plot.addDrawable(l3);
         try {
             Thread.sleep(1000);
             //System.out.println(l1.ID);

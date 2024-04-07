@@ -6,14 +6,17 @@ public class gLine extends Drawable {
     public float[] x;
     public float[] y;
     public float[][] colors;
-    public gLine(float[] x, float[] y, float[][] colors) {
+    public boolean dashed;
+    public gLine(float[] x, float[] y, float[][] colors, boolean dashed) {
         this.x = x;
         this.y = y;
         this.colors = colors;
+        this.dashed = dashed;
     }
-    public gLine(float[] x, float[] y, float[] colors) {
+    public gLine(float[] x, float[] y, float[] colors, boolean dashed) {
         this.x = x;
         this.y = y;
+        this.dashed = dashed;
         this.colors = new float[x.length][4];
         for (int i = 0; i < x.length; ++i) {
             System.arraycopy(colors,0,this.colors[i],0,4);
@@ -40,6 +43,7 @@ public class gLine extends Drawable {
             data[i * VERTEX_SIZE + 5] = y[ind];
 
             data[i * VERTEX_SIZE + 6] = distTotal;
+            data[i * VERTEX_SIZE + 7] = dashed?10.0f:0.0f;
 
             if(ind < x.length - 1) {
                 double dX = x[ind] - x[ind + 1];

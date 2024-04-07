@@ -1,9 +1,6 @@
 package GeomatPlot.Draw;
 
-import GeomatPlot.BufferHelper;
-import GeomatPlot.GLObject;
-import GeomatPlot.ProgramObject;
-import GeomatPlot.ProgramObjectBuilder;
+import GeomatPlot.*;
 import com.jogamp.opengl.GL4;
 
 import java.nio.ByteBuffer;
@@ -14,6 +11,7 @@ import java.util.List;
 
 import static com.jogamp.opengl.GL.*;
 import static com.jogamp.opengl.GL2GL3.GL_PRIMITIVE_RESTART;
+import static com.jogamp.opengl.GL3ES3.GL_DRAW_INDIRECT_BUFFER;
 import static com.jogamp.opengl.GL3ES3.GL_SHADER_STORAGE_BUFFER;
 
 // https://stackoverflow.com/questions/60440682/drawing-a-line-in-modern-opengl
@@ -22,43 +20,38 @@ import static com.jogamp.opengl.GL3ES3.GL_SHADER_STORAGE_BUFFER;
 
 public class LineDrawer extends Drawer{
     private static final Integer INITIAL_CAPACITY = 100 * gLine.VERTEX_BYTE;
-    private static final int INITIAL_INDEX_CAPACITY = 100;
+    private static final int INITIAL_INDIRECT_CAPACITY = 100;
+    private static final int INDIRECT_STRUCT_BYTES = 4 * Integer.BYTES;
     ProgramObject shader;
     private final int ssbo;
-    private final int veo;
+    private final int indirect;
     private int capacity;
     private int position;
-    private int lineCount;
-    private int indCapacity;
-    private int indPosition;
+    private int indirectCapacity;
+    private int indirectPosition;
     private int nextIndex;
     public LineDrawer(GL4 gl) {
-        //gl.glEnable(GL_PRIMITIVE_RESTART);
-        //gl.glPrimitiveRestartIndex(-1);
-
         drawableList = new ArrayList<>();
 
         shader = new ProgramObjectBuilder(gl)
                 .vertex("/Line.vert")
                 .fragment("/Line.frag")
-                //.geometry("/Line.geom")
                 .build();
 
         gl.glUniformBlockBinding(shader.ID,0,0);
 
         capacity = INITIAL_CAPACITY;
         position = 0;
-        lineCount = 0;
 
-        indCapacity = INITIAL_INDEX_CAPACITY;
-        indPosition = 0;
+        indirectCapacity = INITIAL_INDIRECT_CAPACITY;
+        indirectPosition = 0;
         nextIndex = 0;
 
         int[] buffers = GLObject.createBuffers(gl,2);
         ssbo = buffers[0];
-        veo  = buffers[1];
+        indirect  = buffers[1];
         gl.glNamedBufferData(ssbo,capacity,null,GL_STATIC_DRAW);
-        gl.glNamedBufferData(veo,(long)indCapacity * Integer.BYTES, null, GL_STATIC_DRAW);
+        gl.glNamedBufferData(indirect,(long)indirectCapacity * INDIRECT_STRUCT_BYTES, null, GL_STATIC_DRAW);
 
         gl.glBindBufferBase(GL_SHADER_STORAGE_BUFFER,1,ssbo);
     }
@@ -82,67 +75,42 @@ public class LineDrawer extends Drawer{
 
     @Override
     protected void syncInner(GL4 gl) {
-        int size = 0;
-        int indSize = 0;
-        for (int i = lineCount; i < drawableList.size(); i++) {
-            size += drawableList.get(i).bytes();
-            //indSize += (((gLine)drawableList.get(i)).x.length * 2) + 1;
-            indSize += ((((gLine)drawableList.get(i)).x.length - 1) * 6);
+        int bytes = 0;
+        List<Tuple<Integer, Integer>> ranges = new ArrayList<>(drawableList.size() - indirectPosition);
+        for (int i = indirectPosition; i < drawableList.size(); i++) {
+            bytes += drawableList.get(i).bytes();
+            int indSize = ((((gLine)drawableList.get(i)).x.length - 1) * 6);
+            ranges.add(new Tuple<>(nextIndex, indSize));
+            nextIndex += indSize + 18;
         }
 
-        if (position + size > capacity) {
-            capacity = BufferHelper.getNewCapacity(capacity, position + size);
+        if (position + bytes > capacity) {
+            capacity = BufferHelper.getNewCapacity(capacity, position + bytes);
             BufferHelper.resizeBuffer(gl,ssbo,position,capacity,GL_STATIC_DRAW);
         }
-        if (indPosition + indSize > indCapacity) {
-            indCapacity = BufferHelper.getNewCapacity(indCapacity, indPosition + indSize);
-            BufferHelper.resizeBuffer(gl,veo,indPosition * Integer.BYTES, indCapacity * Integer.BYTES,GL_STATIC_DRAW);
+        if (indirectPosition + ranges.size() > indirectCapacity) {
+            indirectCapacity = BufferHelper.getNewCapacity(indirectCapacity, indirectPosition + ranges.size());
+            BufferHelper.resizeBuffer(gl,indirect,indirectPosition * Integer.BYTES, indirectCapacity * INDIRECT_STRUCT_BYTES,GL_STATIC_DRAW);
         }
 
-        ByteBuffer bBuffer = gl.glMapNamedBufferRange(ssbo,position,size,GL_MAP_WRITE_BIT);
+        ByteBuffer bBuffer = gl.glMapNamedBufferRange(ssbo,position,bytes,GL_MAP_WRITE_BIT);
         FloatBuffer fBuffer = bBuffer.asFloatBuffer();
-        drawableList.stream().skip(lineCount).forEach((e)->fBuffer.put(e.pack()));
+        drawableList.stream().skip(indirectPosition).forEach((e)->fBuffer.put(e.pack()));
         gl.glUnmapNamedBuffer(ssbo);
 
-        bBuffer = gl.glMapNamedBufferRange(veo,(long)indPosition * Integer.BYTES, (long)indSize * Integer.BYTES, GL_MAP_WRITE_BIT);
+        bBuffer = gl.glMapNamedBufferRange(indirect,(long)indirectPosition * INDIRECT_STRUCT_BYTES, (long)ranges.size() * INDIRECT_STRUCT_BYTES, GL_MAP_WRITE_BIT);
         IntBuffer iBuffer = bBuffer.asIntBuffer();
+        ranges.forEach(tuple -> iBuffer.put(new int[]{tuple.second,1,tuple.first,0}));
+        gl.glUnmapNamedBuffer(indirect);
 
-        /*for (int i = lineCount; i < drawableList.size(); i++) {
-            nextIndex += 2;
-            gLine current = (gLine)drawableList.get(i);
-            int[] indices = new int[(current.x.length * 2) + 1];
-            for (int j = 0; j < current.x.length * 2; j++) {
-                indices[j] = nextIndex;
-                nextIndex++;
-            }
-            indices[current.x.length * 2] = -1;
-            nextIndex += 2;
-            iBuffer.put(indices);
-        }*/
-        final int[] steps = new int[]{1,1,0,-1,2,-1};
-        for (int i = lineCount; i < drawableList.size(); ++i) {
-            nextIndex += 2;
-            gLine current = (gLine)drawableList.get(i);
-            int[] indices = new int[(current.x.length - 1) * 6];
-            for (int j = 0; j < (current.x.length - 1) * 6; j++) {
-                indices[j] = nextIndex;
-                nextIndex += steps[j%6];
-            }
-            iBuffer.put(indices);
-            nextIndex += 4;
-        }
-
-        gl.glUnmapNamedBuffer(veo);
-        position += size;
-        lineCount = drawableList.size();
-        indPosition += indSize;
+        position += bytes;
+        indirectPosition += ranges.size();
     }
 
     @Override
     protected void drawInner(GL4 gl) {
         shader.use(gl);
-        //gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,veo);
-        //gl.glDrawElements(GL_TRIANGLES,indPosition,GL_UNSIGNED_INT, 0);
-        gl.glDrawArrays(GL_TRIANGLES, 0, 30);
+        gl.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirect);
+        gl.glMultiDrawArraysIndirect(GL_TRIANGLES, 0, indirectPosition, 0);
     }
 }

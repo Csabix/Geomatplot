@@ -1,7 +1,7 @@
 package GeomatPlot.Draw;
 
 public abstract class Drawable {
-    public enum DrawableType{Point,Line,Label};
+    public enum DrawableType{Point,Line,Label,Polygon};
     private int ID;
     public void setID(int ID) {
         this.ID = ID;

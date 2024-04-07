@@ -1,21 +1,57 @@
 package GeomatPlot.Draw;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class gPolygon {
-    private static class Point {
-        public float x,y;
-        public Point(float x, float y) {
-            this.x = x;
-            this.y = y;
+public class gPolygon extends Drawable{
+    public static final int VERTEX_SIZE = 2;
+    public static final int VERTEX_BYTE = VERTEX_SIZE * Float.BYTES;
+    public float[] x;
+    public float[] y;
+    public int[] indices;
+    public gPolygon(float[] x, float[] y, int[][] indices) {
+        this.x = x;
+        this.y = y;
+        this.indices = new int[indices.length * 2];
+        int indx = 0;
+        for (int[] xy:indices) {
+            this.indices[indx++] = xy[0];
+            this.indices[indx++] = xy[1];
         }
     }
+    @Override
+    public float[] pack() {
+        float[] result = new float[elementCount()];
+        for (int i = 0; i < x.length; i++) {
+            result[i * VERTEX_SIZE] = x[i];
+            result[i * VERTEX_SIZE + 1] = y[i];
+        }
+        return result;
+    }
 
-    public gPolygon(float[] x, float [] y) {
+    @Override
+    public int elementCount() {
+        return VERTEX_SIZE * x.length;
+    }
 
-        // kill me
-        // https://dl.acm.org/doi/10.1145/41958.41981
-        // https://ianthehenry.com/posts/delaunay/
+    @Override
+    public int elementCountVertex() {
+        return VERTEX_SIZE;
+    }
+
+    @Override
+    public int bytes() {
+        return VERTEX_BYTE * x.length;
+    }
+
+    @Override
+    public int bytesVertex() {
+        return VERTEX_BYTE;
+    }
+
+    @Override
+    public DrawableType getType() {
+        return DrawableType.Polygon;
     }
 }

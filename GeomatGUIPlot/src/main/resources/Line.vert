@@ -24,8 +24,73 @@ layout(location=0) out vec4 color;
 layout(location=1) out float dist;
 layout(location=2) out float len;
 
+/*const int map[6] = {2,3,4,
+                    4,3,5};*/
+const int map[6] = {2,3,4,
+                    4,5,3};
 
 void main() {
+    //int i = gl_VertexID % 6;
+    int i = (map[gl_VertexID % 6] + (gl_VertexID / 6) * 2) / 2;
+    vec2 position = lines[i].p; // Current Line position
+
+    vec2 a = normalize((lines[i-1].p - position));
+    vec2 b = normalize((lines[i+1].p - position));
+    float x = (width) / ((sqrt( (1.0 - dot(a,b)) / 2.0))); // Smaller the angle the more we need to offset
+
+    a = vec2(-a.y,a.x);
+    b = vec2(b.y,-b.x);
+
+    vec2 v = (x * normalize((a + b)) / scale / wh );
+
+    if (map[gl_VertexID % 6] % 2 == 1) v = -v;
+    float tmp = dot(v,normalize((lines[i+1].p - position)));
+    if(gl_VertexID % 6 < 2  || gl_VertexID % 6 > 4)tmp = -tmp;
+    len = ( lines[i].l + tmp ) * scale.y;
+    vec2 p = position - v;
+
+    gl_Position = vec4((p - translate) * scale,0.1,1.0);
+
+    color = lines[i].c;
+    dist = map[gl_VertexID % 6] % 2 == 1 ? -1.0f : 1.0f;
+
+    //if (gl_VertexID % 2 == 1) v = -v;
+    //len = ( lines[i].l - dot(v,normalize((lines[i+1].p - position))) ) * scale.y;
+    //len = lines[i].l * scale.y;
+}
+
+
+/*void main() {
+    int i = gl_VertexID / 2; // Current Line point
+    vec2 position = lines[i].p; // Current Line position
+
+    vec2 a = normalize((lines[i-1].p - position));
+    vec2 b = normalize((lines[i+1].p - position));
+    float x = (width) / ((sqrt( (1.0 - dot(a,b)) / 2.0))); // Smaller the angle the more we need to offset
+
+    a = vec2(-a.y,a.x);
+    b = vec2(b.y,-b.x);
+
+    vec2 v = (x * normalize((a + b)) / scale / wh );
+
+    float tmp = dot(v,normalize((lines[i+1].p - position)));
+    if (gl_VertexID % 3 == 0) tmp = -tmp;
+    len = ( lines[i].l + tmp ) * scale.y;
+    if (gl_VertexID % 2 == 1) v = -v;
+
+    vec2 p = position - v;
+
+    gl_Position = vec4((p - translate) * scale,0.1,1.0);
+
+    color = lines[i].c;
+    dist = gl_VertexID % 2 == 1 ? -1.0f : 1.0f;
+
+    //if (gl_VertexID % 2 == 1) v = -v;
+    //len = ( lines[i].l - dot(v,normalize((lines[i+1].p - position))) ) * scale.y;
+    //len = lines[i].l * scale.y;
+}*/
+
+/*void main() {
     //float zoom = 2.0 / scale.y;
     //float aspect = 2.0 / scale.x / zoom;
     float aspect = wh.x / wh.y;
@@ -53,7 +118,7 @@ void main() {
     len = lines[i].l * scale.y;
 
     //len = lines[i].l * scale.y + asd;
-}
+}*/
 
 /*
 #version 460

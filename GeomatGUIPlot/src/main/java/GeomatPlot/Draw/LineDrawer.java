@@ -141,7 +141,8 @@ public class LineDrawer extends Drawer{
     @Override
     protected void drawInner(GL4 gl) {
         shader.use(gl);
-        gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,veo);
-        gl.glDrawElements(GL_TRIANGLES,indPosition,GL_UNSIGNED_INT, 0);
+        //gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,veo);
+        //gl.glDrawElements(GL_TRIANGLES,indPosition,GL_UNSIGNED_INT, 0);
+        gl.glDrawArrays(GL_TRIANGLES, 0, 30);
     }
 }

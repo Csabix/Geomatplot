@@ -11,6 +11,12 @@ layout(location=0) out vec4 color_out;
 layout(location=1) out float dist_out;
 layout(location=2) out float len_out;
 
+layout(std140, binding = 0) uniform Camera {
+    vec2 scale;
+    vec2 translate;
+    vec2 wh;
+};
+
 void main() {
     /*float[3] ds;
 
@@ -46,24 +52,28 @@ void main() {
     float mc = length(pc - pm);
     float bc = length(pc - pb);
     float closer,further;
-    gl_Position = gl_in[a].gl_Position;
+
+    vec2 m = (gl_in[a].gl_Position.xy + gl_in[b].gl_Position.xy) / 2.0;
+    vec2 m_c = gl_in[c].gl_Position.xy - m;
+    vec2 m_a = gl_in[a].gl_Position.xy - m;
+    float offset = -dot(m_a, normalize(m_c));
+
+    gl_Position = vec4((gl_in[a].gl_Position.xy - translate) * scale,0.1,1);
     color_out = color[a];
     dist_out = dist[a];
-    //len_out = 0 + 0.01 * dot(pa - pb,pc);
-    len_out = len[a] + (len[a] - len[c]) * ac/mc;
+    len_out = (len[a] + offset) * scale.y;
     EmitVertex();
 
-    gl_Position = gl_in[b].gl_Position;
+    gl_Position = vec4((gl_in[b].gl_Position.xy - translate) * scale,0.1,1);
     color_out = color[b];
     dist_out = dist[b];
-    //len_out = 0 + 0.01 * dot(pb - pa,pc);
-    len_out = len[a] + (len[a] - len[c]) * bc/mc;
+    len_out = (len[b] - offset) * scale.y;
     EmitVertex();
 
-    gl_Position = gl_in[c].gl_Position;
+    gl_Position = vec4((gl_in[c].gl_Position.xy - translate) * scale,0.1,1);
     color_out = color[c];
     dist_out = dist[c];
-    len_out = len[c];
+    len_out = len[c] * scale.y;
     EmitVertex();
     /*gl_Position = gl_in[0].gl_Position;
     color_out = color[0];

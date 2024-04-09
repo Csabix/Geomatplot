@@ -1,4 +1,4 @@
-classdef mpolygon < moveable
+classdef mpolygon < moveable & polygon_base
 methods
     function o=mpolygon(parent,label,args)
         args = namedargs2cell(args);

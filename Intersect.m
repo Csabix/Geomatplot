@@ -40,12 +40,12 @@ function [h,g] = Intersect(varargin)
 
     if drawing.isInputPatternMatching(inputs,{'dcircle','dcircle'})
         callback = @intersect_circle2circle;
-    elseif drawing.isInputPatternMatching(inputs,{'dcircle',{'dlines','mpolygon'}})
+    elseif drawing.isInputPatternMatching(inputs,{'dcircle',{'dlines','polygon_base'}})
         callback = @intersect_circle2polyline;
-    elseif drawing.isInputPatternMatching(inputs,{{'dlines','mpolygon'},'dcircle'})
+    elseif drawing.isInputPatternMatching(inputs,{{'dlines','polygon_base'},'dcircle'})
         callback = @intersect_circle2polyline;
         inputs = inputs([2 1]);
-    elseif drawing.isInputPatternMatching(inputs,{{'dlines','mpolygon'},{'dlines','mpolygon'}})
+    elseif drawing.isInputPatternMatching(inputs,{{'dlines','polygon_base'},{'dlines','polygon_base'}})
         callback = @intersect_poly2poly;
     else
         throw(MException('Intersect:invalidInputPattern','Cannot intersect these input types'));        

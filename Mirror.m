@@ -17,7 +17,7 @@ function h = Mirror(varargin)
             callback = @mirror_point2pointseq;
         elseif drawing.isInputPatternMatching(inputs,{'drawing','dcircle'})
             callback = @mirror_point2circle; 
-        elseif drawing.isInputPatternMatching(inputs,{'drawing',{'dlines','mpolygon'}})
+        elseif drawing.isInputPatternMatching(inputs,{'drawing',{'dlines','polygon_base'}})
             callback = @mirror_point2polyline;
         else
             throw(MException(eidType,msgType));
@@ -36,7 +36,7 @@ function h = Mirror(varargin)
         args = dlines.parse_inputs_(varargin{:});
         c_ = Mirror(parent,[{inputs{1}.center},inputs(2:end)],'LabelVisible','off','MarkerSize',5);
         h_ = dcircle(parent,label,c_,inputs{1}.radius,args);
-    elseif isa(inputs{1},'dlines') || isa(inputs{1},'mpolygon')  % includes dcurves
+    elseif isa(inputs{1},'dlines') || isa(inputs{1},'polygon_base')  % includes dcurves
         if drawing.isInputPatternMatching(inputs,{'drawing','point_base'})
             callback = @mirror_point2point;
         elseif drawing.isInputPatternMatching(inputs,{'drawing','point_base','point_base'})

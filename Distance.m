@@ -25,7 +25,7 @@ function h = Distance(varargin)
         callback = @dist_point2pointseq;
     elseif drawing.isInputPatternMatching(inputs,{'point_base','dcircle'})
         callback = @dist_point2circle; 
-    elseif drawing.isInputPatternMatching(inputs,{'point_base',{'dlines','mpolygon','dpolygon'}})
+    elseif drawing.isInputPatternMatching(inputs,{'point_base',{'dlines','polygon_base'}})
         callback = @dist_point2polyline;
     else
         throw(MException('Distance:invalidInputPattern','Cannot measure distance between these input types'));

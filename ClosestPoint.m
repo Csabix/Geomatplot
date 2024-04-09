@@ -6,7 +6,7 @@ function h = ClosestPoint(varargin)
         callback = @closest_point2pointseq;
     elseif drawing.isInputPatternMatching(inputs,{'point_base','dcircle'})
         callback = @closest_point2circle; 
-    elseif drawing.isInputPatternMatching(inputs,{'point_base',{'dlines','mpolygon'}})
+    elseif drawing.isInputPatternMatching(inputs,{'point_base',{'dlines','polygon_base'}})
         callback = @closest_point2polyline;
     else
         eidType = 'ClosestPoint:invalidInputPattern';

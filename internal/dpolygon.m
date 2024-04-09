@@ -1,4 +1,4 @@
-classdef dpolygon < dpointlineseq
+classdef dpolygon < dpointlineseq & polygon_base
 methods
     function o = dpolygon(parent,label,inputs,callback,args)
         C = args.Color;

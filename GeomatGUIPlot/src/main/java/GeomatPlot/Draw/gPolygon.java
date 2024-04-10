@@ -10,15 +10,10 @@ public class gPolygon extends Drawable{
     public float[] x;
     public float[] y;
     public int[] indices;
-    public gPolygon(float[] x, float[] y, int[][] indices) {
+    public gPolygon(float[] x, float[] y, int[] indices) {
         this.x = x;
         this.y = y;
-        this.indices = new int[indices.length * 2];
-        int indx = 0;
-        for (int[] xy:indices) {
-            this.indices[indx++] = xy[0];
-            this.indices[indx++] = xy[1];
-        }
+        this.indices = indices;
     }
     @Override
     public float[] pack() {

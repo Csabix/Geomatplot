@@ -15,7 +15,7 @@ import java.util.List;
 import static com.jogamp.opengl.GL.*;
 
 public class FontMap {
-    private static final String usable = " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    private static final String usable = " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final char[] usableC = usable.toCharArray();
     HashMap<Character, CharacterInfo> charInfoMap;
     public FontMap(GL4 gl) {

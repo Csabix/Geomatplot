@@ -26,7 +26,8 @@ function h = Line(varargin)
     else
         throw(MException('Line:invalidInputPattern','Unknown overload.')); 
     end
-    h_ = dlines(parent,label,inputs,callback,6,args);
+    args.SizeOverride = 6;
+    h_ = dlines(parent,label,inputs,callback,args);
 
     if nargout == 1; h = h_; end
     

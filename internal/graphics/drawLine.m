@@ -23,6 +23,7 @@ function line = drawLine(varargin)
     addParameter(p,"Visible",defaultVisible);
     addParameter(p,"LabelTextColor",defaultLabelTextColor);
     addParameter(p,"LineWidth",defaultMarkerSize);
+    addParameter(p,"SizeOverride", -1);
 
 
     parse(p,varargin{:});
@@ -48,8 +49,12 @@ function line = drawLine(varargin)
                 color = [1 1 1 1];
         end
     end
-
-    jLine = GeomatPlot.gLine(single(p.Results.X),single(p.Results.Y),color);
+    
+    if p.Results.SizeOverride == -1
+        jLine = GeomatPlot.Draw.gLine(single(p.Results.X),single(p.Results.Y),color);
+    else
+        jLine = GeomatPlot.Draw.gLine(single(zeros(1,p.Results.SizeOverride)),single(zeros(1,p.Results.SizeOverride)),color);
+    end
     plt.addDrawable(jLine);
     line = LineH(jLine,plt);
 end

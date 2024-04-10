@@ -1,10 +1,11 @@
 classdef dlines < dpointlineseq
 methods
-    function o = dlines(parent,label,inputs,callback,count,args)
+    function o = dlines(parent,label,inputs,callback,args)
         hidden = strcmp(args.Visible,'off');
         args = namedargs2cell(args);
         %fig = line(parent.ax,0,0,args{:});
-        fig = drawLine(parent.ax,zeros(1,count),zeros(1,count),args{:});
+        len = numel(inputs);
+        fig = drawLine(parent.ax,zeros(1,len),zeros(1,len),args{:});
         o = o@dpointlineseq(parent,label,fig,inputs,callback,hidden);
     end
 end

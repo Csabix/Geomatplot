@@ -40,9 +40,10 @@
 
 <circle id="M" r="5" cx="625" cy="227.2727" fill="rgb(0,0,0)" />
 <line id="seg7" x1="625" y1="227.2727" x2="562.5" y2="464.4886" stroke="rgb(256,0,0)" stroke-width="1" />
-<circle id="A" r="5" cx="250" cy="500" fill="rgb(0,0,256)" />
-<circle id="B" r="5" cx="875" cy="500" fill="rgb(0,0,256)" />
-<circle id="C" r="5" cx="625" cy="156.25" fill="rgb(0,0,256)" />
+<circle id="A" class="draggable" r="5" cx="250" cy="500" fill="rgb(0,0,256)" />
+<circle id="B" class="draggable" r="5" cx="875" cy="500" fill="rgb(0,0,256)" />
+<circle id="C" class="draggable" r="5" cx="625" cy="156.25" fill="rgb(0,0,256)" />
+
 <script type="text/javascript" href="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"/>
 <script type="text/javascript"><![CDATA[
 
@@ -54,42 +55,15 @@ console.log(math.multiply(vector, 0));
 console.log(math.multiply(vector, 1));
 console.log(matrix);
 console.log(math.sqrt(-4).toString()) // 2i
+<!-- --------------------------------------------------------------------- -->
+<!-- --------------------------------------------------------------------- -->
+<!-- --------------------------------------------------------------------- -->
 
-const A = document.getElementById("A");
+let A = document.getElementById("A");
+let B = document.getElementById("B");
+let C = document.getElementById("C");
+
 console.log(A);
-
-A.addEventListener("mouseover", () => {
-    A.setAttribute("class", "hover draggable");
-})
-
-A.addEventListener("mouseleave", () => {
-    A.setAttribute("class", "");
-})
-
-<!-- --------------------------------------------------------------------- -->
-const B = document.getElementById("B");
-
-B.addEventListener("mouseover", () => {
-    B.setAttribute("class", "hover draggable");
-})
-
-B.addEventListener("mouseleave", () => {
-    B.setAttribute("class", "");
-})
-
-<!-- --------------------------------------------------------------------- -->
-const C = document.getElementById("C");
-
-C.addEventListener("mouseover", () => {
-    C.setAttribute("class", "hover draggable");
-})
-
-C.addEventListener("mouseleave", () => {
-    C.setAttribute("class", "");
-})
-
-<!-- --------------------------------------------------------------------- -->
-
 
 function makeDraggable(evt) {
     var svg = evt.target;
@@ -103,6 +77,7 @@ function makeDraggable(evt) {
     function startDrag(evt) {
         if (evt.target.classList.contains('draggable')) {
             selectedElement = evt.target;
+            console.log(evt.target)
             offset = getMousePosition(evt);
             offset.x -= parseFloat(selectedElement.getAttributeNS(null, "cx"));
             offset.y -= parseFloat(selectedElement.getAttributeNS(null, "cy"));
@@ -111,11 +86,9 @@ function makeDraggable(evt) {
     function drag(evt) {
         if (selectedElement) {
             evt.preventDefault();
-            var coord = getMousePosition(evt);
+            let coord = getMousePosition(evt);
             selectedElement.setAttributeNS(null, "cx", coord.x - offset.x);
             selectedElement.setAttributeNS(null, "cy", coord.y - offset.y);
-
-            moveDeps(coord.x - offset.x, coord.y - offset.y, selectedElement.getAttributeNS(null, "id"));
         }
     }
     function endDrag(evt) {
@@ -131,18 +104,43 @@ function makeDraggable(evt) {
     }
 }
 
+function seg1callback(){
+    aValue = [[A.getAttributeNS(null, "cx"), A.getAttributeNS(null, "cy")]]
+    bValue = [[B.getAttributeNS(null, "cx"), B.getAttributeNS(null, "cy")]]
+    //let ans = math.add(aValue, math.multiply(math.subtract(bValue, aValue),[[0,1]]))
+    console.log(math.transpose(aValue));
+    console.log(aValue);
+    //let ans = math.multiply(math.transpose(aValue), [[0,1]]);
+    let ans = math.add(aValue, math.multiply(math.transpose(math.subtract(bValue, aValue)), [[0,1]]));
 
-function moveDeps(x, y, id){
-    console.log(id);
-    if(id === 'C'){
-        let seg2 = document.getElementById("seg2");
-        let seg3 = document.getElementById("seg3");
-        seg2.setAttributeNS(null, 'x2', x);
-        seg2.setAttributeNS(null, 'y2', y);
-        seg3.setAttributeNS(null, 'x1', x);
-        seg3.setAttributeNS(null, 'y1', y);
-    }
+    return ans;
 }
+
+function seg2callback(){
+    aValue = [[B.getAttributeNS(null, "cx"), B.getAttributeNS(null, "cy")]]
+    bValue = [[C.getAttributeNS(null, "cx"), C.getAttributeNS(null, "cy")]]
+
+    let ans = math.add(aValue, math.multiply(math.transpose(math.subtract(bValue, aValue)), [[0,1]]));
+
+    return ans;
+}
+
+function seg3callback(){
+    aValue = [[C.getAttributeNS(null, "cx"), C.getAttributeNS(null, "cy")]]
+    bValue = [[A.getAttributeNS(null, "cx"), A.getAttributeNS(null, "cy")]]
+    console.log("itt");
+    console.log(math.subtract(bValue, aValue))
+    console.log(math.multiply(math.transpose(math.subtract(bValue, aValue)), [[0,1]]))
+
+    let ans = math.add(aValue, math.multiply(math.transpose(math.subtract(bValue, aValue)), [[0,1]]));
+
+    return ans;
+}
+
+console.log(seg1callback());
+console.log(seg2callback());
+console.log(seg3callback());
+
 
 
 ]]></script>

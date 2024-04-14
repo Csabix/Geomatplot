@@ -1,6 +1,31 @@
 package GeomatPlot.Font;
 
 public class Letter {
+    public static final int ELEMENT_COUNT = 12; // vec4, vec4, vec2, vec2 (padding)
+    public static final int BYTES = ELEMENT_COUNT * Float.BYTES;
+    final CharacterInfo info;
+    final float offset;
+    public Letter(CharacterInfo c, float xOffset) {
+        this.info = c;
+        this.offset = xOffset;
+    }
+    public float[] pack(float x, float y) {
+        float[] data = new float[ELEMENT_COUNT];
+        data[0 ] = offset;
+        data[1 ] = 0;
+        data[2 ] = info.width;
+        data[3 ] = info.height;
+        data[4 ] = info.u;
+        data[5 ] = info.v;
+        data[6 ] = info.w;
+        data[7 ] = info.h;
+        data[8 ] = x;
+        data[9 ] = y;
+
+        return data;
+    }
+}
+/*public class Letter {
     public static final int ELEMENT_COUNT = 6 * 6;
     public static final int BYTES = ELEMENT_COUNT * Float.BYTES;
     final CharacterInfo info;
@@ -55,4 +80,4 @@ public class Letter {
         data[35] = info.v;
         return data;
     }
-}
+}*/

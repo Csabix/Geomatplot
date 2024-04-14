@@ -49,7 +49,7 @@ public class gLabel extends Drawable {
     public DrawableType getType() {
         return DrawableType.Label;
     }
-    private int letterCount() {
+    public int letterCount() {
         int sum = 0;
         for(char c : text.toCharArray()) {
             if(c != ' ') ++sum;

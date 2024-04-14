@@ -1,6 +1,7 @@
 package GeomatPlot.Draw;
 
 import GeomatPlot.BufferHelper;
+import GeomatPlot.Event.CreateEvent;
 import GeomatPlot.Font.FontMap;
 import GeomatPlot.GLObject;
 import GeomatPlot.ProgramObject;
@@ -14,12 +15,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.jogamp.opengl.GL.*;
+import static com.jogamp.opengl.GL3ES3.GL_SHADER_STORAGE_BUFFER;
+
 public class LabelDrawer extends Drawer {
     private static final int INITIAL_CAPACITY = 100 * new gLabel().bytesVertex();
     private final FontMap fontMap;
     private final ProgramObject shader;
-    private final int vao;
-    private final int vbo;
+    private final int ssbo;
     private int capacity;
     private int position;
     private int drawCount;
@@ -36,34 +38,20 @@ public class LabelDrawer extends Drawer {
                 .build();
         gl.glUniformBlockBinding(shader.ID,0,0);
 
-        vao = GLObject.createVertexArrays(gl,1)[0];
-        vbo = GLObject.createBuffers(gl,1)[0];
+        ssbo = GLObject.createBuffers(gl,1)[0];
 
-        gl.glNamedBufferData(vbo,capacity, null, gl.GL_STATIC_DRAW);
-
-        gl.glEnableVertexArrayAttrib(vao,0);
-        gl.glVertexArrayAttribBinding(vao,0,0);
-        gl.glVertexArrayAttribFormat(vao, 0, 2, gl.GL_FLOAT, false, 0);
-
-        gl.glEnableVertexArrayAttrib(vao, 1);
-        gl.glVertexArrayAttribBinding(vao, 1, 0);
-        gl.glVertexArrayAttribFormat(vao, 1, 2, gl.GL_FLOAT, false, 2 * Float.BYTES);
-
-        gl.glEnableVertexArrayAttrib(vao, 2);
-        gl.glVertexArrayAttribBinding(vao, 2, 0);
-        gl.glVertexArrayAttribFormat(vao, 2, 2, gl.GL_FLOAT, false, 4 * Float.BYTES);
-
-        gl.glVertexArrayVertexBuffer(vao, 0, vbo, 0, 6 * Float.BYTES);
+        gl.glNamedBufferData(ssbo, capacity, null, GL_STATIC_DRAW);
+        gl.glBindBufferBase(GL_SHADER_STORAGE_BUFFER,2,ssbo);
     }
     @Override
-    public void add(List<Drawable> drawableList) {
-        super.add(drawableList);
-        drawableList.forEach(d -> ((gLabel)d).fontMap = fontMap);
+    public void add(CreateEvent event) {
+        super.add(event);
+        if(event.type == requiredType())event.drawables.forEach(d -> ((gLabel)d).fontMap = fontMap);
+        //drawableList.forEach(d -> ((gLabel)d).fontMap = fontMap);
     }
     @Override
     public void drawInner(GL4 gl) {
         shader.use(gl);
-        gl.glBindVertexArray(vao);
         gl.glDrawArrays(GL_TRIANGLES,0,drawCount);
     }
     @Override
@@ -73,15 +61,15 @@ public class LabelDrawer extends Drawer {
         while (iterator.hasNext()) {
             Drawable drawable = iterator.next();
             bytes += drawable.bytes();
-            drawCount += drawable.bytes() / drawable.bytesVertex() * 6;
+            drawCount += ((gLabel)drawable).letterCount() * 6;
         }
 
         if(position + bytes > capacity) {
             capacity = BufferHelper.getNewCapacity(capacity, position + bytes);
-            BufferHelper.resizeBuffer(gl,vbo,position,capacity,GL_STATIC_DRAW);
+            BufferHelper.resizeBuffer(gl,ssbo,position,capacity,GL_STATIC_DRAW);
         }
 
-        ByteBuffer bBuffer = gl.glMapNamedBufferRange(vbo,(long)position, (long)bytes, GL_MAP_WRITE_BIT);
+        ByteBuffer bBuffer = gl.glMapNamedBufferRange(ssbo,(long)position, (long)bytes, GL_MAP_WRITE_BIT);
         FloatBuffer fBuffer = bBuffer.asFloatBuffer();
 
         iterator = drawableList.stream().skip(syncedDrawable).iterator();
@@ -89,7 +77,7 @@ public class LabelDrawer extends Drawer {
             fBuffer.put(it.next().pack());
         }
 
-        gl.glUnmapNamedBuffer(vbo);
+        gl.glUnmapNamedBuffer(ssbo);
 
         position += bytes;
     }
@@ -107,13 +95,18 @@ public class LabelDrawer extends Drawer {
             len += iterator.next().bytes();
         }
 
-        ByteBuffer bBuffer = gl.glMapNamedBufferRange(vbo,pos,len, GL_MAP_WRITE_BIT);
+        ByteBuffer bBuffer = gl.glMapNamedBufferRange(ssbo,pos,len, GL_MAP_WRITE_BIT);
         FloatBuffer fBuffer = bBuffer.asFloatBuffer();
 
         for (int i = first; i <= last; i++) {
             fBuffer.put(drawableList.get(i).pack());
         }
 
-        gl.glUnmapNamedBuffer(vbo);
+        gl.glUnmapNamedBuffer(ssbo);
+    }
+
+    @Override
+    public Drawable.DrawableType requiredType() {
+        return Drawable.DrawableType.Label;
     }
 }

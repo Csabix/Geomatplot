@@ -3,10 +3,13 @@ package GeomatPlot;
 import GeomatPlot.Draw.gLabel;
 import GeomatPlot.Draw.gLine;
 import GeomatPlot.Draw.gPoint;
+import GeomatPlot.Draw.gPolygon;
 import GeomatPlot.Event.CreateEvent;
 import GeomatPlot.PolygonCalc.Delaunay;
 import GeomatPlot.PolygonCalc.Vertex;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,15 +27,22 @@ public class PlotTest {
             System.out.println(v.x + " " + v.y);
         }*/
         Plot plot = new Plot();
+        //shrek(plot);
         gPoint p0 = new gPoint(new float[]{-1f,0f,1f,1f,0f,0f,0f,1f});
         gPoint p1 = new gPoint(new float[]{5f,20f,1f,1f,0f,0f,0f,1f});
         plot.addDrawable(p0);
         plot.addDrawable(p1);
-        gLabel label = new gLabel(0,0,"THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG ij");
+        gLabel label = new gLabel(0,0,"THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG 01234");
+        gLabel label2 = new gLabel(0,0,"the quick brown fox jumps over the lazy dog 56789");
+        //gLabel label = new gLabel(0,0,"g");
         plot.addDrawable(label);
+        plot.addDrawable(label2);
 
-        for (int i = 0; i < 100; i++) {
-            for (int j = 0; j < 100; j++) {
+        gPolygon poly = new gPolygon(new float[]{0,1,1}, new float[]{-1,-1,0},new int[]{0,2,1});
+        plot.addDrawable(poly);
+
+        for (int i = 0; i < 1000; i++) {
+            for (int j = 0; j < 1000; j++) {
                 //plot.addDrawable(new gPoint(new float[]{i * 0.01f,j * 0.01f,1f,1f,0f,0f,0f,1f}));
             }
             try {
@@ -69,6 +79,20 @@ public class PlotTest {
             //plot.callEvent(new UpdateEvent(plot,l1));
             plot.updateDrawable(l1);
         }catch (Exception e) {
+
+        }
+    }
+
+    static void shrek(Plot p) {
+        int i = 0;
+        try (BufferedReader br = new BufferedReader(new FileReader("E:\\MProg\\Repos\\Geomatplot\\GeomatGUIPlot\\src\\main\\resources\\shrek.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                gLabel label = new gLabel(0,-i, line);
+                p.addDrawable(label);
+                ++i;
+            }
+        } catch (Exception e) {
 
         }
     }

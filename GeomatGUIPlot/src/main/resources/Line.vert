@@ -23,6 +23,7 @@ layout(location=0) out vec4 color;
 layout(location=1) out float dist;
 layout(location=2) out float len;
 layout(location=3) out float type;
+layout(location=4) out int id;
 
 const int map[6] = {2,3,4,
                     4,5,3};
@@ -57,4 +58,5 @@ void main() {
     color = lines[i].c;
     type = lines[i].type;
     dist = mapIndex % 2 == 1 ? -1.0f : 1.0f;
+    id = gl_DrawID;
 }

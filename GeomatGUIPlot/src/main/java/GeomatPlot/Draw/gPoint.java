@@ -68,13 +68,23 @@ public class gPoint extends Drawable {
             this.id = id;
         }
     }
-    public void notifyPoint(int id) {
+    /*public void notifyPoint(int id) {
         Vector dataCopy;
         synchronized(this) {
             dataCopy = (Vector)callbacks.clone();
         }
         for (int i=0; i < dataCopy.size(); i++) {
             MovingPointEvent event = new MovingPointEvent(this, id);
+            ((MovingPointListener)dataCopy.elementAt(i)).movingPoint(event);
+        }
+    }*/
+    public void notifyPoint() {
+        Vector dataCopy;
+        synchronized(this) {
+            dataCopy = (Vector)callbacks.clone();
+        }
+        for (int i=0; i < dataCopy.size(); i++) {
+            MovingPointEvent event = new MovingPointEvent(this, getID());
             ((MovingPointListener)dataCopy.elementAt(i)).movingPoint(event);
         }
     }

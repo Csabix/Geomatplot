@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.jogamp.opengl.GL.*;
-import static com.jogamp.opengl.GL2GL3.GL_PRIMITIVE_RESTART;
 import static com.jogamp.opengl.GL3ES3.GL_DRAW_INDIRECT_BUFFER;
 import static com.jogamp.opengl.GL3ES3.GL_SHADER_STORAGE_BUFFER;
 
@@ -110,7 +109,13 @@ public class LineDrawer extends Drawer{
     @Override
     protected void drawInner(GL4 gl) {
         shader.use(gl);
+        gl.glUniform1i(shader.getUniformLocation(gl, "drawerID"), getDrawID());
         gl.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirect);
         gl.glMultiDrawArraysIndirect(GL_TRIANGLES, 0, indirectPosition, 0);
+    }
+
+    @Override
+    public Drawable.DrawableType requiredType() {
+        return Drawable.DrawableType.Line;
     }
 }

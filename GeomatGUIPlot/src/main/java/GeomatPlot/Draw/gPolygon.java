@@ -49,4 +49,5 @@ public class gPolygon extends Drawable{
     public DrawableType getType() {
         return DrawableType.Polygon;
     }
+
 }

@@ -34,6 +34,10 @@ public abstract class AbstractWindow {
         canvas.addMouseWheelListener(mouseListener);
 
         running = true;
+
+        /*GL gl = getGl();
+        gl.setSwapInterval(0);
+        freeGL();*/
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -93,6 +97,7 @@ public abstract class AbstractWindow {
 
         canvas = new GLCanvas(capabilities);
         canvas.setBounds(left,top,width,height);
+
         frame.setLayout(null);
         frame.setSize(width+left+right, height+bot+top);
         frame.add(canvas);

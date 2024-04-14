@@ -84,7 +84,13 @@ public class PointDrawer extends Drawer{
     @Override
     protected void drawInner(GL4 gl) {
         shader.use(gl);
+        gl.glUniform1i(shader.getUniformLocation(gl, "drawerID"), getDrawID());
         gl.glBindVertexArray(vao);
         gl.glDrawArrays(gl.GL_POINTS,0,syncedDrawable);
+    }
+
+    @Override
+    public Drawable.DrawableType requiredType() {
+        return Drawable.DrawableType.Point;
     }
 }

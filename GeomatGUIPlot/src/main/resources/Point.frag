@@ -27,6 +27,7 @@ layout(location=0) out vec4 color;
 layout(location=1) out int id;
 
 const float bP = 0.2;
+uniform int drawerID;
 
 float circleSDF(vec2 position){
 	return length(position) - 1.0;
@@ -56,5 +57,5 @@ void main(){
 	vec3 col = mix(bcolor, color_in, o);
 	float alpha = mix( 1.0, 0.0,-o);
 	color = vec4(col,alpha);
-	id = d < 0.0 ? id_in : -1;
+	id = d < 0.0 ? id_in | drawerID : -1;
 }

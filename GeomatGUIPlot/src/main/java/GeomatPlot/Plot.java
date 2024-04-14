@@ -12,7 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.Collections;
+import java.util.Optional;
 
 import static com.jogamp.opengl.GL.*;
 import static com.jogamp.opengl.GL2ES2.GL_INT;
@@ -30,17 +30,14 @@ public class Plot extends AbstractWindow{
         POINT_DRAG
     }
     private Camera camera;
-    private PointDrawer pointDrawer;
-    private LineDrawer lineDrawer;
-    private LabelDrawer labelDrawer;
+    private DrawerContainer drawerContainer;
+    private ObjectClicked objectClicked;
     private Tuple<Float,Float> clickLocation;
     private PlotState plotState;
     private boolean resized;
     private boolean fboCreated;
     private int fbo,colorTex,indexTex;
-    private IntBuffer readValue = GLBuffers.newDirectIntBuffer(1);
-    private int selectedPoint;
-    private FontMap fontMap;
+    private final IntBuffer readValue = GLBuffers.newDirectIntBuffer(1);
     public Plot(){
         super("GeomatPLot",640,640,false);
         plotState = PlotState.NONE;
@@ -56,14 +53,8 @@ public class Plot extends AbstractWindow{
         gl.glLineWidth(2f);
 
         camera = new Camera(gl, width, height, 10, 0, 0);
-        pointDrawer = new PointDrawer(gl);
-        lineDrawer = new LineDrawer(gl);
-        labelDrawer = new LabelDrawer(gl);
-        fontMap = new FontMap(gl);
-        //gLabel l = fontMap.createLabel("THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG ij",0,0);
-        //labelDrawer.add(Collections.singletonList(l));
-        //l = fontMap.createLabel("the quick brown fox jumps over the lazy dog",0,4);
-        //labelDrawer.add(Collections.singletonList(l));
+
+        drawerContainer = new DrawerContainer(gl);
 
         resize(gl,canvas.getSurfaceWidth(),canvas.getSurfaceHeight());
     }
@@ -74,30 +65,10 @@ public class Plot extends AbstractWindow{
                 running = false;
                 break;
             case CreateEvent.CREATE_EVENT:
-                switch(((CreateEvent)event).type){
-                    case Point:
-                        pointDrawer.add(((CreateEvent)event).drawables);
-                        break;
-                    case Line:
-                        lineDrawer.add(((CreateEvent)event).drawables);
-                        break;
-                    case Label:
-                        labelDrawer.add(((CreateEvent)event).drawables);
-                        break;
-                }
+                drawerContainer.callAdd((CreateEvent)event);
                 break;
             case UpdateEvent.UPDATE_EVENT:
-                switch(((UpdateEvent)event).type){
-                    case Point:
-                        pointDrawer.sync(gl,((UpdateEvent)event).IDs);
-                        break;
-                    case Line:
-                        lineDrawer.sync(gl,((UpdateEvent)event).IDs);
-                        break;
-                    case Label:
-                        labelDrawer.sync(gl,((UpdateEvent)event).IDs);
-                        break;
-                }
+                drawerContainer.callSync(gl, (UpdateEvent)event);
                 break;
             case MOUSE_PRESSED:
                 MouseEvent evt = (MouseEvent)event;
@@ -109,15 +80,29 @@ public class Plot extends AbstractWindow{
                     }
                 } else if(plotState == PlotState.NONE){
                     gl.glGetTextureSubImage(indexTex,0,evt.getX(),height - evt.getY(),0,1,1,1,GL_RED_INTEGER,GL_INT,Float.BYTES,readValue);
-                    int id = readValue.get();
+                    int typeID = readValue.get();
                     readValue.rewind();
-                    if(id == -1) {
+                    Optional<ObjectClicked> result = drawerContainer.getClicked(typeID);
+                    if(result.isPresent()) {
+                        objectClicked = result.get();
+                        System.out.println(objectClicked.type.toString() + " " + objectClicked.data.getID());
+                        switch (objectClicked.type) {
+                            case Point:
+                                plotState = PlotState.POINT_DRAG;
+                                break;
+                            case Polygon:
+                                // TODO
+                                break;
+                            default:
+                                plotState = PlotState.CAMERA_DRAG;
+                                camera.setOldData();
+                                clickLocation = camera.invert(evt.getX() / (float)width * 2f - 1f, (height - evt.getY()) / (float)height * 2f - 1f);
+
+                        }
+                    } else {
                         plotState = PlotState.CAMERA_DRAG;
                         camera.setOldData();
                         clickLocation = camera.invert(evt.getX() / (float)width * 2f - 1f, (height - evt.getY()) / (float)height * 2f - 1f);
-                    } else {
-                        plotState = PlotState.POINT_DRAG;
-                        selectedPoint = id;
                     }
                 }
                 break;
@@ -136,11 +121,12 @@ public class Plot extends AbstractWindow{
                         break;
                     case POINT_DRAG:
                         location = camera.invert(evt.getX() / (float)width * 2f - 1f, (height - evt.getY()) / (float)height * 2f - 1f);
-                        gPoint selected = pointDrawer.get(selectedPoint);
+                        //gPoint selected = pointDrawer.get(selectedPoint);
+                        gPoint selected = (gPoint)objectClicked.data;
                         selected.x = location.first;
                         selected.y = location.second;
                         updateDrawable(selected);
-                        selected.notifyPoint(selectedPoint);
+                        selected.notifyPoint();
                         break;
                 }
                 break;
@@ -160,22 +146,18 @@ public class Plot extends AbstractWindow{
             resize(gl, canvas.getSurfaceWidth(), canvas.getSurfaceHeight());
             resized = false;
         }
-        pointDrawer.sync(gl);
-        lineDrawer.sync(gl);
-        labelDrawer.sync(gl);
+        drawerContainer.callSync(gl);
         camera.sync(gl);
     }
-    private static FloatBuffer colorClear = GLBuffers.newDirectFloatBuffer(new float[]{1f,0f,0f,0f});
-    private static IntBuffer indexClear = GLBuffers.newDirectIntBuffer(new int[]{-1});
+    private static final FloatBuffer colorClear = GLBuffers.newDirectFloatBuffer(new float[]{1f,0f,0f,0f});
+    private static final IntBuffer indexClear = GLBuffers.newDirectIntBuffer(new int[]{-1});
     @Override
     protected void draw(GL4 gl) {
         gl.glClearTexImage(colorTex,0,GL_RGBA,GL_FLOAT,colorClear);
         gl.glClearTexImage(indexTex,0,GL_RED_INTEGER,GL_INT,indexClear);
         gl.glBindFramebuffer(GL_FRAMEBUFFER,fbo);
 
-        lineDrawer.draw(gl);
-        labelDrawer.draw(gl);
-        pointDrawer.draw(gl);
+        drawerContainer.callDraw(gl);
 
         int w = canvas.getSurfaceWidth();
         int h = canvas.getSurfaceHeight();

@@ -3,7 +3,7 @@ function ExportScript(userData, outFile)
     fprintf(outFile, '<script type="text/javascript"><![CDATA[\n');
 
     fprintf(outFile, GetDraggableFunction());
-
+    fprintf(outFile, 'const config = { attributes: true, childList: false, subtree: false };');
     dependents = userData.deps;
     dependentFields = fieldnames(dependents);
 
@@ -22,12 +22,10 @@ function ExportScript(userData, outFile)
                 
                     case "dlines"
                         
-                        cbString = func2str(FieldBuffer.callback);
-
-                        disp(regexp(cbString, '.+?)', 'match'));
-
-                        % regexp(func2str(userData.deps.seg1.callback), '.+?(?=))', 'match')
-                        % math.multiply(math.transpose([[1, 2]]), [[1, 2]])
+                        if isequal(size(FieldBuffer.inputs, 2),2) && isequal(class(FieldBuffer.inputs{1}),'mpoint') && isequal(class(FieldBuffer.inputs{2}),'mpoint')
+                            disp(FieldBuffer.inputs{1});
+                            disp(FieldBuffer.inputs{2});
+                        end
 
                 end
 

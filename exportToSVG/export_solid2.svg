@@ -66,6 +66,7 @@ let C = document.getElementById("C");
 console.log(A);
 
 function makeDraggable(evt) {
+    console.log(evt)
     var svg = evt.target;
     svg.addEventListener('mousedown', startDrag);
     svg.addEventListener('mousemove', drag);
@@ -104,44 +105,40 @@ function makeDraggable(evt) {
     }
 }
 
-function seg1callback(){
-    aValue = [[A.getAttributeNS(null, "cx"), A.getAttributeNS(null, "cy")]]
-    bValue = [[B.getAttributeNS(null, "cx"), B.getAttributeNS(null, "cy")]]
-    //let ans = math.add(aValue, math.multiply(math.subtract(bValue, aValue),[[0,1]]))
-    console.log(math.transpose(aValue));
-    console.log(aValue);
-    //let ans = math.multiply(math.transpose(aValue), [[0,1]]);
-    let ans = math.add(aValue, math.multiply(math.transpose(math.subtract(bValue, aValue)), [[0,1]]));
+// Options for the observer (which mutations to observe)
+const config = { attributes: true, childList: false, subtree: false };
 
-    return ans;
-}
+// Callback function to execute when mutations are observed
+/*const callback = (mutationList, observer) => {
+  for (const mutation of mutationList) {
+    if (mutation.type === "childList") {
+      console.log("A child node has been added or removed.");
+    } else if (mutation.type === "attributes") {
+      console.log(`The ${mutation.attributeName} ${mutation.value} attribute was modified.`);
+    }
+  }
+};*/
 
-function seg2callback(){
-    aValue = [[B.getAttributeNS(null, "cx"), B.getAttributeNS(null, "cy")]]
-    bValue = [[C.getAttributeNS(null, "cx"), C.getAttributeNS(null, "cy")]]
+const callback = (mutationList, observer) => {
+  for (const mutation of mutationList) {
+    if (mutation.type === "attributes") {
 
-    let ans = math.add(aValue, math.multiply(math.transpose(math.subtract(bValue, aValue)), [[0,1]]));
+        if(mutation.attributeName === "cx"){
+            document.getElementById("seg1").setAttributeNS(null, "x1", A.getAttributeNS(null, mutation.attributeName));
+        }
+        if(mutation.attributeName === "cy"){
+            document.getElementById("seg1").setAttributeNS(null, "y1", A.getAttributeNS(null, mutation.attributeName));
+        }
+    
+    }
+  }
+};
 
-    return ans;
-}
+// Create an observer instance linked to the callback function
+const observer = new MutationObserver(callback);
 
-function seg3callback(){
-    aValue = [[C.getAttributeNS(null, "cx"), C.getAttributeNS(null, "cy")]]
-    bValue = [[A.getAttributeNS(null, "cx"), A.getAttributeNS(null, "cy")]]
-    console.log("itt");
-    console.log(math.subtract(bValue, aValue))
-    console.log(math.multiply(math.transpose(math.subtract(bValue, aValue)), [[0,1]]))
-
-    let ans = math.add(aValue, math.multiply(math.transpose(math.subtract(bValue, aValue)), [[0,1]]));
-
-    return ans;
-}
-
-console.log(seg1callback());
-console.log(seg2callback());
-console.log(seg3callback());
-
-
+// Start observing the target node for configured mutations
+observer.observe(A, config);
 
 ]]></script>
 

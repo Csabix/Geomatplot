@@ -24,6 +24,7 @@ function line = drawLine(varargin)
     addParameter(p,"LabelTextColor",defaultLabelTextColor);
     addParameter(p,"LineWidth",defaultMarkerSize);
     addParameter(p,"SizeOverride", -1);
+    addParameter(p,"LineStyle",'-')
 
 
     parse(p,varargin{:});
@@ -50,10 +51,18 @@ function line = drawLine(varargin)
         end
     end
     
+    dashed = false;
+    if p.Results.LineStyle == "--"
+        dashed = true;
+    elseif p.Results.LineStyle ~= '-'
+        ME = MException("drawLine:invalidVariable only - or -- allowed");
+    throw(ME)
+    end
+
     if p.Results.SizeOverride == -1
-        jLine = GeomatPlot.Draw.gLine(single(p.Results.X),single(p.Results.Y),color);
+        jLine = GeomatPlot.Draw.gLine(single(p.Results.X),single(p.Results.Y),color,dashed);
     else
-        jLine = GeomatPlot.Draw.gLine(single(zeros(1,p.Results.SizeOverride)),single(zeros(1,p.Results.SizeOverride)),color);
+        jLine = GeomatPlot.Draw.gLine(single(zeros(1,p.Results.SizeOverride)),single(zeros(1,p.Results.SizeOverride)),color,dashed);
     end
     plt.addDrawable(jLine);
     line = LineH(jLine,plt);

@@ -22,7 +22,7 @@ function h = PerpendicularBisector(varargin)
     else
         throw(MException('PerpendicularBisector:invalidInputPattern','Unknown overload.')); 
     end
-
+    args.SizeOverride = 6;
     h_ = dlines(parent,label,inputs,@perpendicular_bisector,args);
 
     if nargout == 1; h = h_; end

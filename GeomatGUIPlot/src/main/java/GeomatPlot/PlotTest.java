@@ -38,7 +38,7 @@ public class PlotTest {
         plot.addDrawable(label);
         plot.addDrawable(label2);
 
-        gPolygon poly = new gPolygon(new float[]{0,1,1}, new float[]{-1,-1,0},new int[]{0,2,1});
+        gPolygon poly = new gPolygon(new float[]{0,1,1}, new float[]{-1,-1,0},new int[]{0,2,1},new float[]{0.3f,0.2f,0.2f});
         plot.addDrawable(poly);
 
         for (int i = 0; i < 1000; i++) {

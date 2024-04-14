@@ -26,8 +26,8 @@ function h = Ray(varargin)
     else
         throw(MException('Ray:invalidInputPattern','Unknown overload.')); 
     end
-
-    h_ = dlines(parent,label,inputs,callback,4,args);
+    args.SizeOverride = 4;
+    h_ = dlines(parent,label,inputs,callback,args);
 
     if nargout == 1; h = h_; end
 

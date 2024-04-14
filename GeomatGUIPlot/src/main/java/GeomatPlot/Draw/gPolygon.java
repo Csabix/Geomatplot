@@ -9,11 +9,13 @@ public class gPolygon extends Drawable{
     public static final int VERTEX_BYTE = VERTEX_SIZE * Float.BYTES;
     public float[] x;
     public float[] y;
+    public float[] color;
     public int[] indices;
-    public gPolygon(float[] x, float[] y, int[] indices) {
+    public gPolygon(float[] x, float[] y, int[] indices, float[] color) {
         this.x = x;
         this.y = y;
         this.indices = indices;
+        this.color = color;
     }
     @Override
     public float[] pack() {

@@ -6,6 +6,7 @@ properties
     clickData % contains the clicked objects
     acceptFcn % accept function callback
     drawFcn % draw function callback
+    errorFcn % error function callback
 end
 properties (Hidden)
     nextCapitalLabel (1,1) int32  = 0;      % 65 = 'A' = 'Z'-25
@@ -66,21 +67,26 @@ methods (Access = public)
         b = isfield(o.movs,l) || isfield(o.deps,l);
     end
 
-    function addHandlerFcns(o,acceptFcn,drawFcn)
+    function addHandlerFcns(o,acceptFcn,drawFcn,errorFcn)
         o.acceptFcn = acceptFcn;
         o.drawFcn = drawFcn;
+        o.errorFcn = errorFcn;
         o.clickData = [];
     end
 
     function pushData(o,value)
         if isempty(o.acceptFcn); return; end
         o.clickData = [o.clickData, {value}];
+        o.checkData();
+    end
+
+    function checkData(o)
         switch o.acceptFcn(o.clickData)
             case 1 %Accept state
                 o.drawFcn(o.clickData);
                 o.clickData = [];
             case -1 %Error state
-                disp("Error handling is not implemented yet!");
+                o.errorFcn(); %Temporary
                 o.clickData = [];
         end
     end

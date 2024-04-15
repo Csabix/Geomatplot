@@ -109,6 +109,22 @@ classdef AcceptTypes
             pattern = {'point_base',{'point_base','dpointseq','dcircle','dlines','mpolygon'}};
             accepted = AcceptTypes.acceptGeometryByPattern(data,pattern);
         end
+
+        function accepted = acceptSegmentSequence(data,shouldAccept)
+            if isempty(data); accepted = 0; return; end
+            accepted = 1;
+
+            if ~shouldAccept
+                accepted = 0;
+                AcceptTypes.setSelected(data{end},true);
+            elseif mod(length(data),2)==1 || ...
+                AcceptTypes.checkForDuplicates(data) || ...
+                ~all(cellfun(@(x) isa(x, 'point_base'), data))
+                accepted = -1; 
+            end
+
+            if accepted ~= 0; AcceptTypes.resetDataSelection(data); end   
+        end
     end
 
     methods(Access = private,Static)

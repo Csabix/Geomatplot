@@ -1,5 +1,7 @@
-function retFunc = GetDraggableFunction()
-    retFunc = "\tfunction makeDraggable(evt) {\n";
+function retFunc = GetBasicFunction(name)
+    switch name
+        case 'makeDraggable'
+        retFunc = "\tfunction makeDraggable(evt) {\n";
         retFunc = retFunc + "\t\tvar svg = evt.target;\n";
         retFunc = retFunc + "\t\tsvg.addEventListener('mousedown', startDrag);\n";
         retFunc = retFunc + "\t\tsvg.addEventListener('mousemove', drag);\n";
@@ -37,5 +39,7 @@ function retFunc = GetDraggableFunction()
             retFunc = retFunc + "\t\t\t};\n";
         retFunc = retFunc + "\t\t}\n";
     retFunc = retFunc + "\t}\n";
+    
+    end
 end
 

@@ -2,8 +2,9 @@ function ExportScript(userData, outFile)
     fprintf(outFile, '<script type="text/javascript" href="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"/>\n');
     fprintf(outFile, '<script type="text/javascript"><![CDATA[\n');
 
-    fprintf(outFile, GetDraggableFunction());
+    fprintf(outFile, GetBasicFunction('makeDraggable'));
     fprintf(outFile, 'const config = { attributes: true, childList: false, subtree: false };');
+    fprintf(outFile, 'let temp;');
     dependents = userData.deps;
     dependentFields = fieldnames(dependents);
 
@@ -22,10 +23,27 @@ function ExportScript(userData, outFile)
                 
                     case "dlines"
                         
-                        if isequal(size(FieldBuffer.inputs, 2),2) && isequal(class(FieldBuffer.inputs{1}),'mpoint') && isequal(class(FieldBuffer.inputs{2}),'mpoint')
-                            disp(FieldBuffer.inputs{1});
-                            disp(FieldBuffer.inputs{2});
+                        if isequal(size(FieldBuffer.inputs, 2),2) && ...
+                            isequal(class(FieldBuffer.inputs{1}),'mpoint') || isequal(class(FieldBuffer.inputs{1}),'dpoint') && ...
+                            isequal(class(FieldBuffer.inputs{2}),'mpoint') || isequal(class(FieldBuffer.inputs{2}),'dpoint') && ...
+                            isequal(func2str(FieldBuffer.callback), '@(a,b)a.value+(b.value-a.value).*[0;1]')
+                            
+
+                                temp = "temp = new MutationObserver((mutationList, observer) => {for (const mutation of mutationList) {if (mutation.type === 'attributes') {if(mutation.attributeName === 'cx'){\n";
+                                temp = temp + "document.getElementById('"+FieldBuffer.label+"').setAttributeNS(null, 'x1', document.getElementById('"+FieldBuffer.inputs{1}+"').getAttributeNS(null, mutation.attributeName));\n";
+                                temp = temp + "document.getElementById('"+FieldBuffer.label+"').setAttributeNS(null, 'x2', document.getElementById('"+FieldBuffer.inputs{2}+"').getAttributeNS(null, mutation.attributeName));\n}";
+                                temp = temp + "if(mutation.attributeName === 'cy'){\n";
+                                temp = temp + "document.getElementById('"+FieldBuffer.label+"').setAttributeNS(null, 'y1', document.getElementById('"+FieldBuffer.inputs{1}+"').getAttributeNS(null, mutation.attributeName));";
+                                temp = temp + "document.getElementById('"+FieldBuffer.label+"').setAttributeNS(null, 'y2', document.getElementById('"+FieldBuffer.inputs{2}+"').getAttributeNS(null, mutation.attributeName));}}}});\n";
+                                temp = temp + "temp.observe(getElementById('"+FieldBuffer.inputs{1}+"'), config);temp.observe(getElementById('"+FieldBuffer.inputs{2}+"'), config);";
+                                
+                                fprintf(outFile, temp);
                         end
+
+                    case "dcircle"
+                        if isequal(class(FieldBuffer.inputs{1}),'mpoint') && isequal(class(FieldBuffer.inputs{2}),'dscalar')
+                        end
+
 
                 end
 

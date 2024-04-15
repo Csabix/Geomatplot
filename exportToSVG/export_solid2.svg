@@ -134,11 +134,51 @@ const callback = (mutationList, observer) => {
   }
 };
 
+let a = new MutationObserver((mutationList, observer) => {
+    for (const mutation of mutationList) {
+    if (mutation.type === "attributes") {
+
+        if(mutation.attributeName === "cx"){
+            document.getElementById("seg1").setAttributeNS(null, "x2", B.getAttributeNS(null, mutation.attributeName));
+            document.getElementById("seg1").setAttributeNS(null, "x1", A.getAttributeNS(null, mutation.attributeName));
+        }
+        if(mutation.attributeName === "cy"){
+            document.getElementById("seg1").setAttributeNS(null, "y2", B.getAttributeNS(null, mutation.attributeName));
+            document.getElementById("seg1").setAttributeNS(null, "y1", A.getAttributeNS(null, mutation.attributeName));
+        }
+    
+    }
+  }
+})
+a.observe(B, config);
+a.observe(A, config);
+
+a = null
+
+a = new MutationObserver((mutationList, observer) => {
+    for (const mutation of mutationList) {
+    if (mutation.type === "attributes") {
+
+        if(mutation.attributeName === "cx"){
+            document.getElementById("seg2").setAttributeNS(null, "x2", B.getAttributeNS(null, mutation.attributeName));
+            document.getElementById("seg2").setAttributeNS(null, "x1", C.getAttributeNS(null, mutation.attributeName));
+        }
+        if(mutation.attributeName === "cy"){
+            document.getElementById("seg2").setAttributeNS(null, "y2", B.getAttributeNS(null, mutation.attributeName));
+            document.getElementById("seg2").setAttributeNS(null, "y1", C.getAttributeNS(null, mutation.attributeName));
+        }
+    
+    }
+  }
+})
+a.observe(B, config);
+a.observe(C, config);
+
 // Create an observer instance linked to the callback function
-const observer = new MutationObserver(callback);
+// const observer = new MutationObserver(callback);
 
 // Start observing the target node for configured mutations
-observer.observe(A, config);
+// observer.observe(A, config);
 
 ]]></script>
 

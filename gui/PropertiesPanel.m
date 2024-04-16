@@ -195,7 +195,7 @@ classdef PropertiesPanel < handle
         end
 
         function setLinestyle(o,~,evt)
-            o.fig.LineStyle = evt.Value;
+            o.geometry.fig.LineStyle = evt.Value;
         end
 
         function setLabel(o,~,evt)

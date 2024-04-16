@@ -35,7 +35,7 @@ classdef AcceptTypes
         end
 
         function accepted = acceptCircle2(data)
-            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base',{'point_base','dpointlineseq','mpolygon'}});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base',{'point_base','dpointlineseq','polygon_base'}});
         end
 
         function accepted = acceptMidpoint2(data)
@@ -89,16 +89,16 @@ classdef AcceptTypes
         function accepted = acceptIntersection(data)
             patterns = {
                 {'dcircle','dcircle'}
-                {'dcircle',{'dlines','mpolygon'}}
-                {{'dlines','mpolygon'},'dcircle'}
-                {{'dlines','mpolygon'},{'dlines','mpolygon'}}
+                {'dcircle',{'dlines','polygon_base'}}
+                {{'dlines','polygon_base'},'dcircle'}
+                {{'dlines','polygon_base'},{'dlines','polygon_base'}}
                 };
             accepted = AcceptTypes.acceptGeometryByPatterns(data,patterns);
         end
 
         function accepted = acceptMirror(data)
             patterns = {
-                {'point_base',{'point_base','dpointseq','dcircle','dlines','mpolygon'}}
+                {'point_base',{'point_base','dpointseq','dcircle','dlines','polygon_base'}}
                 {'dcircle','point_base'}
                 {'dlines','point_base'}
                 };
@@ -106,24 +106,29 @@ classdef AcceptTypes
         end
 
         function accepted = acceptClosestPoint(data)
-            pattern = {'point_base',{'point_base','dpointseq','dcircle','dlines','mpolygon'}};
+            pattern = {'point_base',{'point_base','dpointseq','dcircle','dlines','polygon_base'}};
             accepted = AcceptTypes.acceptGeometryByPattern(data,pattern);
         end
 
         function accepted = acceptSegmentSequence(data,shouldAccept)
-            if isempty(data); accepted = 0; return; end
-            accepted = 1;
-
-            if ~shouldAccept
-                accepted = 0;
-                AcceptTypes.setSelected(data{end},true);
-            elseif mod(length(data),2)==1 || ...
-                AcceptTypes.checkForDuplicates(data) || ...
-                ~all(cellfun(@(x) isa(x, 'point_base'), data))
-                accepted = -1; 
+            if isempty(data) || ~shouldAccept
+                accepted = 0; 
+                if ~shouldAccept; AcceptTypes.setSelected(data{end},true); end
+                return; 
             end
 
-            if accepted ~= 0; AcceptTypes.resetDataSelection(data); end   
+            types = {'point_base','polygon_base'};
+            check_type = @(x) any(cellfun(@(type) isa(x,type), types));
+                
+            if mod(length(data),2)==1 || ...
+                AcceptTypes.checkForDuplicates(data) || ...
+                ~all(cellfun(check_type, data))
+                accepted = -1; 
+            else
+                accepted = 1;
+            end
+
+            AcceptTypes.resetDataSelection(data);   
         end
     end
 
@@ -193,6 +198,10 @@ classdef AcceptTypes
                 fig = elem.fig;
                 if selected; fig.LineWidth = fig.LineWidth + 1;
                 else; fig.LineWidth = fig.LineWidth - 1; end
+            elseif isa(elem,'polygon_base')
+                fig = elem.fig;
+                if selected; fig.FaceAlpha = fig.FaceAlpha + 0.4;
+                else; fig.FaceAlpha = fig.FaceAlpha - 0.4; end
             end
         end
     end

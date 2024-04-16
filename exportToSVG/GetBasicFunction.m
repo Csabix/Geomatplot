@@ -1,4 +1,4 @@
-function retFunc = GetBasicFunction(name)
+function retFunc = GetBasicFunction(name, inputs)
     switch name
         case 'makeDraggable'
         retFunc = "\tfunction makeDraggable(evt) {\n";
@@ -39,6 +39,9 @@ function retFunc = GetBasicFunction(name)
             retFunc = retFunc + "\t\t\t};\n";
         retFunc = retFunc + "\t\t}\n";
     retFunc = retFunc + "\t}\n";
+
+        case '@dist_point2pointseq'
+            
     
     end
 end

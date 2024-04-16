@@ -2,7 +2,7 @@ function ExportScript(userData, outFile)
     fprintf(outFile, '<script type="text/javascript" href="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"/>\n');
     fprintf(outFile, '<script type="text/javascript"><![CDATA[\n');
 
-    fprintf(outFile, GetBasicFunction('makeDraggable'));
+    fprintf(outFile, GetBasicFunction('makeDraggable', []));
     fprintf(outFile, 'const config = { attributes: true, childList: false, subtree: false };');
     fprintf(outFile, 'let temp;');
     dependents = userData.deps;
@@ -30,12 +30,12 @@ function ExportScript(userData, outFile)
                             
 
                                 temp = "temp = new MutationObserver((mutationList, observer) => {for (const mutation of mutationList) {if (mutation.type === 'attributes') {if(mutation.attributeName === 'cx'){\n";
-                                temp = temp + "document.getElementById('"+FieldBuffer.label+"').setAttributeNS(null, 'x1', document.getElementById('"+FieldBuffer.inputs{1}+"').getAttributeNS(null, mutation.attributeName));\n";
-                                temp = temp + "document.getElementById('"+FieldBuffer.label+"').setAttributeNS(null, 'x2', document.getElementById('"+FieldBuffer.inputs{2}+"').getAttributeNS(null, mutation.attributeName));\n}";
+                                temp = temp + "document.getElementById('"+string(FieldBuffer.label)+"').setAttributeNS(null, 'x1', document.getElementById('"+string(FieldBuffer.inputs{1}.label)+"').getAttributeNS(null, mutation.attributeName));\n";
+                                temp = temp + "document.getElementById('"+string(FieldBuffer.label)+"').setAttributeNS(null, 'x2', document.getElementById('"+string(FieldBuffer.inputs{2}.label)+"').getAttributeNS(null, mutation.attributeName));\n}";
                                 temp = temp + "if(mutation.attributeName === 'cy'){\n";
-                                temp = temp + "document.getElementById('"+FieldBuffer.label+"').setAttributeNS(null, 'y1', document.getElementById('"+FieldBuffer.inputs{1}+"').getAttributeNS(null, mutation.attributeName));";
-                                temp = temp + "document.getElementById('"+FieldBuffer.label+"').setAttributeNS(null, 'y2', document.getElementById('"+FieldBuffer.inputs{2}+"').getAttributeNS(null, mutation.attributeName));}}}});\n";
-                                temp = temp + "temp.observe(getElementById('"+FieldBuffer.inputs{1}+"'), config);temp.observe(getElementById('"+FieldBuffer.inputs{2}+"'), config);";
+                                temp = temp + "document.getElementById('"+string(FieldBuffer.label)+"').setAttributeNS(null, 'y1', document.getElementById('"+string(FieldBuffer.inputs{1}.label)+"').getAttributeNS(null, mutation.attributeName));";
+                                temp = temp + "document.getElementById('"+string(FieldBuffer.label)+"').setAttributeNS(null, 'y2', document.getElementById('"+string(FieldBuffer.inputs{2}.label)+"').getAttributeNS(null, mutation.attributeName));}}}});\n";
+                                temp = temp + "temp.observe(document.getElementById('"+string(FieldBuffer.inputs{1}.label)+"'), config);temp.observe(document.getElementById('"+string(FieldBuffer.inputs{2}.label)+"'), config);";
                                 
                                 fprintf(outFile, temp);
                         end
@@ -49,6 +49,13 @@ function ExportScript(userData, outFile)
 
 
             otherwise
+
+                if isequal(class(FieldBuffer), 'dscalar')
+                    
+                    temp = "let "+string(FieldBuffer.label)+" = ";
+
+                    fprintf(outFile, temp);
+
         end
 
 

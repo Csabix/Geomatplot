@@ -44,17 +44,17 @@
 <circle id="B" class="draggable" r="5" cx="875" cy="500" fill="rgb(0,0,256)" />
 <circle id="C" class="draggable" r="5" cx="625" cy="156.25" fill="rgb(0,0,256)" />
 
-<script type="text/javascript" href="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"/>
+<script type="text/javascript" href="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
 <script type="text/javascript"><![CDATA[
 
 <!-- --------------------------------------------------------------------- -->
 
 const matrix = math.matrix([[7, 1], [-2, 3]]) // Matrix
 const vector = [1, 1]
-console.log(math.multiply(vector, 0));
-console.log(math.multiply(vector, 1));
-console.log(matrix);
-console.log(math.sqrt(-4).toString()) // 2i
+//console.log(math.multiply(vector, 0));
+//console.log(math.multiply(vector, 1));
+//console.log(matrix);
+//console.log(math.sqrt(-4).toString()) // 2i
 <!-- --------------------------------------------------------------------- -->
 <!-- --------------------------------------------------------------------- -->
 <!-- --------------------------------------------------------------------- -->
@@ -63,10 +63,10 @@ let A = document.getElementById("A");
 let B = document.getElementById("B");
 let C = document.getElementById("C");
 
-console.log(A);
+// console.log(A);
 
 function makeDraggable(evt) {
-    console.log(evt)
+    // console.log(evt)
     var svg = evt.target;
     svg.addEventListener('mousedown', startDrag);
     svg.addEventListener('mousemove', drag);
@@ -78,7 +78,7 @@ function makeDraggable(evt) {
     function startDrag(evt) {
         if (evt.target.classList.contains('draggable')) {
             selectedElement = evt.target;
-            console.log(evt.target)
+            //console.log(evt.target)
             offset = getMousePosition(evt);
             offset.x -= parseFloat(selectedElement.getAttributeNS(null, "cx"));
             offset.y -= parseFloat(selectedElement.getAttributeNS(null, "cy"));
@@ -179,6 +179,19 @@ a.observe(C, config);
 
 // Start observing the target node for configured mutations
 // observer.observe(A, config);
+
+let x = math.matrixFromRows([0.5,0.0568]);
+let y = math.matrixFromRows([0,0]);
+
+let b = function dist_point2pointseq(a, b){
+    
+    a = math.subtract(a, b);
+    d = math.sqrt(math.min(math.add(math.dotPow(math.column(a, 0),2), math.dotPow(math.column(a, 1),2))))
+    
+    return d;
+}
+
+console.log(b(x,y));
 
 ]]></script>
 

@@ -41,8 +41,22 @@ function retFunc = GetBasicFunction(name, inputs)
     retFunc = retFunc + "\t}\n";
 
         case '@dist_point2pointseq'
-            
-    
+            a = inputs{1};
+            b = inputs{2};
+
+            switch class(b)
+                case 'dpointseq'
+                    % have to collect the svg group point coordinates into
+                    % an array to make a matrix from
+
+
+                    
+
+                otherwise
+                    % distance of 2 points
+
+                    
+                    
     end
 end
 

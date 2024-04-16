@@ -83,7 +83,7 @@ methods (Access = public)
     function checkData(o)
         switch o.acceptFcn(o.clickData)
             case 1 %Accept state
-                o.drawFcn(o.clickData);
+                o.drawFcn(o,o.clickData);
                 o.clickData = [];
             case -1 %Error state
                 o.errorFcn(); %Temporary

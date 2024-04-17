@@ -26,7 +26,7 @@
 <circle id="center1" r="5" cx="562.5" cy="464.4886" fill="rgb(0,0,0)" />
 
 <circle id="circ1" r="314.5112" cx="562.5" cy="464.4886" fill="none" stroke-width="2" stroke="rgb(256,0,256)" />
-
+<circle id="dist1" r="0" cx="0" cy="0" value="0" visibility="hidden" />
 <line id="angbi11" x1="99260731979.6904" y1="50546005768.9493" x2="9926948.1105" y2="5055100.5269" stroke="rgb(0,0,0)" stroke-width="1" /><line id="angbi12" x1="9926948.1105" y1="5055100.5269" x2="875" y2="500" stroke="rgb(0,0,0)" stroke-width="1" /><line id="angbi13" x1="875" y1="500" x2="-117.6073" y2="-5.4601" stroke="rgb(0,0,0)" stroke-width="1" /><line id="angbi14" x1="-117.6073" y1="-5.4601" x2="-9925198.1105" y2="-5054100.5269" stroke="rgb(0,0,0)" stroke-width="1" /><line id="angbi15" x1="-9925198.1105" y1="-5054100.5269" x2="-99260730229.6904" y2="-50546004768.9493" stroke="rgb(0,0,0)" stroke-width="1" />
 <line id="angbi21" x1="9311403282.8559" y1="-92778794395.0334" x2="931765.2658" y2="-9277723.2051" stroke="rgb(0,0,0)" stroke-width="1" /><line id="angbi22" x1="931765.2658" y1="-9277723.2051" x2="625" y2="156.25" stroke="rgb(0,0,0)" stroke-width="1" /><line id="angbi23" x1="625" y1="156.25" x2="531.886" y2="1084.0379" stroke="rgb(0,0,0)" stroke-width="1" /><line id="angbi24" x1="531.886" y1="1084.0379" x2="-930515.2658" y2="9278035.7051" stroke="rgb(0,0,0)" stroke-width="1" /><line id="angbi25" x1="-930515.2658" y1="9278035.7051" x2="-9311402032.8559" y2="92778794707.5334" stroke="rgb(0,0,0)" stroke-width="1" />
 <line id="angbi31" x1="-108572133512.5463" y1="42232789782.3341" x2="-10856963.3763" y2="4223778.9282" stroke="rgb(0,0,0)" stroke-width="1" /><line id="angbi32" x1="-10856963.3763" y1="4223778.9282" x2="250" y2="500" stroke="rgb(0,0,0)" stroke-width="1" /><line id="angbi33" x1="250" y1="500" x2="1335.7213" y2="77.6721" stroke="rgb(0,0,0)" stroke-width="1" /><line id="angbi34" x1="1335.7213" y1="77.6721" x2="10857463.3763" y2="-4222778.9282" stroke="rgb(0,0,0)" stroke-width="1" /><line id="angbi35" x1="10857463.3763" y1="-4222778.9282" x2="108572134012.5463" y2="-42232788782.3341" stroke="rgb(0,0,0)" stroke-width="1" />
@@ -183,15 +183,41 @@ a.observe(C, config);
 let x = math.matrixFromRows([0.5,0.0568]);
 let y = math.matrixFromRows([0,0]);
 
-let b = function dist_point2pointseq(a, b){
+let k = {
+    value : 0,
+};
+
+function dist_point2pointseq(a, b){
     
     a = math.subtract(a, b);
     d = math.sqrt(math.min(math.add(math.dotPow(math.column(a, 0),2), math.dotPow(math.column(a, 1),2))))
     
-    return d;
+    //return d;
+    proxy.value = d;
 }
 
-console.log(b(x,y));
+const handler = {
+    set(target, prop, value, receiver) {console.log("Pöts");},
+}
+
+let proxy = new Proxy(k, {
+    set(target, prop, value, receiver) {
+        target[prop] = value;
+        console.log(`property set: ${prop} = ${value}`);
+        return true;
+    },
+})
+
+console.log(proxy.value = 10);
+
+dist_point2pointseq(x,y);
+
+console.log(dist_point2pointseq(x,y));
+console.log(proxy.value);
+
+let dist1 = document.getElementById("dist1");
+console.log(dist1.getAttributeNS(null, "value"));
+dist1.setAttributeNS(null, "value", 0.50321);
 
 ]]></script>
 

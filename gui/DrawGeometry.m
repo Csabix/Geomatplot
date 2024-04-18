@@ -73,8 +73,13 @@ classdef DrawGeometry
             ClosestPoint(o,data{1},data{2});
         end
 
-        function drawSegmentSequence(o,data)
-            SegmentSequence(o,data,'strip');
+        function drawSegmentSequence(o,data,breakEvery)
+            if isempty(breakEvery); breakEvery = 'lines'; end
+            SegmentSequence(o,data,breakEvery);
+        end
+
+        function drawCentroidPoint(o,data)
+            Midpoint(o,data);
         end
     end
 end

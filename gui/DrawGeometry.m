@@ -81,6 +81,10 @@ classdef DrawGeometry
         function drawCentroidPoint(o,data)
             Midpoint(o,data);
         end
-    end
+
+        function drawMirrorSegment(o,data)
+            Mirror(o,data{1},data{2},data{3});
+        end
+    end % static public
 end
 

@@ -20,7 +20,7 @@ classdef PropertiesPanel < handle
             o.closeSubPanels();
             delete(o.propertiesPanel);
         end
-    end
+    end % public
 
     methods(Access = private)
         function o = createPointPanel(o,fig,pos,geometry)
@@ -87,9 +87,7 @@ classdef PropertiesPanel < handle
 
             o.createLinestyleDropdown(grid,[1 2]);
         end
-    end
     
-    methods (Access = private)
         function colorDropdown = createColorDropdown(o,grid,layout,valueChangedFcn)
             colors = {[1 0 0], [0 1 0], [0 0 1], [0 0 0]};
             colorDropdown = uidropdown(grid);
@@ -172,7 +170,8 @@ classdef PropertiesPanel < handle
             if isempty(faPanel); PropertiesPanel.createFaceAlphaPanel(o);
             else; delete(faPanel); end
         end
-    end
+    end % private
+
     methods (Access = private,Static)
         function createLabelPanel(o)
             labelPanel = uipanel(o.propertiesPanel.Parent);
@@ -285,5 +284,5 @@ classdef PropertiesPanel < handle
         function setLabelVisibility(o,evt)
             o.geometry.fig.LabelVisible = string(matlab.lang.OnOffSwitchState(evt.Value));
         end
-    end
+    end % static private
 end

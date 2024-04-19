@@ -51,7 +51,9 @@ classdef AcceptTypes
         end
 
         function accepted = acceptPolygon(data)
-            if AcceptTypes.checkForDuplicates(data(1:end-1)) || ~all(cellfun(@(x) isa(x, 'point_base'), data))
+            types = {'point_base','dpointseq','polygon_base'};
+            check_type = @(x) any(cellfun(@(type) isa(x,type), types));
+            if AcceptTypes.checkForDuplicates(data(1:end-1)) || ~all(cellfun(check_type, data))
                 AcceptTypes.resetDataSelection(data);
                 accepted = -1; 
                 return;
@@ -111,7 +113,7 @@ classdef AcceptTypes
         end
 
         function accepted = acceptSegmentSequence(data,shouldAccept)
-            types = {'point_base','polygon_base'};
+            types = {'point_base','dpointseq','polygon_base'};
             checks = (mod(length(data),2) == 1 && mod(length(data),3) ~= 0);
             accepted = AcceptTypes.acceptSequencedInputGeometry(data,shouldAccept,types,checks);  
         end
@@ -125,7 +127,12 @@ classdef AcceptTypes
             end
             accepted = AcceptTypes.acceptSequencedInputGeometry(data,shouldAccept,types,check);  
         end
-    end
+
+        function accepted = acceptMirrorSegment(data)
+            pattern = {{'point_base','dcircle','dlines','polygon_base'},'point_base','point_base'};
+            accepted = AcceptTypes.acceptGeometryByPattern(data,pattern);
+        end
+    end % static public
 
     methods(Access = private,Static)
         function accepted = acceptGeometryByPattern(data,pattern)
@@ -217,6 +224,6 @@ classdef AcceptTypes
                 else; fig.FaceAlpha = fig.FaceAlpha - 0.4; end
             end
         end
-    end
+    end % static private
 end
 

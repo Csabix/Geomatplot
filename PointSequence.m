@@ -39,7 +39,7 @@ function [h] = PointSequence(varargin)
         [usercallback,varargin] = parse_callback(inputs,varargin{:});
         n = abs(nargout(usercallback));
     end
-    args = parse_(varargin{:});
+    [args,hidden] = parse_(varargin{:});
 
     function varargout = internalcallback(varargin)
         params = cell(1,nargin);
@@ -55,7 +55,7 @@ function [h] = PointSequence(varargin)
         callback = @internalcallback;
     end
 
-    h_ = dpointseq(parent,label,inputs,callback,args,false);
+    h_ = dpointseq(parent,label,inputs,callback,args,hidden);
 
     if nargout == 1; h = h_; end
 end
@@ -77,7 +77,7 @@ function [usercallback,varargin] = parse_callback(inputs,usercallback,varargin)
     end
 end
 
-function params = parse_(color,markersize,params,options)
+function [params,hidden] = parse_(color,markersize,params,options)
     arguments
         color                                 {drawing.mustBeColor}                      = 'k'
         markersize          (1,1) double      {mustBePositive}                           = 2
@@ -88,6 +88,7 @@ function params = parse_(color,markersize,params,options)
         params.MarkerColor                  {drawing.mustBeColor}               = 'k'
         params.MarkerSymbol (1,:) char      {mustBeMember(params.MarkerSymbol,{'o','+','*','x','_','|','^','v','>','<','square','diamond','pentagram','hexagram'})}='o'
         params.ColorVariable
+        options.Visible      (1,:) char   {mustBeMember(options.Visible,{'on','off'})} = 'on'
         options.c
         options.m
     end
@@ -98,6 +99,7 @@ function params = parse_(color,markersize,params,options)
     if ~isfield(params,'MarkerColor');     params.MarkerColor     = color; end
     if ~isfield(params,'MarkerSize');      params.MarkerSize = markersize; end
     params.MarkerSize = 16 * params.MarkerSize;
+    hidden = strcmp(options.Visible,'off');
 end
 
 function mustBePointCallback(usercallback,inputs)

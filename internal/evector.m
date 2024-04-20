@@ -19,6 +19,9 @@ methods
         [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'-',[1 2]);
         c = evector(parent,inputs,constants,expression,operator);
     end
+    function c = times(a,b)
+        c = mtimes(a,b);
+    end
     function c = mtimes(a,b)
         arguments
             a   (1,1) {mustBeA(a,["evector","dvector","escalar","dscalar","numeric"])}

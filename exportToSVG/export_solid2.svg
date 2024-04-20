@@ -40,6 +40,20 @@
 
 <circle id="M" r="5" cx="625" cy="227.2727" fill="rgb(0,0,0)" />
 <line id="seg7" x1="625" y1="227.2727" x2="562.5" y2="464.4886" stroke="rgb(256,0,0)" stroke-width="1" />
+
+<g id="pointseq">
+    <circle id="S1" class="draggable" r="5" cx="1090" cy="389" fill="rgb(120,0,0)" />
+    <circle id="S2" class="draggable" r="5" cx="1089" cy="388" fill="rgb(0,120,0)" />
+    <circle id="S3" class="draggable" r="5" cx="1088" cy="387" fill="rgb(0,0,120)" />
+    <circle id="S4" class="draggable" r="5" cx="1087" cy="386" fill="rgb(240,0,0)" />
+    <circle id="S5" class="draggable" r="5" cx="1086" cy="385" fill="rgb(0,0,240)" />
+    <circle id="S6" class="draggable" r="5" cx="1085" cy="384" fill="rgb(0,240,240)" />
+    <circle id="S7" class="draggable" r="5" cx="1084" cy="383" fill="rgb(240,240,0)" />
+    <circle id="S8" class="draggable" r="5" cx="1083" cy="382" fill="rgb(240,0,240)" />
+    <circle id="S9" class="draggable" r="5" cx="1082" cy="381" fill="rgb(0,240,240)" />
+    <circle id="S10" class="draggable" r="5" cx="1081" cy="380" fill="rgb(240,240,240)" />
+</g>
+
 <circle id="A" class="draggable" r="5" cx="250" cy="500" fill="rgb(0,0,256)" />
 <circle id="B" class="draggable" r="5" cx="875" cy="500" fill="rgb(0,0,256)" />
 <circle id="C" class="draggable" r="5" cx="625" cy="156.25" fill="rgb(0,0,256)" />
@@ -48,22 +62,6 @@
 <script type="text/javascript"><![CDATA[
 
 <!-- --------------------------------------------------------------------- -->
-
-const matrix = math.matrix([[7, 1], [-2, 3]]) // Matrix
-const vector = [1, 1]
-//console.log(math.multiply(vector, 0));
-//console.log(math.multiply(vector, 1));
-//console.log(matrix);
-//console.log(math.sqrt(-4).toString()) // 2i
-<!-- --------------------------------------------------------------------- -->
-<!-- --------------------------------------------------------------------- -->
-<!-- --------------------------------------------------------------------- -->
-
-let A = document.getElementById("A");
-let B = document.getElementById("B");
-let C = document.getElementById("C");
-
-// console.log(A);
 
 function makeDraggable(evt) {
     // console.log(evt)
@@ -106,54 +104,7 @@ function makeDraggable(evt) {
 }
 
 // Options for the observer (which mutations to observe)
-const config = { attributes: true, childList: false, subtree: false };
-
-// Callback function to execute when mutations are observed
-/*const callback = (mutationList, observer) => {
-  for (const mutation of mutationList) {
-    if (mutation.type === "childList") {
-      console.log("A child node has been added or removed.");
-    } else if (mutation.type === "attributes") {
-      console.log(`The ${mutation.attributeName} ${mutation.value} attribute was modified.`);
-    }
-  }
-};*/
-
-const callback = (mutationList, observer) => {
-  for (const mutation of mutationList) {
-    if (mutation.type === "attributes") {
-
-        if(mutation.attributeName === "cx"){
-            document.getElementById("seg1").setAttributeNS(null, "x1", A.getAttributeNS(null, mutation.attributeName));
-        }
-        if(mutation.attributeName === "cy"){
-            document.getElementById("seg1").setAttributeNS(null, "y1", A.getAttributeNS(null, mutation.attributeName));
-        }
-    
-    }
-  }
-};
-
-let a = new MutationObserver((mutationList, observer) => {
-    for (const mutation of mutationList) {
-    if (mutation.type === "attributes") {
-
-        if(mutation.attributeName === "cx"){
-            document.getElementById("seg1").setAttributeNS(null, "x2", B.getAttributeNS(null, mutation.attributeName));
-            document.getElementById("seg1").setAttributeNS(null, "x1", A.getAttributeNS(null, mutation.attributeName));
-        }
-        if(mutation.attributeName === "cy"){
-            document.getElementById("seg1").setAttributeNS(null, "y2", B.getAttributeNS(null, mutation.attributeName));
-            document.getElementById("seg1").setAttributeNS(null, "y1", A.getAttributeNS(null, mutation.attributeName));
-        }
-    
-    }
-  }
-})
-a.observe(B, config);
-a.observe(A, config);
-
-a = null
+const config = { attributes: true, childList: false, subtree: true };
 
 a = new MutationObserver((mutationList, observer) => {
     for (const mutation of mutationList) {
@@ -174,50 +125,20 @@ a = new MutationObserver((mutationList, observer) => {
 a.observe(B, config);
 a.observe(C, config);
 
-// Create an observer instance linked to the callback function
-// const observer = new MutationObserver(callback);
+let pseq = document.getElementById("pointseq");
 
-// Start observing the target node for configured mutations
-// observer.observe(A, config);
-
-let x = math.matrixFromRows([0.5,0.0568]);
-let y = math.matrixFromRows([0,0]);
-
-let k = {
-    value : 0,
-};
-
-function dist_point2pointseq(a, b){
-    
-    a = math.subtract(a, b);
-    d = math.sqrt(math.min(math.add(math.dotPow(math.column(a, 0),2), math.dotPow(math.column(a, 1),2))))
-    
-    //return d;
-    proxy.value = d;
-}
-
-const handler = {
-    set(target, prop, value, receiver) {console.log("Pöts");},
-}
-
-let proxy = new Proxy(k, {
-    set(target, prop, value, receiver) {
-        target[prop] = value;
-        console.log(`property set: ${prop} = ${value}`);
-        return true;
-    },
+a = new MutationObserver((mutationList, observer) => {
+    for (const mutation of mutationList) {
+    if (mutation.type === "attributes") {
+        let a = math.matrixFromRows([document.getElementById("center1").getAttributeNS(null, "cx"), document.getElementById("center1").getAttributeNS(null, "cy")]);
+        let b = math.matrixFromRows([document.getElementById("A").getAttributeNS(null, "cx"), document.getElementById("A").getAttributeNS(null, "cy")]);
+        let c = math.subtract(a, b);
+        console.log(c);
+        document.getElementById("dist1").setAttributeNS(null, "value", math.sqrt(math.min(math.add(math.dotPow(math.column(c, 0),2), math.dotPow(math.column(c, 1),2)))))
+    }
+  }
 })
-
-console.log(proxy.value = 10);
-
-dist_point2pointseq(x,y);
-
-console.log(dist_point2pointseq(x,y));
-console.log(proxy.value);
-
-let dist1 = document.getElementById("dist1");
-console.log(dist1.getAttributeNS(null, "value"));
-dist1.setAttributeNS(null, "value", 0.50321);
+a.observe(document.getElementById("A"), config);*/
 
 ]]></script>
 

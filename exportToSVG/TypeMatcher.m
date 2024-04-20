@@ -84,6 +84,16 @@ function svgLine = TypeMatcher(plotData, scale)
             svgLine = strcat('<circle id="', plotData.title,'" r="', string(radius),'" cx="', string(cx), '" cy="', string(cy));
             svgLine = strcat(svgLine, '" fill="none" stroke-width="2" stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
        
+        case 'dscalar'
+
+            % Should look for a better element that doesn't need to be
+            % drawn
+
+            value = plotData.val * scale;
+
+            svgLine = strcat('<circle id="', plotData.title,'" r="0" cx="0" cy="0"');
+            svgLine = strcat(svgLine, ' value="', string(value),'" visibility="hidden" />');
+
         otherwise
             svgLine = "";
     end

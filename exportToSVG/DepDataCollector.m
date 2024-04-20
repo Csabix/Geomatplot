@@ -97,6 +97,12 @@ function elementDataStruct = DepDataCollector(FieldBuffer, FieldID)
             %elementDataStruct.Position = elementCoords;
             %elementDataStruct.Color = elementColor;
 
+        case "dscalar"
+            elementDataStruct.type = "dscalar";
+            elementDataStruct.title = FieldID;
+
+            elementDataStruct.val = FieldBuffer.val;
+
         otherwise
             %error("Invalid movable type, or not yet documented movable type");
             elementDataStruct.type = "none";

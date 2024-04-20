@@ -40,23 +40,31 @@ function retFunc = GetBasicFunction(name, inputs)
         retFunc = retFunc + "\t\t}\n";
     retFunc = retFunc + "\t}\n";
 
-        case '@dist_point2pointseq'
+        case 'dist_point2pointseq'
             a = inputs{1};
             b = inputs{2};
+            out = inputs{3}.label;
+            retFunc = "temp = new MutationObserver((mutationList, observer) => {for (const mutation of mutationList) {if (mutation.type === 'attributes') {\n";
+            retFunc = retFunc + "let a = math.matrixFromRows([document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cx'), document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cy')]);\n";
 
-            switch class(b)
-                case 'dpointseq'
-                    % have to collect the svg group point coordinates into
-                    % an array to make a matrix from
-
-
-                    
-
-                otherwise
-                    % distance of 2 points
-
-                    
-                    
+            if (isequal(class(b), 'dpointseq'))
+                % collect all points in a matrix HAVE TO TEST THIS
+                retFunc = retFunc + "let b = math.matrixFromRows(";
+                for k = 1:length(b.inputs) % have to get all the points in pointseq and make a matrix
+                    retFunc = retFunc + "[document.getElementById('"+string(b.inputs{k}.label)+"').getAttributeNS(null, 'cx'), document.getElementById('"+string(b.inputs{k}.label)+"').getAttributeNS(null, 'cy')]";
+                    if isequal(k, length(b.inputs)) == false
+                        retFunc = retFunc + ", ";
+                    end
+                end
+                retFunc = retFunc + ");\n";
+            else % in case second input is a point
+                retFunc = retFunc + "let b = math.matrixFromRows([document.getElementById('"+string(b.label)+"').getAttributeNS(null, 'cx'), document.getElementById('"+string(b.label)+"').getAttributeNS(null, 'cy')]);\n";
+            end % end of second input type check
+            retFunc = retFunc + "let c = math.subtract(a, b);\n";
+            retFunc = retFunc + "document.getElementById('"+string(out)+"').setAttributeNS(null, 'value', math.sqrt(math.min(math.add(math.dotPow(math.column(c, 0),2), math.dotPow(math.column(c, 1),2)))));}}});\n";
+            retFunc = retFunc + "temp.observe(document.getElementById('"+string(a.label)+"'), config);temp.observe(document.getElementById('"+string(b.label)+"'), config);\n";
+        otherwise
+            retFunc = "\n";
     end
 end
 

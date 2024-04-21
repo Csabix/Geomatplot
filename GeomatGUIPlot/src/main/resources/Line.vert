@@ -17,7 +17,7 @@ layout(std430, binding = 1) readonly buffer skeleton {
     Line[] lines;
 };
 
-const float width = 20.0f;
+const float width = 10.0f;
 
 layout(location=0) out vec4 color;
 layout(location=1) out float dist;
@@ -39,12 +39,7 @@ void main() {
     float x = width / sqrt((1.0 - dot(a,b)) / 2.0); // Smaller the angle the more we need to offset
 
     a = vec2(-a.y,a.x);
-    if(dot(a,b) < 0.985) {
-        b = vec2(b.y,-b.x);
-    } else {
-        x = width;
-        b = vec2(0);
-    }
+    b = vec2(b.y,-b.x);
 
     vec2 v = (x * normalize((a + b)) / scale / wh );
     if (mapIndex % 2 == 1) v = -v;

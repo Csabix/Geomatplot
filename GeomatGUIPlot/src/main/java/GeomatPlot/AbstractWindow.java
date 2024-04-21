@@ -14,8 +14,8 @@ public abstract class AbstractWindow {
     protected static int top,left,bot,right;
     public Frame frame;
     public GLCanvas canvas;
-    private GLContext context;
-    private EventAggregator eventAggregator;
+    private final GLContext context;
+    private final EventAggregator eventAggregator;
     protected Boolean running;
     public Integer width, height;
     public  AbstractWindow(String title, Integer width, Integer height, Boolean maximized){
@@ -57,6 +57,10 @@ public abstract class AbstractWindow {
                 eventAggregator.addEvent(event);
             }
         });
+    }
+    public void toFront() {
+        frame.toFront();
+        frame.requestFocus();
     }
     private void mainLoop() {
         GL4 gl_ = getGl();

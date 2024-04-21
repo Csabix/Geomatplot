@@ -38,12 +38,14 @@ public class Plot extends AbstractWindow{
     private boolean fboCreated;
     private int fbo,colorTex,indexTex;
     private final IntBuffer readValue = GLBuffers.newDirectIntBuffer(1);
+    public final ClickInputQuery clickInputQuery;
     public Plot(){
         super("GeomatPLot",640,640,false);
         plotState = PlotState.NONE;
         clickLocation = new Tuple<>(0f,0f);
         resized = false;
         fboCreated = false;
+        clickInputQuery = new ClickInputQuery(this);
     }
     @Override
     protected void init(GL4 gl) {
@@ -72,7 +74,40 @@ public class Plot extends AbstractWindow{
                 break;
             case MOUSE_PRESSED:
                 MouseEvent evt = (MouseEvent)event;
-                if(plotState == PlotState.WAITING_INPUT) {
+                if(clickInputQuery.isWaitingInput()) {
+                    synchronized(clickInputQuery) {
+                        clickInputQuery.setEvent(evt, camera);
+                        clickInputQuery.notify();
+                    }
+                    //plotState = PlotState.NONE;
+                } else if(plotState == PlotState.NONE) {
+                    gl.glGetTextureSubImage(indexTex, 0, evt.getX(), height - evt.getY(), 0, 1, 1, 1, GL_RED_INTEGER, GL_INT, Float.BYTES, readValue);
+                    int typeID = readValue.get();
+                    readValue.rewind();
+                    Optional<ObjectClicked> result = drawerContainer.getClicked(typeID);
+                    if (result.isPresent()) {
+                        objectClicked = result.get();
+                        System.out.println(objectClicked.type.toString() + " " + objectClicked.data.getID());
+                        switch (objectClicked.type) {
+                            case Point:
+                                plotState = PlotState.POINT_DRAG;
+                                break;
+                            case Polygon:
+                                // TODO
+                                break;
+                            default:
+                                plotState = PlotState.CAMERA_DRAG;
+                                camera.setOldData();
+                                clickLocation = camera.invert(evt.getX() / (float) width * 2f - 1f, (height - evt.getY()) / (float) height * 2f - 1f);
+
+                        }
+                    } else {
+                        plotState = PlotState.CAMERA_DRAG;
+                        camera.setOldData();
+                        clickLocation = camera.invert(evt.getX() / (float) width * 2f - 1f, (height - evt.getY()) / (float) height * 2f - 1f);
+                    }
+                }
+                /*if(plotState == PlotState.WAITING_INPUT) {
                     synchronized (this) {
                         clickLocation = camera.invert(evt.getX() / (float)width * 2f - 1f, (height - evt.getY()) / (float)height * 2f - 1f);
                         notify();
@@ -104,7 +139,7 @@ public class Plot extends AbstractWindow{
                         camera.setOldData();
                         clickLocation = camera.invert(evt.getX() / (float)width * 2f - 1f, (height - evt.getY()) / (float)height * 2f - 1f);
                     }
-                }
+                }*/
                 break;
             case MOUSE_DRAGGED:
                 evt = (MouseEvent)event;
@@ -164,17 +199,18 @@ public class Plot extends AbstractWindow{
         gl.glBlitNamedFramebuffer(fbo,0,0,0,w,h,0,0,w,h,GL_COLOR_BUFFER_BIT,GL_NEAREST);
     }
     public float[] clickInput() {
-        plotState = PlotState.WAITING_INPUT;
-        frame.toFront();
-        frame.requestFocus();
-        try {
+        //plotState = PlotState.WAITING_INPUT;
+        toFront();
+        clickInputQuery.getInput();
+        return clickInputQuery.xy;
+        /*try {
             synchronized (this) {
                 wait();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new float[]{clickLocation.first,clickLocation.second};
+        return new float[]{clickLocation.first,clickLocation.second};*/
     }
     public void addDrawable(Drawable drawable) {
         callEvent(new CreateEvent(this,drawable));

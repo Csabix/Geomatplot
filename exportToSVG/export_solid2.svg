@@ -23,7 +23,7 @@
 <line id="perpbi11" x1="562.5" y1="62500000812.5" x2="562.5" y2="6250812.5" stroke="rgb(0,0,0)" stroke-width="1" /><line id="perpbi12" x1="562.5" y1="6250812.5" x2="562.5" y2="812.5" stroke="rgb(0,0,0)" stroke-width="1" /><line id="perpbi13" x1="562.5" y1="812.5" x2="562.5" y2="187.5" stroke="rgb(0,0,0)" stroke-width="1" /><line id="perpbi14" x1="562.5" y1="187.5" x2="562.5" y2="-6249187.5" stroke="rgb(0,0,0)" stroke-width="1" /><line id="perpbi15" x1="562.5" y1="-6249187.5" x2="562.5" y2="-62499999187.5" stroke="rgb(0,0,0)" stroke-width="1" />
 <line id="perpbi21" x1="34375000921.875" y1="-24999999796.875" x2="3438421.875" y2="-2499796.875" stroke="rgb(0,0,0)" stroke-width="1" /><line id="perpbi22" x1="3438421.875" y1="-2499796.875" x2="921.875" y2="203.125" stroke="rgb(0,0,0)" stroke-width="1" /><line id="perpbi23" x1="921.875" y1="203.125" x2="578.125" y2="453.125" stroke="rgb(0,0,0)" stroke-width="1" /><line id="perpbi24" x1="578.125" y1="453.125" x2="-3436578.125" y2="2500203.125" stroke="rgb(0,0,0)" stroke-width="1" /><line id="perpbi25" x1="-3436578.125" y1="2500203.125" x2="-34374999078.125" y2="25000000203.125" stroke="rgb(0,0,0)" stroke-width="1" />
 <line id="perpbi31" x1="-34374999734.375" y1="-37499999859.375" x2="-3437234.375" y2="-3749859.375" stroke="rgb(0,0,0)" stroke-width="1" /><line id="perpbi32" x1="-3437234.375" y1="-3749859.375" x2="265.625" y2="140.625" stroke="rgb(0,0,0)" stroke-width="1" /><line id="perpbi33" x1="265.625" y1="140.625" x2="609.375" y2="515.625" stroke="rgb(0,0,0)" stroke-width="1" /><line id="perpbi34" x1="609.375" y1="515.625" x2="3437765.625" y2="3750140.625" stroke="rgb(0,0,0)" stroke-width="1" /><line id="perpbi35" x1="3437765.625" y1="3750140.625" x2="34375000265.625" y2="37500000140.625" stroke="rgb(0,0,0)" stroke-width="1" />
-<circle id="center1" r="5" cx="562.5" cy="464.4886" fill="rgb(0,0,0)" />
+<circle id="center1" class="draggable" r="5" cx="562.5" cy="464.4886" fill="rgb(0,0,0)" />
 
 <circle id="circ1" r="314.5112" cx="562.5" cy="464.4886" fill="none" stroke-width="2" stroke="rgb(256,0,256)" />
 <circle id="dist1" r="0" cx="0" cy="0" value="0" visibility="hidden" />
@@ -62,6 +62,11 @@
 <script type="text/javascript"><![CDATA[
 
 <!-- --------------------------------------------------------------------- -->
+
+let A = document.getElementById("A");
+let B = document.getElementById("B");
+let C = document.getElementById("C");
+
 
 function makeDraggable(evt) {
     // console.log(evt)
@@ -138,7 +143,21 @@ a = new MutationObserver((mutationList, observer) => {
     }
   }
 })
-a.observe(document.getElementById("A"), config);*/
+a.observe(document.getElementById("A"), config);
+a.observe(document.getElementById("center1"), config);
+
+a = new MutationObserver((mutationList, observer) => {
+    for (const mutation of mutationList) {
+    if (mutation.type === "attributes") {
+        document.getElementById("circ1").setAttributeNS(null, "cx", document.getElementById("center1").getAttributeNS(null, "cx"));
+        document.getElementById("circ1").setAttributeNS(null, "cy", document.getElementById("center1").getAttributeNS(null, "cy"));
+        document.getElementById("circ1").setAttributeNS(null, "r", document.getElementById("dist1").getAttributeNS(null, "value"));
+    }
+  }
+})
+a.observe(document.getElementById("center1"), config);
+a.observe(document.getElementById("dist1"), config);
+
 
 ]]></script>
 

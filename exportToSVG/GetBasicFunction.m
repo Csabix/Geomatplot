@@ -63,6 +63,17 @@ function retFunc = GetBasicFunction(name, inputs)
             retFunc = retFunc + "let c = math.subtract(a, b);\n";
             retFunc = retFunc + "document.getElementById('"+string(out)+"').setAttributeNS(null, 'value', math.sqrt(math.min(math.add(math.dotPow(math.column(c, 0),2), math.dotPow(math.column(c, 1),2)))));}}});\n";
             retFunc = retFunc + "temp.observe(document.getElementById('"+string(a.label)+"'), config);temp.observe(document.getElementById('"+string(b.label)+"'), config);\n";
+        
+        case 'dcircleDefaultCallback'
+            a = inputs{1};
+            b = inputs{2};
+            out = inputs{3};
+            retFunc = "temp = new MutationObserver((mutationList, observer) => {for (const mutation of mutationList) {if (mutation.type === 'attributes') {\n";
+            retFunc = retFunc + "document.getElementById('"+string(out.label)+"').setAttributeNS(null, 'cx', document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cx'));\n";
+            retFunc = retFunc + "document.getElementById('"+string(out.label)+"').setAttributeNS(null, 'cy', document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cy'));\n";
+            retFunc = retFunc + "document.getElementById('"+string(out.label)+"').setAttributeNS(null, 'r', document.getElementById('"+string(b.label)+"').getAttributeNS(null, 'value'));}}});\n";
+            retFunc = retFunc + "temp.observe(document.getElementById('"+string(a.label)+"'), config);temp.observe(document.getElementById('"+string(b.label)+"'), config);\n";
+
         otherwise
             retFunc = "\n";
     end

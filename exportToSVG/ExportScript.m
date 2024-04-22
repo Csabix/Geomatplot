@@ -34,7 +34,8 @@ disp(FieldBuffer.callback);
                 fprintf(outFile, temp);
             end % if
         case "dcircle"
-            if isequal(class(FieldBuffer.inputs{1}),'mpoint') && isequal(class(FieldBuffer.inputs{2}),'dscalar')
+            if isequal(class(FieldBuffer.inputs{2}),'dscalar')
+                fprintf(outFile, GetBasicFunction("dcircleDefaultCallback", {FieldBuffer.inputs{1}, FieldBuffer.inputs{2}, FieldBuffer}));
             end % if
         end % inside switch
     otherwise

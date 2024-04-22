@@ -11,12 +11,14 @@ public class gLabel extends Drawable {
     public float x,y; // Anchor
     public int id;
     public gLabel(int x, int y, String text) {
+        super(false);
         this.x = x;
         this.y = y;
         //this.letters = letters;
         this.text = text;
     }
     public gLabel(){
+        super(false);
         //letters = null;
         text = "";
     }

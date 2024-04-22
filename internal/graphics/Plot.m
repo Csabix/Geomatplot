@@ -1,6 +1,9 @@
 classdef Plot < handle
-    properties
+    properties (SetAccess = immutable)
         JPlot
+        JClickInput
+    end
+    properties
         UserData
     end
 
@@ -12,6 +15,7 @@ classdef Plot < handle
     methods
         function obj = Plot()
             obj.JPlot = GeomatPlot.Plot;
+            obj.JClickInput = obj.JPlot.clickInputQuery;
             obj.FrameH = handle(obj.JPlot.frame,'CallbackProperties');
             obj.CanvasH = handle(obj.JPlot.canvas,'CallbackProperties');
         end
@@ -34,6 +38,21 @@ classdef Plot < handle
 
         function p = clickInput(obj)
             p = obj.JPlot.clickInput;
+            p = p';
+        end
+
+        function p = getInput(obj, condition)
+            arguments
+                obj
+                condition = @(x) true
+            end
+
+            obj.JClickInput.getInput;
+            while(~condition(obj.JClickInput))
+                obj.JClickInput.getInput;
+            end
+
+            p = obj.JClickInput.xy;
             p = p';
         end
     end

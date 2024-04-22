@@ -2,8 +2,11 @@ classdef mpolygon < moveable
 methods
     function o=mpolygon(parent,label,args)
         args = namedargs2cell(args);
-        h = drawpolygon(args{:});
+        %h = drawpolygon(args{:});
+        h = drawPolygon(args{:});
+        h.fig
         o = o@moveable(parent,label,h);
+        %f = dfill(o,)
     end
 % TODO .value not consistent with dpolygon
     function v = value(o)

@@ -41,7 +41,7 @@ public class LabelDrawer extends Drawer {
         ssbo = GLObject.createBuffers(gl,1)[0];
 
         gl.glNamedBufferData(ssbo, capacity, null, GL_STATIC_DRAW);
-        gl.glBindBufferBase(GL_SHADER_STORAGE_BUFFER,2,ssbo);
+        //gl.glBindBufferBase(GL_SHADER_STORAGE_BUFFER,2,ssbo);
     }
     @Override
     public void add(CreateEvent event) {
@@ -51,6 +51,7 @@ public class LabelDrawer extends Drawer {
     }
     @Override
     public void drawInner(GL4 gl) {
+        gl.glBindBufferBase(GL_SHADER_STORAGE_BUFFER,1,ssbo);
         shader.use(gl);
         gl.glDrawArrays(GL_TRIANGLES,0,drawCount);
     }

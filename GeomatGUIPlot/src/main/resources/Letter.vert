@@ -2,7 +2,7 @@
 
 struct Letter {
     vec4 offset; // x,y,w,h
-    vec4  tex_coord; // u,v,w,h
+    vec4 tex_coord; // u,v,w,h
     vec2 anchor;
     vec2 padding;
 };
@@ -15,7 +15,7 @@ layout(std140, binding = 0) uniform Camera {
     vec2 wh;
 };
 
-layout(std430, binding = 2) readonly buffer lettersBuffer {
+layout(std430, binding = 1) readonly buffer lettersBuffer {
     Letter[] letters;
 };
 const vec2[] operations = { vec2(0, 0), vec2(0,-1), vec2(1,-1),

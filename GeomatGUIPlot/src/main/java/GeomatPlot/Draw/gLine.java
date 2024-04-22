@@ -8,12 +8,14 @@ public class gLine extends Drawable {
     public float[][] colors;
     public boolean dashed;
     public gLine(float[] x, float[] y, float[][] colors, boolean dashed) {
+        super(false);
         this.x = x;
         this.y = y;
         this.colors = colors;
         this.dashed = dashed;
     }
     public gLine(float[] x, float[] y, float[] colors, boolean dashed) {
+        super(false);
         this.x = x;
         this.y = y;
         this.dashed = dashed;

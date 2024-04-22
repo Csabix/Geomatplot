@@ -8,17 +8,25 @@ public class gPoint extends Drawable {
     public float x,y;
     float r,g,b;
     float br,bg,bb;
-    public gPoint(List<Float> xy, List<Float> rgb, List<Float> brgb) {
+    /*public gPoint(List<Float> xy, List<Float> rgb, List<Float> brgb, boolean movable) {
         x = xy.get(0);y = xy.get(1);
         r = rgb.get(0);g = rgb.get(1);b = rgb.get(2);
         br = brgb.get(0);bg = brgb.get(1);bb = brgb.get(2);
-    }
-    public gPoint(float[] data) {
+        this.movable = movable;
+    }*/
+    public gPoint(float[] data, boolean movable) {
+        super(movable);
         x = data[0];y = data[1];
         r = data[2];g = data[3];b = data[4];
         br = data[5];bg = data[6];bb = data[7];
     }
-    public gPoint(){}
+    public gPoint(float[] data) {
+        super(true);
+        x = data[0];y = data[1];
+        r = data[2];g = data[3];b = data[4];
+        br = data[5];bg = data[6];bb = data[7];
+    }
+    public gPoint(){super(false);}
     @Override
     public float[] pack() {
         return new float[]{x,y,r,g,b,br,bg,bb};

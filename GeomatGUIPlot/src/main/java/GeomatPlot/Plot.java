@@ -85,7 +85,7 @@ public class Plot extends AbstractWindow{
                     int typeID = readValue.get();
                     readValue.rewind();
                     Optional<ObjectClicked> result = drawerContainer.getClicked(typeID);
-                    if (result.isPresent()) {
+                    if (result.isPresent() && result.get().data.isMovable()) {
                         objectClicked = result.get();
                         System.out.println(objectClicked.type.toString() + " " + objectClicked.data.getID());
                         switch (objectClicked.type) {

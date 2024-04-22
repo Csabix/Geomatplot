@@ -4,6 +4,10 @@ public abstract class Drawable {
     //public enum DrawableType{Point,Line,Label,Polygon};
     public enum DrawableType{Polygon,Line, Label, Point};
     private int ID;
+    private final boolean movable;
+    protected Drawable(boolean movable) {
+        this.movable = movable;
+    }
     public void setID(int ID) {
         this.ID = ID;
     }
@@ -16,4 +20,7 @@ public abstract class Drawable {
     public abstract int bytes();
     public abstract int bytesVertex();
     public abstract DrawableType getType();
+    public boolean isMovable() {
+        return movable;
+    }
 }

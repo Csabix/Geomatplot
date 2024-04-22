@@ -52,7 +52,7 @@ public class LineDrawer extends Drawer{
         gl.glNamedBufferData(ssbo,capacity,null,GL_STATIC_DRAW);
         gl.glNamedBufferData(indirect,(long)indirectCapacity * INDIRECT_STRUCT_BYTES, null, GL_STATIC_DRAW);
 
-        gl.glBindBufferBase(GL_SHADER_STORAGE_BUFFER,1,ssbo);
+        //gl.glBindBufferBase(GL_SHADER_STORAGE_BUFFER,1,ssbo);
     }
     @Override
     protected void syncInner(GL4 gl, List<Integer> IDs, Integer first, Integer last) {
@@ -108,6 +108,7 @@ public class LineDrawer extends Drawer{
 
     @Override
     protected void drawInner(GL4 gl) {
+        gl.glBindBufferBase(GL_SHADER_STORAGE_BUFFER,1,ssbo);
         shader.use(gl);
         gl.glUniform1i(shader.getUniformLocation(gl, "drawerID"), getDrawID());
         gl.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirect);

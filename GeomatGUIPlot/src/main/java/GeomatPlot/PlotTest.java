@@ -28,7 +28,7 @@ public class PlotTest {
         }*/
         Plot plot = new Plot();
         shrek(plot);
-        gPoint p0 = new gPoint(new float[]{-1f,0f,1f,1f,0f,0f,0f,1f});
+        gPoint p0 = new gPoint(new float[]{-1f,0f,1f,1f,0f,0f,0f,1f}, false);
         gPoint p1 = new gPoint(new float[]{5f,20f,1f,1f,0f,0f,0f,1f});
         plot.addDrawable(p0);
         plot.addDrawable(p1);

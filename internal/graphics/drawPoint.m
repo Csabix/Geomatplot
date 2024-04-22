@@ -31,7 +31,8 @@ function point = drawPoint(varargin)
 
     position = p.Results.Position;
     if isempty(position)
-        position = plt.clickInput;
+        %position = plt.clickInput;
+        position = plt.getInput(@(x)x.isButton(1));
     end
 
     borderColor = p.Results.Bcolor;

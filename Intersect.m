@@ -133,6 +133,7 @@ function [args,s] = parse_(color,markersize,args,s)
         args.LabelTextColor             {drawing.mustBeColor}
         args.LineWidth  (1,1) double    {mustBePositive}
         args.Visible    (1,:) char      {mustBeMember(args.Visible,{'on','off'})} = 'on'
+        args.LabelVisible (1,:) char    {mustBeMember(args.LabelVisible,{'on','off','hover'})}
         s.SMarkerEdgeColor              {drawing.mustBeColor}               = [.7 .7 .7]
         s.SMarkerFaceColor              {drawing.mustBeColor}               = [.4 .4 .4]
         s.SLineWidth    (1,1) double    {mustBePositive}                    = 0.5

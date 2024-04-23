@@ -84,7 +84,7 @@ function h = Point(varargin)
     if nargout == 1; h = h_; end
 end
 
-function params = parse_mpoint(position,color,markersize,params)
+function params = parse_mpoint(position,color,markersize,params,options)
     arguments
         position            (1,2) double {mustBeReal}
         color                            {drawing.mustBeColor}               = 'b'
@@ -95,7 +95,9 @@ function params = parse_mpoint(position,color,markersize,params)
         params.LineWidth    (1,1) double {mustBePositive}
         params.LabelVisible (1,:) char   {mustBeMember(params.LabelVisible,{'on','off','hover'})}
         params.Visible      (1,:) char   {mustBeMember(params.Visible,{'on','off'})} = 'on'
+        options.m          (1,1) double    {mustBePositive} % hack, do not intentionally use this name value arg
     end
+    if isfield(options,'m'); color = 'm'; markersize = options.m; end
     params.Color = color;
     if ~isfield(params,'LabelTextColor'); params.LabelTextColor = color; end
     if ~isfield(params,'MarkerSize');     params.MarkerSize = markersize; end
@@ -110,7 +112,7 @@ function [usercallback,varargin] = parse_callback(inputs,usercallback,varargin)
         varargin
     end
 end
-function params = parse_dpoint(color,markersize,params)
+function params = parse_dpoint(color,markersize,params,options)
     arguments
         color                                 {drawing.mustBeColor}                      = 'k'
         markersize          (1,1) double      {mustBePositive}                           = 6
@@ -120,7 +122,11 @@ function params = parse_dpoint(color,markersize,params)
         params.LineWidth    (1,1) double      {mustBePositive}
         params.LabelVisible (1,:) char        {mustBeMember(params.LabelVisible,{'on','off','hover'})}
         params.Visible      (1,:) char        {mustBeMember(params.Visible,{'on','off'})} = 'on'
+        %options.c          (1,1) double    {mustBePositive} % hack, do not intentionally use this name value arg
+        options.m          (1,1) double    {mustBePositive} % hack, do not intentionally use this name value arg
     end
+    %if isfield(options,'c'); color = 'c'; params.MarkerSize = options.c; end
+    if isfield(options,'m'); color = 'm'; params.MarkerSize = options.m; end
     params.Color = color;
     if ~isfield(params,'LabelTextColor'); params.LabelTextColor = color; end
     if ~isfield(params,'MarkerSize');     params.MarkerSize = markersize; end

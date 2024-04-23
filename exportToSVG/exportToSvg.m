@@ -1,11 +1,11 @@
-function exp = exportToSvg(g)
+function exportToSvg(g, location)
     
     userData = get(g, 'UserData');
     
     rawData = DataSweeper(userData);
     rawDataSize = size(rawData);
     
-    outFile = fopen('export.svg','w');
+    outFile = fopen(strcat(location,'/export.svg'),'w');
     
     fprintf(outFile, '<svg xmlns="http://www.w3.org/2000/svg" onload="makeDraggable(evt)">\n');
 

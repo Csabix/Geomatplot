@@ -178,6 +178,31 @@ document.getElementById('seg7').setAttributeNS(null, 'x2', document.getElementBy
 document.getElementById('seg7').setAttributeNS(null, 'y1', document.getElementById('M').getAttributeNS(null, mutation.attributeName));document.getElementById('seg7').setAttributeNS(null, 'y2', document.getElementById('center1').getAttributeNS(null, mutation.attributeName));}}}});
 temp.observe(document.getElementById('M'), config);temp.observe(document.getElementById('center1'), config);
 
+temp = new MutationObserver((mutationList, observer) => {
+    for (const mutation of mutationList) {
+        if (mutation.type === 'attributes') {
+
+        }
+    }
+});
+temp.observe(document.getElementById('O'), config);temp.observe(document.getElementById('dist2'), config);
+
+function midpoint_(list /*list of math.matrix*/){
+    let x = list[0];
+    console.log(x);
+    let n = math.size(x)[0];
+    console.log(n);
+    let v = math.mean(x, 0);
+    console.log(v);
+    for(let j = 1; j < list.length; ++j){
+        x = list[j];
+        let n1 = math.size(x)[0];
+        v = math.add(math.multiply(v, (n/(n+n1))), math.multiply(math.mean(x, 0), (n1/(n+n1))))
+        n = n + n1;
+    }
+    return v;
+}
+
 var svgCanvas = document.getElementById("canvas");
 console.log(svgCanvas.viewBox);
 document.addEventListener('contextmenu', event => {event.preventDefault(); console.log(event.which)});

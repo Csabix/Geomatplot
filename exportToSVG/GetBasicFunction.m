@@ -41,6 +41,10 @@ function retFunc = GetBasicFunction(name, inputs)
     retFunc = retFunc + "\t}\n";
 
         case 'dist_point2pointseq'
+            % not the best, it always writes the output to value attribute,
+            % there should be a function determining which attribute to
+            % change
+            
             a = inputs{1};
             b = inputs{2};
             out = inputs{3}.label;

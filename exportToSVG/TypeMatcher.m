@@ -1,4 +1,4 @@
-function svgLine = TypeMatcher(plotData, scale)
+function svgLine = TypeMatcher(plotData, scale, dashedEnabled, dottedEnabled)
 
     switch plotData.type
         case 'mpoint'
@@ -28,7 +28,7 @@ function svgLine = TypeMatcher(plotData, scale)
         case 'dlines'
 
             width = plotData.LineWidth;
-            style = LineStyleMatcher(plotData.LineStyle);
+            style = LineStyleMatcher(plotData.LineStyle, dashedEnabled, dottedEnabled);
 
             if isequal(size(plotData.XData, 2), 2) & isequal(size(plotData.XData), size(plotData.YData))
     

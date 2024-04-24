@@ -1,7 +1,12 @@
-function exportToSvg(g, location)
+function exportToSvg(g, location, dashedEnabled, dottedEnabled, interactive)
     
     userData = get(g, 'UserData');
-    
+    if(isequal(userData, []))
+        fig = get(g,'parent');
+        close(fig);
+        return;
+    end
+
     rawData = DataSweeper(userData);
     rawDataSize = size(rawData);
     
@@ -16,12 +21,13 @@ function exportToSvg(g, location)
     
     for i=1:rawDataSize(2)
 
-        fprintf(outFile, "%s\n", TypeMatcher(rawData{i}, 500 / minWidth));
+        fprintf(outFile, "%s\n", TypeMatcher(rawData{i}, 500 / minWidth, dashedEnabled, dottedEnabled));
         
     end
 
-    ExportScript(userData, outFile);
-
+    if(interactive)
+        ExportScript(userData, outFile);
+    end
     fprintf(outFile, '</svg>');
     fclose(outFile);
     

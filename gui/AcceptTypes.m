@@ -35,7 +35,8 @@ classdef AcceptTypes
         end
 
         function accepted = acceptCircle2(data)
-            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base',{'point_base','dpointlineseq','polygon_base'}});
+            pattern = {'point_base',{'point_base','dpointlineseq','polygon_base','dscalar'}};
+            accepted = AcceptTypes.acceptGeometryByPattern(data,pattern);
         end
 
         function accepted = acceptMidpoint2(data)
@@ -69,7 +70,7 @@ classdef AcceptTypes
         end
 
         function accepted = acceptCircularArc(data)
-            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base'});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base',{'point_base','dscalar'}});
         end
 
         function accepted = acceptPerpendicularLine3(data)

@@ -163,7 +163,7 @@ classdef PropertiesPanel < handle
             editField.Layout.Column = 2;
             editField.Tooltip = "Label";
             editField.Value = o.geometry.label;
-            editField.ValueChangedFcn = @(src,evt) o.setLabel(evt);
+            editField.ValueChangedFcn = @(src,evt) o.setLabel(src,evt);
 
             showLabel = uilabel(grid);
             showLabel.Layout.Row = 2;
@@ -226,17 +226,9 @@ classdef PropertiesPanel < handle
             o.geometry.fig.LineStyle = evt.Value;
         end
 
-        function setLabel(o,evt)
-            newLabel = evt.Value;
-            oldLabel = o.geometry.label;
-            go = o.geometry.parent;
-            if go.isLabel(newLabel)
-                %Needs better response
-                disp("Label already exists!");
-            else
-                PropertiesPanel.changeGeomatplotLabel(go,oldLabel,newLabel);
-                o.geometry.fig.Label = newLabel;
-                o.geometry.label = newLabel;
+        function setLabel(o,src,evt)
+            if ~PropertiesPanel.renameLabel(o.geometry,evt.Value)
+                src.Value = o.geometry.label;
             end
         end
 
@@ -275,4 +267,19 @@ classdef PropertiesPanel < handle
             end
         end
     end % static private
+
+    methods(Access=public,Static,Hidden)
+        function renamed = renameLabel(geometry,newLabel)
+            oldLabel = geometry.label;
+            go = geometry.parent;
+            renamed = ~go.isLabel(newLabel);
+            if renamed
+                PropertiesPanel.changeGeomatplotLabel(go,oldLabel,newLabel);
+                if isprop(geometry.fig.Label); geometry.fig.Label = newLabel; end
+                geometry.label = newLabel;
+            else
+                errordlg('This label already exists!','Label Rename Error','modal');
+            end
+        end
+    end % static public hidden
 end

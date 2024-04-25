@@ -27,7 +27,9 @@ public class PlotTest {
         for (Vertex v:asd) {
             System.out.println(v.x + " " + v.y);
         }*/
+        gPatch patch = new gPatch(new float[]{0,1,1},new float[]{0,0,1},new float[][]{{0,0,0,1}},new float[][]{{0,1,1,1}},new int[][]{{0, 1, 2}});
         Plot plot = new Plot();
+        plot.addDrawable(patch);
         shrek(plot);
         gPoint p0 = new gPoint(new float[]{-1f,0f,1f,1f,0f,0f,0f,1f}, false);
         gPoint p1 = new gPoint(new float[]{5f,20f,1f,1f,0f,0f,0f,1f});
@@ -40,7 +42,7 @@ public class PlotTest {
         plot.addDrawable(label2);
 
         gPolygon poly = new gPolygon(new float[]{0,1,1}, new float[]{-1,-1,0},new int[]{0,2,1},new float[]{0.3f,0.2f,0.2f});
-        plot.addDrawable(poly);
+        //plot.addDrawable(poly);
 
         for (int i = 0; i < 1000; i++) {
             for (int j = 0; j < 1000; j++) {

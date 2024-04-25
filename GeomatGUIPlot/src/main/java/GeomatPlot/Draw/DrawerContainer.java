@@ -11,7 +11,7 @@ public class DrawerContainer {
     private static final int bitmask = genBitmask();
     private final Drawer[] drawers;
     public DrawerContainer(GL4 gl) {
-        final Drawer[] initDrawers = {new PointDrawer(gl), new LineDrawer(gl), new LabelDrawer(gl), new PolygonDrawer(gl)};
+        final Drawer[] initDrawers = {new PointDrawer(gl), new LineDrawer(gl), new LabelDrawer(gl), new PolygonDrawer(gl), new PatchDrawer(gl)};
         drawers = new Drawer[values.length];
         for (Drawer drawer : initDrawers) {
             drawers[drawer.requiredType().ordinal()] = drawer;

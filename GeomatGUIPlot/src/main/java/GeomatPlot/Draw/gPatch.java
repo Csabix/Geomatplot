@@ -27,18 +27,20 @@ public class gPatch extends Drawable{
     }
     @Override
     public float[] pack() {
+        int bgD = backgroundColors.length;
+        int brD = borderColors.length;
         float[] result = new float[x.length * 10];
         for (int i = 0; i < x.length; i++) {
             result[i * ELEMENT_COUNT]     = x[i];
             result[i * ELEMENT_COUNT + 1] = y[i];
-            result[i * ELEMENT_COUNT + 2] = backgroundColors[i][0];
-            result[i * ELEMENT_COUNT + 3] = backgroundColors[i][1];
-            result[i * ELEMENT_COUNT + 4] = backgroundColors[i][2];
-            result[i * ELEMENT_COUNT + 5] = backgroundColors[i][3];
-            result[i * ELEMENT_COUNT + 6] = borderColors[i][0];
-            result[i * ELEMENT_COUNT + 7] = borderColors[i][1];
-            result[i * ELEMENT_COUNT + 8] = borderColors[i][2];
-            result[i * ELEMENT_COUNT + 9] = borderColors[i][3];
+            result[i * ELEMENT_COUNT + 2] = backgroundColors[i % bgD][0];
+            result[i * ELEMENT_COUNT + 3] = backgroundColors[i % bgD][1];
+            result[i * ELEMENT_COUNT + 4] = backgroundColors[i % bgD][2];
+            result[i * ELEMENT_COUNT + 5] = backgroundColors[i % bgD][3];
+            result[i * ELEMENT_COUNT + 6] = borderColors[i % brD][0];
+            result[i * ELEMENT_COUNT + 7] = borderColors[i % brD][1];
+            result[i * ELEMENT_COUNT + 8] = borderColors[i % brD][2];
+            result[i * ELEMENT_COUNT + 9] = borderColors[i % brD][3];
         }
         return result;
     }

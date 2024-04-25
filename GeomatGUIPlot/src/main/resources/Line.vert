@@ -1,10 +1,17 @@
 #version 460
 
-struct Line {
+/*struct Line {
     vec4 c;
     vec2 p;
     float l;
     float type; // 0 line, 10 dashed
+};*/
+
+struct Line {
+    vec4 primaryColorWidth;
+    vec2 position;
+    float length;
+    // float padding;
 };
 
 layout(std140, binding = 0) uniform Camera {
@@ -19,7 +26,7 @@ layout(std430, binding = 1) readonly buffer skeleton {
 
 const float width = 10.0f;
 
-layout(location=0) out vec4 color;
+layout(location=0) out vec4 primaryColor_out;
 layout(location=1) out float dist;
 layout(location=2) out float len;
 layout(location=3) out float type;

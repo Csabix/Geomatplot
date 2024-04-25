@@ -1,35 +1,37 @@
 package GeomatPlot.Draw;
 
-import java.util.List;
 import java.util.Vector;
 public class gPoint extends Drawable {
-    public static final int ELEMENT_COUNT = 8;
+    public static final int ELEMENT_COUNT = 7;
     public static final int BYTES = ELEMENT_COUNT * Float.BYTES;
     public float x,y;
-    float r,g,b;
-    float br,bg,bb;
+    public float[] primaryColor;
+    public float width;
+    public float type;
     /*public gPoint(List<Float> xy, List<Float> rgb, List<Float> brgb, boolean movable) {
         x = xy.get(0);y = xy.get(1);
         r = rgb.get(0);g = rgb.get(1);b = rgb.get(2);
         br = brgb.get(0);bg = brgb.get(1);bb = brgb.get(2);
         this.movable = movable;
     }*/
-    public gPoint(float[] data, boolean movable) {
+    public gPoint(float x, float y, float[] primaryColor, float width, float type, boolean movable) {
         super(movable);
-        x = data[0];y = data[1];
-        r = data[2];g = data[3];b = data[4];
-        br = data[5];bg = data[6];bb = data[7];
+        this.x = x;
+        this.y = y;
+        this.primaryColor = primaryColor;
+        this.width = width;
+        this.type = type;
     }
-    public gPoint(float[] data) {
-        super(true);
-        x = data[0];y = data[1];
-        r = data[2];g = data[3];b = data[4];
-        br = data[5];bg = data[6];bb = data[7];
+    public gPoint(float x, float y, boolean movable) {
+        this(x,y, new float[]{0f, 0.4470f, 0.7410f}, 20f, 0f, movable);
+    }
+    public gPoint(float x, float y) {
+        this(x, y, false);
     }
     public gPoint(){super(false);}
     @Override
     public float[] pack() {
-        return new float[]{x,y,r,g,b,br,bg,bb};
+        return new float[]{x,y,primaryColor[0],primaryColor[1],primaryColor[2], width,type};
     }
 
     @Override

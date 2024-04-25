@@ -5,24 +5,16 @@ public class gLine extends Drawable {
     public static final int VERTEX_BYTE = VERTEX_SIZE * Float.BYTES;
     public float[] x;
     public float[] y;
-    public float[][] colors;
+    public float[][] primaryColor; // rgb
+    public float[] width;
     public boolean dashed;
-    public gLine(float[] x, float[] y, float[][] colors, boolean dashed) {
+    public gLine(float[] x, float[] y, float[][] primaryColor, float[] width, boolean dashed) {
         super(false);
         this.x = x;
         this.y = y;
-        this.colors = colors;
+        this.primaryColor = primaryColor;
+        this.width = width;
         this.dashed = dashed;
-    }
-    public gLine(float[] x, float[] y, float[] colors, boolean dashed) {
-        super(false);
-        this.x = x;
-        this.y = y;
-        this.dashed = dashed;
-        this.colors = new float[x.length][4];
-        for (int i = 0; i < x.length; ++i) {
-            System.arraycopy(colors,0,this.colors[i],0,4);
-        }
     }
 
     @Override
@@ -33,13 +25,14 @@ public class gLine extends Drawable {
         data[data.length - 4] = x[x.length - 1] + x[x.length - 1] - x[x.length - 2];
         data[data.length - 3] = y[y.length - 1] + y[y.length - 1] - y[y.length - 2];
 
+        int colorDiv = primaryColor.length;
         float distTotal = 0;
         for (int i = 1; i < x.length + 1; i++) {
             int ind = i - 1;
-            data[i * VERTEX_SIZE    ] = colors[ind][0];
-            data[i * VERTEX_SIZE + 1] = colors[ind][1];
-            data[i * VERTEX_SIZE + 2] = colors[ind][2];
-            data[i * VERTEX_SIZE + 3] = colors[ind][3];
+            data[i * VERTEX_SIZE    ] = primaryColor[ind % colorDiv][0];
+            data[i * VERTEX_SIZE + 1] = primaryColor[ind % colorDiv][1];
+            data[i * VERTEX_SIZE + 2] = primaryColor[ind % colorDiv][2];
+            data[i * VERTEX_SIZE + 3] = primaryColor[ind % colorDiv][3];
 
             data[i * VERTEX_SIZE + 4] = x[ind];
             data[i * VERTEX_SIZE + 5] = y[ind];

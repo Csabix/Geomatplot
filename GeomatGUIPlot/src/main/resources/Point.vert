@@ -1,12 +1,13 @@
 #version 460
 
-layout(location=0) in vec2 pos;
-layout(location=1) in vec3 col;
-layout(location=2) in vec3 bcol;
+layout(location=0) in vec2 position_in;
+layout(location=1) in vec3 primaryColor_in;
+layout(location=2) in float size_in;
+layout(location=3) in float type_in;
 
-layout(location=0) out vec3 color;
-layout(location=1) out vec3 bcolor;
-layout(location=2) out int id;
+layout(location=0) out vec3 primaryColor_out;
+layout(location=1) out int id_out;
+layout(location=2) out int type_out;
 
 layout(std140, binding = 0) uniform Camera {
     vec2 scale;
@@ -14,10 +15,13 @@ layout(std140, binding = 0) uniform Camera {
     vec2 wh;
 };
 
+uniform int drawerID;
+
 void main(){
-    gl_Position = vec4((pos - translate) * scale,0,1);
-	gl_PointSize = 20.;
-	color = col;
-	bcolor = bcol;
-    id = gl_VertexID;
+    primaryColor_out = primaryColor_in;
+    type_out = int(type_in);
+    id_out = gl_VertexID | drawerID;
+
+    gl_PointSize = size_in;
+    gl_Position = vec4((position_in - translate) * scale,0,1);
 }

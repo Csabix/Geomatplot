@@ -31,8 +31,8 @@ public class PlotTest {
         Plot plot = new Plot();
         plot.addDrawable(patch);
         shrek(plot);
-        gPoint p0 = new gPoint(new float[]{-1f,0f,1f,1f,0f,0f,0f,1f}, false);
-        gPoint p1 = new gPoint(new float[]{5f,20f,1f,1f,0f,0f,0f,1f});
+        gPoint p0 = new gPoint(-1,0, true);
+        gPoint p1 = new gPoint(5, 20, true);
         plot.addDrawable(p0);
         plot.addDrawable(p1);
         gLabel label = new gLabel(0,0,"THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG 01234");
@@ -44,16 +44,16 @@ public class PlotTest {
         gPolygon poly = new gPolygon(new float[]{0,1,1}, new float[]{-1,-1,0},new int[]{0,2,1},new float[]{0.3f,0.2f,0.2f});
         //plot.addDrawable(poly);
 
-        for (int i = 0; i < 1000; i++) {
+        /*for (int i = 0; i < 1000; i++) {
             for (int j = 0; j < 1000; j++) {
-                //plot.addDrawable(new gPoint(new float[]{i * 0.01f,j * 0.01f,1f,1f,0f,0f,0f,1f}));
+                plot.addDrawable(new gPoint(i * 0.01f,j * 0.01f, true));
             }
             try {
                 //Thread.sleep(100);
             }catch (Exception e) {
 
             }
-        }
+        }*/
 
         gLine l1 = new gLine(new float[]{-1f,5f,10f,15f,20f,25f},new float[]{0f,20f,0f,20f,0f,20f},new float[]{0f,0f,0f,1f},true);
         plot.addDrawable(l1);

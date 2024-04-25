@@ -12,7 +12,7 @@ public abstract class Drawer {
     protected List<Drawable> drawableList;
     protected int syncedDrawable = 0;
     protected int nextID = 0;
-    protected abstract void syncInner(GL4 gl, List<Integer> IDs, Integer first, Integer last);
+    protected abstract void syncInner(GL4 gl, List<Integer> IDs, Integer first, Integer last); // [first, last]
     protected abstract void syncInner(GL4 gl);
     protected abstract void drawInner(GL4 gl);
     public abstract Drawable.DrawableType requiredType();

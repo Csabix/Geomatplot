@@ -1,9 +1,6 @@
 package GeomatPlot.Draw;
 
-import GeomatPlot.BufferHelper;
-import GeomatPlot.GLObject;
-import GeomatPlot.ProgramObject;
-import GeomatPlot.ProgramObjectBuilder;
+import GeomatPlot.*;
 import com.jogamp.opengl.GL4;
 
 import java.nio.ByteBuffer;
@@ -14,20 +11,13 @@ import java.util.List;
 import static com.jogamp.opengl.GL3.GL_PROGRAM_POINT_SIZE;
 
 public class PointDrawer extends Drawer{
-    private static final int BYTES = new gPoint().bytesVertex();
-    private static final int SIZE = new gPoint().elementCountVertex();
-    private static final int INITIAL_CAPACITY = 100 * BYTES;
+    private static final int INITIAL_CAPACITY = 100 * gPoint.BYTES;
     private final ProgramObject shader;
     private final int vao;
-    private final int vbo;
-    private int capacity;
-    private int position;
+    private final ManagedDrawableBuffer vbo;
     public PointDrawer(GL4 gl) {
         gl.glEnable(GL_PROGRAM_POINT_SIZE);
-
         drawableList = new ArrayList<>();
-        position = 0;
-        capacity = PointDrawer.INITIAL_CAPACITY;
 
         shader = new ProgramObjectBuilder(gl)
                 .vertex("/Point.vert")
@@ -36,9 +26,7 @@ public class PointDrawer extends Drawer{
         gl.glUniformBlockBinding(shader.ID,0,0);
 
         vao = GLObject.createVertexArrays(gl,1)[0];
-        vbo = GLObject.createBuffers(gl,1)[0];
-
-        gl.glNamedBufferData(vbo,capacity, null, gl.GL_STATIC_DRAW);
+        vbo = new ManagedDrawableBuffer(gl, INITIAL_CAPACITY);
 
         gl.glEnableVertexArrayAttrib(vao,0);
         gl.glVertexArrayAttribBinding(vao,0,0);
@@ -50,35 +38,25 @@ public class PointDrawer extends Drawer{
 
         gl.glEnableVertexArrayAttrib(vao, 2);
         gl.glVertexArrayAttribBinding(vao, 2, 0);
-        gl.glVertexArrayAttribFormat(vao, 2, 3, gl.GL_FLOAT, false, 5 * Float.BYTES);
+        gl.glVertexArrayAttribFormat(vao, 2, 1, gl.GL_FLOAT, false, 5 * Float.BYTES);
 
-        gl.glVertexArrayVertexBuffer(vao, 0, vbo, 0, gPoint.BYTES);
+        gl.glEnableVertexArrayAttrib(vao, 3);
+        gl.glVertexArrayAttribBinding(vao, 3, 0);
+        gl.glVertexArrayAttribFormat(vao, 3, 1, gl.GL_FLOAT, false, 6 * Float.BYTES);
+
+        gl.glVertexArrayVertexBuffer(vao, 0, vbo.buffer, 0, gPoint.BYTES);
     }
     public gPoint get(int index) {
         return (gPoint)drawableList.get(index);
     }
     @Override
     protected void syncInner(GL4 gl, List<Integer> IDs, Integer first, Integer last) {
-        ByteBuffer bBuffer = gl.glMapNamedBufferRange(vbo,(long)first * BYTES,(long)(last - first + 1) * BYTES,gl.GL_MAP_WRITE_BIT);
-        FloatBuffer fBuffer = bBuffer.asFloatBuffer();
-        IDs.stream().distinct().forEach((id) -> {
-            fBuffer.position((id-first) * SIZE);
-            fBuffer.put(drawableList.get(id).pack());
-        });
-        gl.glUnmapNamedBuffer(vbo);
+        vbo.update(gl, drawableList, first, last);
     }
 
     @Override
     protected void syncInner(GL4 gl) {
-        if(drawableList.size() * BYTES > capacity) {
-            capacity = BufferHelper.getNewCapacity(capacity, drawableList.size() * BYTES);
-            BufferHelper.resizeBuffer(gl,vbo,position,capacity, gl.GL_STATIC_DRAW);
-        }
-        ByteBuffer bBuffer = gl.glMapNamedBufferRange(vbo,position,(long)(drawableList.size() - syncedDrawable) * BYTES,gl.GL_MAP_WRITE_BIT);
-        FloatBuffer fBuffer = bBuffer.asFloatBuffer();
-        drawableList.stream().skip(syncedDrawable).forEach((e)->fBuffer.put(e.pack()));
-        gl.glUnmapNamedBuffer(vbo);
-        position = drawableList.size() * BYTES;
+        vbo.add(gl, drawableList.subList(syncedDrawable, drawableList.size()));
     }
 
     @Override

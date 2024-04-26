@@ -30,7 +30,7 @@ classdef PropertiesPanel < handle
 
             grid = PropertiesPanel.createContainerGrid(o.propPanel,{{25},{25 25 25}},[5 5 5 5]);
             addlistener (grid, 'ButtonDown', @(~,~) o.closeSubPanels);
-            colorDropdown = o.createColorDropdown(grid,[1 1],@(src,evt) o.setColor(evt));
+            colorDropdown = o.createColorDropdown(grid,[1 1],@(src,evt) o.setColor(evt),"Color");
             colorDropdown.Value = o.geometry.fig.Color;
 
             labelButton = uibutton(grid);
@@ -58,7 +58,7 @@ classdef PropertiesPanel < handle
 
             grid = PropertiesPanel.createContainerGrid(o.propPanel,{{25}, {25 25 25}},[5 5 5 5]);
             addlistener (grid, 'ButtonDown', @(~,~) o.closeSubPanels);
-            colorDropdown = o.createColorDropdown(grid,[1 1],@(src,evt) o.setColor(evt));  
+            colorDropdown = o.createColorDropdown(grid,[1 1],@(src,evt) o.setColor(evt),"Color");  
             colorDropdown.Value = o.geometry.fig.Color;
 
             o.createLinestyleDropdown(grid,[1 2]);
@@ -75,17 +75,20 @@ classdef PropertiesPanel < handle
         function o = createPolygonPanel(o,fig,pos,geometry)
             o.geometry = geometry;
             o.propPanel = uipanel(fig);
-            o.propPanel.Position = [pos + [10 -50], 75, 35];
+            o.propPanel.Position = [pos + [10 -50], 105, 35];
 
-            grid = PropertiesPanel.createContainerGrid(o.propPanel,{{25}, {25 25}},[5 5 5 5]);
+            grid = PropertiesPanel.createContainerGrid(o.propPanel,{{25}, {25 25 25}},[5 5 5 5]);
             addlistener (grid, 'ButtonDown', @(~,~) o.closeSubPanels);
-            colorDropdown = o.createColorDropdown(grid,[1 1],@(src,evt) o.setFaceColor(evt));
+            colorDropdown = o.createColorDropdown(grid,[1 1],@(src,evt) o.setFaceColor(evt),"Face color");
             colorDropdown.Value = o.geometry.fig.FaceColor;
 
             o.createLinestyleDropdown(grid,[1 2]);
+
+            lineColorDropdown = o.createColorDropdown(grid,[1 3],@(src,evt) o.setEdgeColor(evt),"Line color");
+            lineColorDropdown.Value = o.geometry.fig.EdgeColor;
         end
     
-        function colorDropdown = createColorDropdown(o,grid,layout,valueChangedFcn)
+        function colorDropdown = createColorDropdown(o,grid,layout,valueChangedFcn,tooltip)
             colors = {[1 0 0], [0 1 0], [0 0 1], [0 0 0]};
             colorDropdown = uidropdown(grid);
             colorDropdown.ValueChangedFcn = valueChangedFcn;
@@ -93,7 +96,7 @@ classdef PropertiesPanel < handle
             colorDropdown.Layout.Column = layout(2);
             colorDropdown.Items = repmat({''}, numel(colors), 1);
             colorDropdown.ItemsData = colors;
-            colorDropdown.Tooltip = "Color";
+            colorDropdown.Tooltip = tooltip;
             addlistener (colorDropdown, 'DropDownOpening', @(~,~) o.closeSubPanels);
             for i = 1:numel(colors)
                 style = uistyle('BackgroundColor',colors{i});
@@ -216,6 +219,10 @@ classdef PropertiesPanel < handle
 
         function setFaceColor(o,evt)
             o.geometry.fig.FaceColor = evt.Value;
+        end
+
+        function setEdgeColor(o,evt)
+            o.geometry.fig.EdgeColor = evt.Value;
         end
 
         function setColor(o,evt)

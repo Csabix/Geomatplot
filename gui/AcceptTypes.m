@@ -113,9 +113,21 @@ classdef AcceptTypes
             accepted = AcceptTypes.acceptGeometryByPattern(data,pattern);
         end
 
-        function accepted = acceptSegmentSequence(data,shouldAccept)
+        function accepted = acceptSegmentSequenceStrip(data,shouldAccept)
             types = {'point_base','dpointseq','polygon_base'};
-            checks = (mod(length(data),2) == 1 && mod(length(data),3) ~= 0);
+            checks = length(data) < 2;
+            accepted = AcceptTypes.acceptSequencedInputGeometry(data,shouldAccept,types,checks);  
+        end
+
+        function accepted = acceptSegmentSequenceLines(data,shouldAccept)
+            types = {'point_base','dpointseq','polygon_base'};
+            checks = mod(length(data),2) == 1;
+            accepted = AcceptTypes.acceptSequencedInputGeometry(data,shouldAccept,types,checks);  
+        end
+
+        function accepted = acceptSegmentSequenceTriangles(data,shouldAccept)
+            types = {'point_base','dpointseq','polygon_base'};
+            checks = mod(length(data),3) ~= 0;
             accepted = AcceptTypes.acceptSequencedInputGeometry(data,shouldAccept,types,checks);  
         end
 

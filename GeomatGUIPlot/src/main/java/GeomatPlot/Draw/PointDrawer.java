@@ -1,10 +1,10 @@
 package GeomatPlot.Draw;
 
 import GeomatPlot.*;
+import GeomatPlot.Mem.ManagedFloatBuffer;
+import GeomatPlot.Mem.PackableFloat;
 import com.jogamp.opengl.GL4;
 
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +14,7 @@ public class PointDrawer extends Drawer{
     private static final int INITIAL_CAPACITY = 100 * gPoint.BYTES;
     private final ProgramObject shader;
     private final int vao;
-    private final ManagedDrawableBuffer vbo;
+    private final ManagedFloatBuffer pointBuffer;
     public PointDrawer(GL4 gl) {
         gl.glEnable(GL_PROGRAM_POINT_SIZE);
         drawableList = new ArrayList<>();
@@ -26,7 +26,7 @@ public class PointDrawer extends Drawer{
         gl.glUniformBlockBinding(shader.ID,0,0);
 
         vao = GLObject.createVertexArrays(gl,1)[0];
-        vbo = new ManagedDrawableBuffer(gl, INITIAL_CAPACITY);
+        pointBuffer = new ManagedFloatBuffer(gl, INITIAL_CAPACITY);
 
         gl.glEnableVertexArrayAttrib(vao,0);
         gl.glVertexArrayAttribBinding(vao,0,0);
@@ -44,19 +44,20 @@ public class PointDrawer extends Drawer{
         gl.glVertexArrayAttribBinding(vao, 3, 0);
         gl.glVertexArrayAttribFormat(vao, 3, 1, gl.GL_FLOAT, false, 6 * Float.BYTES);
 
-        gl.glVertexArrayVertexBuffer(vao, 0, vbo.buffer, 0, gPoint.BYTES);
+        gl.glVertexArrayVertexBuffer(vao, 0, pointBuffer.buffer, 0, gPoint.BYTES);
     }
     public gPoint get(int index) {
         return (gPoint)drawableList.get(index);
     }
+
     @Override
-    protected void syncInner(GL4 gl, List<Integer> IDs, Integer first, Integer last) {
-        vbo.update(gl, drawableList, first, last);
+    protected void syncInner(GL4 gl, Integer first, Integer last) {
+        pointBuffer.update(gl, toPackableFloat(drawableList), first, last);
     }
 
     @Override
     protected void syncInner(GL4 gl) {
-        vbo.add(gl, drawableList.subList(syncedDrawable, drawableList.size()));
+        pointBuffer.add(gl, toPackableFloat(drawableList.subList(syncedDrawable, drawableList.size())));
     }
 
     @Override
@@ -65,6 +66,17 @@ public class PointDrawer extends Drawer{
         gl.glUniform1i(shader.getUniformLocation(gl, "drawerID"), getDrawID());
         gl.glBindVertexArray(vao);
         gl.glDrawArrays(gl.GL_POINTS,0,syncedDrawable);
+    }
+
+    @Override
+    protected void deleteInner(GL4 gl, int[] IDs) {
+        int[] offsets = new int[IDs.length];
+
+        for (int i = 0; i < IDs.length; ++i) {
+            offsets[i] = IDs[i] * gPoint.BYTES;
+        }
+
+        pointBuffer.deleteRange(gl, offsets, gPoint.BYTES);
     }
 
     @Override

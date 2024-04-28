@@ -1,7 +1,5 @@
 package GeomatPlot.PolygonCalc;
 
-import GeomatPlot.Draw.gPolygon;
-
 public class QuarterEdge {
     public Vertex data;
     private QuarterEdge next;

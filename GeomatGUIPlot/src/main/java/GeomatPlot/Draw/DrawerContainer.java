@@ -1,6 +1,7 @@
 package GeomatPlot.Draw;
 
 import GeomatPlot.Event.CreateEvent;
+import GeomatPlot.Event.DeleteEvent;
 import GeomatPlot.Event.UpdateEvent;
 import com.jogamp.opengl.GL4;
 
@@ -11,7 +12,7 @@ public class DrawerContainer {
     private static final int bitmask = genBitmask();
     private final Drawer[] drawers;
     public DrawerContainer(GL4 gl) {
-        final Drawer[] initDrawers = {new PointDrawer(gl), new LineDrawer(gl), new LabelDrawer(gl), new PolygonDrawer(gl), new PatchDrawer(gl)};
+        final Drawer[] initDrawers = {new PointDrawer(gl), new LineDrawer<gLine>(gl), new LabelDrawer(gl), new PatchDrawer(gl), new PolygonDrawer(gl)};
         drawers = new Drawer[values.length];
         for (Drawer drawer : initDrawers) {
             drawers[drawer.requiredType().ordinal()] = drawer;
@@ -20,9 +21,12 @@ public class DrawerContainer {
     public void callAdd(CreateEvent event) {
         drawers[event.type.ordinal()].add(event);
     }
+    public void callRemove(DeleteEvent event) {
+        drawers[event.type.ordinal()].remove(event);
+    }
     public void callSync(GL4 gl) {
         for (Drawer drawer : drawers) {
-            drawer.sync(gl);
+            if(drawer != null)drawer.sync(gl);
         }
     }
     public void callSync(GL4 gl, UpdateEvent event) {
@@ -30,7 +34,7 @@ public class DrawerContainer {
     }
     public void callDraw(GL4 gl) {
         for (Drawer drawer : drawers) {
-            drawer.draw(gl);
+            if(drawer != null)drawer.draw(gl);
         }
     }
     public Optional<ObjectClicked> getClicked(int typeID) {
@@ -38,7 +42,7 @@ public class DrawerContainer {
         int ordinal  = typeID >>> Integer.BYTES * 8 - Drawer.ID_BIT_COUNT;
         int id = typeID & bitmask;
 
-        return Optional.of(new ObjectClicked(values[ordinal], drawers[ordinal].drawableList.get(id)));
+        return Optional.of(new ObjectClicked(values[ordinal], drawers[ordinal].getDrawable(id)));
     }
     private static int genBitmask() {
         char[] chars = new char[Integer.BYTES * 8];

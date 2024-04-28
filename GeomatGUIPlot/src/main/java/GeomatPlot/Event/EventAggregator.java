@@ -44,6 +44,10 @@ public class EventAggregator {
             case UpdateEvent.UPDATE_EVENT:
                 UpdateEVT((UpdateEvent)event);
                 break;
+            case DeleteEvent.DELETE_EVENT:
+                deleteEVT((DeleteEvent)event);
+                break;
+
         }
     }
     private void nonDuplicatingEVT(AWTEvent event) {
@@ -76,6 +80,20 @@ public class EventAggregator {
                     ((UpdateEvent)event).type == e.type) {
                 insert = false;
                 ((UpdateEvent)event).merge(e);
+                break;
+            }
+        }
+        if(insert) {
+            singleEventList.add(e);
+        }
+    }
+    private void deleteEVT(DeleteEvent e) {
+        boolean insert = true;
+        for (AWTEvent event:singleEventList) {
+            if(event.getID() == DeleteEvent.DELETE_EVENT &&
+                    ((DeleteEvent)event).type == e.type) {
+                insert = false;
+                ((DeleteEvent)event).merge(e);
                 break;
             }
         }

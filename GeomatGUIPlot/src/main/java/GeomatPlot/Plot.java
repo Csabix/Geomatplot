@@ -2,6 +2,7 @@ package GeomatPlot;
 
 import GeomatPlot.Draw.*;
 import GeomatPlot.Event.CreateEvent;
+import GeomatPlot.Event.DeleteEvent;
 import GeomatPlot.Event.UpdateEvent;
 import GeomatPlot.Font.FontMap;
 import com.jogamp.opengl.GL4;
@@ -71,6 +72,9 @@ public class Plot extends AbstractWindow{
                 break;
             case UpdateEvent.UPDATE_EVENT:
                 drawerContainer.callSync(gl, (UpdateEvent)event);
+                break;
+            case DeleteEvent.DELETE_EVENT:
+                drawerContainer.callRemove((DeleteEvent)event);
                 break;
             case MOUSE_PRESSED:
                 MouseEvent evt = (MouseEvent)event;
@@ -218,6 +222,7 @@ public class Plot extends AbstractWindow{
     public void updateDrawable(Drawable drawable) {
         callEvent(new UpdateEvent(this,drawable));
     }
+    public void removeDrawable(Drawable drawable){callEvent(new DeleteEvent(this, drawable));}
     private void resize(GL4 gl,int sWidth, int sHeight) {
         gl.glViewport(0,0,sWidth,sHeight);
         camera.setWidth(sWidth);

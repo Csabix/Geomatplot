@@ -20,25 +20,27 @@ public class gLine extends Drawable {
     @Override
     public float[] pack() {
         float[] data = new float[elementCount()];
+
         data[4] = x[0] + x[0] - x[1];
         data[5] = y[0] + y[0] - y[1];
         data[data.length - 4] = x[x.length - 1] + x[x.length - 1] - x[x.length - 2];
         data[data.length - 3] = y[y.length - 1] + y[y.length - 1] - y[y.length - 2];
 
         int colorDiv = primaryColor.length;
+        int widthDiv = width.length;
         float distTotal = 0;
         for (int i = 1; i < x.length + 1; i++) {
             int ind = i - 1;
             data[i * VERTEX_SIZE    ] = primaryColor[ind % colorDiv][0];
             data[i * VERTEX_SIZE + 1] = primaryColor[ind % colorDiv][1];
             data[i * VERTEX_SIZE + 2] = primaryColor[ind % colorDiv][2];
-            data[i * VERTEX_SIZE + 3] = primaryColor[ind % colorDiv][3];
+            data[i * VERTEX_SIZE + 3] = width[i % widthDiv];
 
             data[i * VERTEX_SIZE + 4] = x[ind];
             data[i * VERTEX_SIZE + 5] = y[ind];
 
-            data[i * VERTEX_SIZE + 6] = distTotal;
-            data[i * VERTEX_SIZE + 7] = dashed?10.0f:0.0f;
+            data[i * VERTEX_SIZE + 6] = dashed?distTotal:Float.NaN;
+            //data[i * VERTEX_SIZE + 7] = ... ;
 
             if(ind < x.length - 1) {
                 double dX = x[ind] - x[ind + 1];

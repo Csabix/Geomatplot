@@ -5,61 +5,79 @@ import java.nio.FloatBuffer;
 import java.util.Arrays;
 
 public class gPatch extends Drawable{
-    public static final int ELEMENT_COUNT = 10;
-    public static final int VERTEX_BYTE = ELEMENT_COUNT * Float.BYTES;
+    public static final int ELEMENT_COUNT = 6;
+    public static final int BYTE = ELEMENT_COUNT * Float.BYTES;
 
     public float[] x;
     public float[] y;
-    public float[][] backgroundColors;
+    public float faceAlpha;
+    public float[][] primaryColors;
     public float[][] borderColors;
     public int[][] indices;
 
-    public gPatch(float[] x, float[] y, float[][] bgColor, float[][] brColor, int[][] indices ) {
-        super(false);
+
+    public gPatch(float[] x, float[] y, int[][] indices, float[][] primaryColors, float[][] borderColors, float faceAlpha, boolean movable) {
+        super(movable);
         this.x = x;
         this.y = y;
-        backgroundColors = bgColor;
-        borderColors = brColor;
+        this.primaryColors = primaryColors;
+        this.borderColors = borderColors;
         this.indices = indices;
+        this.faceAlpha = faceAlpha;
     }
-    public int[] flatIndices() {
-        return Arrays.stream(indices).flatMapToInt(Arrays::stream).toArray();
+
+    public gPatch(float[] x, float[] y, int[][] indices, boolean movable) {
+        this(x,y,indices,new float[][]{{0.466f, 0.674f, 0.188f}}, new float[][]{{0f,0f,0f}}, 1f, movable);
     }
+
+    public gLine getLine() {
+        float[] xL = new float[x.length+1];
+        float[] yL = new float[x.length+1];
+        for (int i = 0; i < x.length; i++) {
+            xL[i] = x[i];
+            yL[i] = y[i];
+        }
+        xL[x.length] = x[0];
+        yL[y.length] = y[0];
+        return new gLine(xL,yL,borderColors,new float[]{5.f}, false);
+    }
+
     @Override
     public float[] pack() {
-        int bgD = backgroundColors.length;
-        int brD = borderColors.length;
-        float[] result = new float[x.length * 10];
+        int pCD = primaryColors.length;
+
+        float[] result = new float[elementCount()];
         for (int i = 0; i < x.length; i++) {
-            result[i * ELEMENT_COUNT]     = x[i];
-            result[i * ELEMENT_COUNT + 1] = y[i];
-            result[i * ELEMENT_COUNT + 2] = backgroundColors[i % bgD][0];
-            result[i * ELEMENT_COUNT + 3] = backgroundColors[i % bgD][1];
-            result[i * ELEMENT_COUNT + 4] = backgroundColors[i % bgD][2];
-            result[i * ELEMENT_COUNT + 5] = backgroundColors[i % bgD][3];
-            result[i * ELEMENT_COUNT + 6] = borderColors[i % brD][0];
-            result[i * ELEMENT_COUNT + 7] = borderColors[i % brD][1];
-            result[i * ELEMENT_COUNT + 8] = borderColors[i % brD][2];
-            result[i * ELEMENT_COUNT + 9] = borderColors[i % brD][3];
+            result[i * ELEMENT_COUNT    ] = primaryColors[i % pCD][0];
+            result[i * ELEMENT_COUNT + 1] = primaryColors[i % pCD][1];
+            result[i * ELEMENT_COUNT + 2] = primaryColors[i % pCD][2];
+            result[i * ELEMENT_COUNT + 3] = faceAlpha;
+            result[i * ELEMENT_COUNT + 4] = x[i];
+            result[i * ELEMENT_COUNT + 5] = y[i];
         }
         return result;
     }
+
     @Override
     public int elementCount() {
         return x.length * ELEMENT_COUNT;
     }
+
     @Override
     public int elementCountVertex() {
         return ELEMENT_COUNT;
     }
+
     @Override
     public int bytes() {
-        return x.length * VERTEX_BYTE;
+        return x.length * BYTE;
     }
+
     @Override
     public int bytesVertex() {
-        return VERTEX_BYTE;
+        return BYTE;
     }
+
     @Override
     public DrawableType getType() {
         return Drawable.DrawableType.Patch;

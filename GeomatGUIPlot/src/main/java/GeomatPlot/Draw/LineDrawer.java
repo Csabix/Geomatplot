@@ -1,12 +1,17 @@
 package GeomatPlot.Draw;
 
 import GeomatPlot.*;
+import GeomatPlot.Mem.ManagedFloatBuffer;
+import GeomatPlot.Mem.ManagedIntBuffer;
+import GeomatPlot.Mem.PackableFloat;
 import com.jogamp.opengl.GL4;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.jogamp.opengl.GL.*;
@@ -17,17 +22,11 @@ import static com.jogamp.opengl.GL3ES3.GL_SHADER_STORAGE_BUFFER;
 // https://www.codeproject.com/articles/199525/drawing-nearly-perfect-2d-line-segments-in-opengl
 // https://www.codeproject.com/Articles/226569/Drawing-polylines-by-tessellation
 
-public class LineDrawer extends Drawer{
+public class LineDrawer<T extends  gLine> extends Drawer{
     private static final Integer INITIAL_CAPACITY = 100 * gLine.VERTEX_BYTE;
-    private static final int INITIAL_INDIRECT_CAPACITY = 100;
-    private static final int INDIRECT_STRUCT_BYTES = 4 * Integer.BYTES;
     ProgramObject shader;
-    private final int ssbo;
-    private final int indirect;
-    private int capacity;
-    private int position;
-    private int indirectCapacity;
-    private int indirectPosition;
+    private final ManagedFloatBuffer lineBuffer;
+    private final ManagedIntBuffer indirectDrawArraysCommandBuffer;
     private int nextIndex;
     public LineDrawer(GL4 gl) {
         drawableList = new ArrayList<>();
@@ -36,83 +35,93 @@ public class LineDrawer extends Drawer{
                 .vertex("/Line.vert")
                 .fragment("/Line.frag")
                 .build();
-
         gl.glUniformBlockBinding(shader.ID,0,0);
 
-        capacity = INITIAL_CAPACITY;
-        position = 0;
 
-        indirectCapacity = INITIAL_INDIRECT_CAPACITY;
-        indirectPosition = 0;
         nextIndex = 0;
-
-        int[] buffers = GLObject.createBuffers(gl,2);
-        ssbo = buffers[0];
-        indirect  = buffers[1];
-        gl.glNamedBufferData(ssbo,capacity,null,GL_STATIC_DRAW);
-        gl.glNamedBufferData(indirect,(long)indirectCapacity * INDIRECT_STRUCT_BYTES, null, GL_STATIC_DRAW);
-
-        //gl.glBindBufferBase(GL_SHADER_STORAGE_BUFFER,1,ssbo);
+        lineBuffer = new ManagedFloatBuffer(gl, INITIAL_CAPACITY);
+        indirectDrawArraysCommandBuffer = new ManagedIntBuffer(gl, 100 * DrawArraysIndirectCommand.BYTES);
     }
     @Override
-    protected void syncInner(GL4 gl, List<Integer> IDs, Integer first, Integer last) {
-        int start = 0;
-        int length = 0;
-        for (int i = 0; i < first; i++) {
-            start += drawableList.get(i).bytes();
-        }
-        for(int i = first; i <= last; ++i) {
-            length += drawableList.get(i).bytes();
-        }
-        ByteBuffer bBuffer = gl.glMapNamedBufferRange(ssbo,start,length,gl.GL_MAP_WRITE_BIT);
-        FloatBuffer fBuffer = bBuffer.asFloatBuffer();
-        for (int i = first; i <= last ; i++) {
-            fBuffer.put(drawableList.get(i).pack());
-        }
-        gl.glUnmapNamedBuffer(ssbo);
+    protected void syncInner(GL4 gl, Integer first, Integer last) {
+        lineBuffer.update(gl,toPackableFloat(drawableList),first,last);
     }
 
     @Override
     protected void syncInner(GL4 gl) {
-        int bytes = 0;
-        List<Tuple<Integer, Integer>> ranges = new ArrayList<>(drawableList.size() - indirectPosition);
-        for (int i = indirectPosition; i < drawableList.size(); i++) {
-            bytes += drawableList.get(i).bytes();
-            int indSize = ((((gLine)drawableList.get(i)).x.length - 1) * 6);
+        List<Tuple<Integer, Integer>> ranges = new ArrayList<>(drawableList.size() - syncedDrawable);
+        for (int i = syncedDrawable; i < drawableList.size(); i++) {
+            int indSize = ((((T)drawableList.get(i)).x.length - 1) * 6);
             ranges.add(new Tuple<>(nextIndex, indSize));
             nextIndex += indSize + 18;
         }
 
-        if (position + bytes > capacity) {
-            capacity = BufferHelper.getNewCapacity(capacity, position + bytes);
-            BufferHelper.resizeBuffer(gl,ssbo,position,capacity,GL_STATIC_DRAW);
-        }
-        if (indirectPosition + ranges.size() > indirectCapacity) {
-            indirectCapacity = BufferHelper.getNewCapacity(indirectCapacity, indirectPosition + ranges.size());
-            BufferHelper.resizeBuffer(gl,indirect,indirectPosition * Integer.BYTES, indirectCapacity * INDIRECT_STRUCT_BYTES,GL_STATIC_DRAW);
+        List<DrawArraysIndirectCommand> commands = new ArrayList<>(drawableList.size() - syncedDrawable);
+        for (Tuple<Integer, Integer> range: ranges) {
+            commands.add(new DrawArraysIndirectCommand(range.second,range.first));
         }
 
-        ByteBuffer bBuffer = gl.glMapNamedBufferRange(ssbo,position,bytes,GL_MAP_WRITE_BIT);
-        FloatBuffer fBuffer = bBuffer.asFloatBuffer();
-        drawableList.stream().skip(indirectPosition).forEach((e)->fBuffer.put(e.pack()));
-        gl.glUnmapNamedBuffer(ssbo);
-
-        bBuffer = gl.glMapNamedBufferRange(indirect,(long)indirectPosition * INDIRECT_STRUCT_BYTES, (long)ranges.size() * INDIRECT_STRUCT_BYTES, GL_MAP_WRITE_BIT);
-        IntBuffer iBuffer = bBuffer.asIntBuffer();
-        ranges.forEach(tuple -> iBuffer.put(new int[]{tuple.second,1,tuple.first,0}));
-        gl.glUnmapNamedBuffer(indirect);
-
-        position += bytes;
-        indirectPosition += ranges.size();
+        indirectDrawArraysCommandBuffer.add(gl, toPackableInt(commands));
+        lineBuffer.add(gl, toPackableFloat(drawableList.subList(syncedDrawable, drawableList.size())));
     }
 
     @Override
     protected void drawInner(GL4 gl) {
-        gl.glBindBufferBase(GL_SHADER_STORAGE_BUFFER,1,ssbo);
+        gl.glBindBufferBase(GL_SHADER_STORAGE_BUFFER,1,lineBuffer.buffer);
         shader.use(gl);
         gl.glUniform1i(shader.getUniformLocation(gl, "drawerID"), getDrawID());
-        gl.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirect);
-        gl.glMultiDrawArraysIndirect(GL_TRIANGLES, 0, indirectPosition, 0);
+        gl.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectDrawArraysCommandBuffer.buffer);
+        gl.glMultiDrawArraysIndirect(GL_TRIANGLES, 0, syncedDrawable, 0);
+    }
+
+    @Override
+    protected void deleteInner(GL4 gl, int[] IDs) throws Exception {
+        int[] offsets = new int[IDs.length];
+        int[] lineranges = new int[IDs.length];
+        int resultIndex = 0;
+        int currentOffset = 0;
+        int currentID = 0;
+
+        for (Drawable drawable:drawableList) {
+            if(resultIndex == IDs.length || currentID == IDs.length)break;
+            if(drawable.getID() == IDs[currentID]) {
+                offsets[resultIndex] = currentOffset;
+                lineranges[resultIndex] = drawable.bytes();
+                ++resultIndex;
+                ++currentID;
+            }
+            currentOffset += drawable.bytes();
+        }
+
+        lineBuffer.deleteRange(gl, offsets, lineranges);
+
+        for (int i = 0; i < IDs.length; i++) {
+            offsets[i] = DrawArraysIndirectCommand.BYTES * IDs[i];
+        }
+
+        indirectDrawArraysCommandBuffer.clear();
+
+        currentID = 0;
+        nextIndex = 0;
+        List<Tuple<Integer, Integer>> ranges = new ArrayList<>(drawableList.size() - IDs.length);
+        for (int i = 0; i < drawableList.size(); i++) {
+            T current = (T)drawableList.get(i);
+            if(currentID < IDs.length && current.getID() == IDs[currentID]) {
+                ++currentID;
+                continue;
+            }
+            int indSize = (current.x.length - 1) * 6;
+            ranges.add(new Tuple<>(nextIndex, indSize));
+            nextIndex += indSize + 18;
+        }
+
+        List<DrawArraysIndirectCommand> commands = new ArrayList<>(drawableList.size() - IDs.length);
+        for (Tuple<Integer, Integer> range: ranges) {
+            commands.add(new DrawArraysIndirectCommand(range.second,range.first));
+        }
+
+        indirectDrawArraysCommandBuffer.add(gl, toPackableInt(commands));
+
     }
 
     @Override

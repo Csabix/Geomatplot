@@ -1,8 +1,9 @@
 package GeomatPlot.Draw;
 
-public abstract class Drawable {
-    //public enum DrawableType{Point,Line,Label,Polygon};
-    public enum DrawableType{Patch,Polygon,Line, Label, Point};
+import GeomatPlot.Mem.PackableFloat;
+
+public abstract class Drawable implements PackableFloat {
+    public enum DrawableType{Patch, PatchLine, Polygon, Line, Label, Point};
     private int ID;
     private final boolean movable;
     protected Drawable(boolean movable) {

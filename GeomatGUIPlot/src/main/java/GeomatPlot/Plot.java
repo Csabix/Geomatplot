@@ -26,7 +26,6 @@ import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 public class Plot extends AbstractWindow{
     private Camera camera;
     private DrawerContainer drawerContainer;
-    private ObjectClicked objectClicked;
     private Tuple<Float,Float> clickLocation;
     private boolean resized;
     private boolean fboCreated;
@@ -90,7 +89,7 @@ public class Plot extends AbstractWindow{
                 Optional<ObjectClicked> result = drawerContainer.getClicked(typeID);
 
                 if(result.isPresent() && result.get().data.isMovable()) {
-                    objectClicked = result.get();
+                    ObjectClicked objectClicked = result.get();
                     System.out.println(objectClicked.type.toString() + " " + objectClicked.data.getID());
                     movement = new Movement(objectClicked.data, clickLocation.first, clickLocation.second);
                 } else {

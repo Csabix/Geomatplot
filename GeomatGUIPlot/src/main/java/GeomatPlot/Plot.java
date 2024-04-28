@@ -24,17 +24,10 @@ import static java.awt.event.MouseEvent.*;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 
 public class Plot extends AbstractWindow{
-    private enum PlotState {
-        WAITING_INPUT,
-        NONE,
-        CAMERA_DRAG,
-        POINT_DRAG
-    }
     private Camera camera;
     private DrawerContainer drawerContainer;
     private ObjectClicked objectClicked;
     private Tuple<Float,Float> clickLocation;
-    private PlotState plotState;
     private boolean resized;
     private boolean fboCreated;
     private int fbo,colorTex,indexTex;
@@ -43,7 +36,6 @@ public class Plot extends AbstractWindow{
     private Movement movement;
     public Plot(){
         super("GeomatPLot",640,640,false);
-        plotState = PlotState.NONE;
         clickLocation = new Tuple<>(0f,0f);
         resized = false;
         fboCreated = false;
@@ -80,102 +72,49 @@ public class Plot extends AbstractWindow{
                 break;
             case MOUSE_PRESSED:
                 MouseEvent evt = (MouseEvent)event;
+
                 if(clickInputQuery.isWaitingInput()) {
                     synchronized(clickInputQuery) {
                         clickInputQuery.setEvent(evt, camera);
                         clickInputQuery.notify();
                     }
-                    //plotState = PlotState.NONE;
-                } else if(plotState == PlotState.NONE) {
-                    gl.glGetTextureSubImage(indexTex, 0, evt.getX(), height - evt.getY(), 0, 1, 1, 1, GL_RED_INTEGER, GL_INT, Float.BYTES, readValue);
-                    int typeID = readValue.get();
-                    readValue.rewind();
-                    Optional<ObjectClicked> result = drawerContainer.getClicked(typeID);
-                    if (result.isPresent() && result.get().data.isMovable()) {
-                        objectClicked = result.get();
-                        System.out.println(objectClicked.type.toString() + " " + objectClicked.data.getID());
-                        plotState = PlotState.POINT_DRAG;
-                        clickLocation = camera.invert(evt.getX() / (float) width * 2f - 1f, (height - evt.getY()) / (float) height * 2f - 1f);
-                        switch (objectClicked.type) {
-                            case Point:
-                                movement = new Movement(objectClicked.data, clickLocation.first, clickLocation.second);
-                                break;
-                            case Patch:
-                                // TODO
-                                movement = new Movement(objectClicked.data, clickLocation.first, clickLocation.second);
-                                break;
-                            default:
-                                plotState = PlotState.CAMERA_DRAG;
-                                camera.setOldData();
-                                clickLocation = camera.invert(evt.getX() / (float) width * 2f - 1f, (height - evt.getY()) / (float) height * 2f - 1f);
-
-                        }
-                    } else {
-                        plotState = PlotState.CAMERA_DRAG;
-                        camera.setOldData();
-                        clickLocation = camera.invert(evt.getX() / (float) width * 2f - 1f, (height - evt.getY()) / (float) height * 2f - 1f);
-                    }
+                    break;
                 }
-                /*if(plotState == PlotState.WAITING_INPUT) {
-                    synchronized (this) {
-                        clickLocation = camera.invert(evt.getX() / (float)width * 2f - 1f, (height - evt.getY()) / (float)height * 2f - 1f);
-                        notify();
-                        plotState = PlotState.NONE;
-                    }
-                } else if(plotState == PlotState.NONE){
-                    gl.glGetTextureSubImage(indexTex,0,evt.getX(),height - evt.getY(),0,1,1,1,GL_RED_INTEGER,GL_INT,Float.BYTES,readValue);
-                    int typeID = readValue.get();
-                    readValue.rewind();
-                    Optional<ObjectClicked> result = drawerContainer.getClicked(typeID);
-                    if(result.isPresent()) {
-                        objectClicked = result.get();
-                        System.out.println(objectClicked.type.toString() + " " + objectClicked.data.getID());
-                        switch (objectClicked.type) {
-                            case Point:
-                                plotState = PlotState.POINT_DRAG;
-                                break;
-                            case Polygon:
-                                // TODO
-                                break;
-                            default:
-                                plotState = PlotState.CAMERA_DRAG;
-                                camera.setOldData();
-                                clickLocation = camera.invert(evt.getX() / (float)width * 2f - 1f, (height - evt.getY()) / (float)height * 2f - 1f);
 
-                        }
-                    } else {
-                        plotState = PlotState.CAMERA_DRAG;
-                        camera.setOldData();
-                        clickLocation = camera.invert(evt.getX() / (float)width * 2f - 1f, (height - evt.getY()) / (float)height * 2f - 1f);
-                    }
-                }*/
+                clickLocation = camera.invert(evt.getX() / (float) width * 2f - 1f, (height - evt.getY()) / (float) height * 2f - 1f);
+
+                gl.glGetTextureSubImage(indexTex, 0, evt.getX(), height - evt.getY(), 0, 1, 1, 1, GL_RED_INTEGER, GL_INT, Float.BYTES, readValue);
+                int typeID = readValue.get();
+                readValue.rewind();
+
+                Optional<ObjectClicked> result = drawerContainer.getClicked(typeID);
+
+                if(result.isPresent() && result.get().data.isMovable()) {
+                    objectClicked = result.get();
+                    System.out.println(objectClicked.type.toString() + " " + objectClicked.data.getID());
+                    movement = new Movement(objectClicked.data, clickLocation.first, clickLocation.second);
+                } else {
+                    camera.setOldData();
+                }
                 break;
             case MOUSE_DRAGGED:
                 evt = (MouseEvent)event;
                 Tuple<Float,Float> location;
-                switch(plotState){
-                    case CAMERA_DRAG:
-                        camera.swap();
-                        location = camera.invert(evt.getX() / (float)width * 2f - 1f, (height - evt.getY()) / (float)height * 2f - 1f);
-                        location.first = camera.getX() - location.first + clickLocation.first;
-                        location.second = camera.getY() - location.second + clickLocation.second;
-                        camera.swap();
-                        camera.setX(location.first);
-                        camera.setY(location.second);
-                        break;
-                    case POINT_DRAG:
-                        location = camera.invert(evt.getX() / (float)width * 2f - 1f, (height - evt.getY()) / (float)height * 2f - 1f);
-                        if(movement != null)movement.drag(this, location.first, location.second);
-                        /*gPoint selected = (gPoint)objectClicked.data;
-                        selected.x = location.first;
-                        selected.y = location.second;
-                        updateDrawable(selected);
-                        selected.notifyPoint();*/
-                        break;
+
+                if(movement == null) {
+                    camera.swap();
+                    location = camera.invert(evt.getX() / (float)width * 2f - 1f, (height - evt.getY()) / (float)height * 2f - 1f);
+                    location.first = camera.getX() - location.first + clickLocation.first;
+                    location.second = camera.getY() - location.second + clickLocation.second;
+                    camera.swap();
+                    camera.setX(location.first);
+                    camera.setY(location.second);
+                } else {
+                    location = camera.invert(evt.getX() / (float)width * 2f - 1f, (height - evt.getY()) / (float)height * 2f - 1f);
+                    movement.drag(this, location.first, location.second);
                 }
                 break;
             case MOUSE_RELEASED:
-                if(plotState != PlotState.WAITING_INPUT)plotState = PlotState.NONE;
                 movement = null;
             case COMPONENT_RESIZED:
                 resized = true;
@@ -209,18 +148,9 @@ public class Plot extends AbstractWindow{
         gl.glBlitNamedFramebuffer(fbo,0,0,0,w,h,0,0,w,h,GL_COLOR_BUFFER_BIT,GL_NEAREST);
     }
     public float[] clickInput() {
-        //plotState = PlotState.WAITING_INPUT;
         toFront();
         clickInputQuery.getInput();
         return clickInputQuery.xy;
-        /*try {
-            synchronized (this) {
-                wait();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return new float[]{clickLocation.first,clickLocation.second};*/
     }
     public void addDrawable(Drawable drawable) {
         callEvent(new CreateEvent(this,drawable));

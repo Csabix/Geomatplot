@@ -40,6 +40,7 @@ public class Plot extends AbstractWindow{
     private int fbo,colorTex,indexTex;
     private final IntBuffer readValue = GLBuffers.newDirectIntBuffer(1);
     public final ClickInputQuery clickInputQuery;
+    private Movement movement;
     public Plot(){
         super("GeomatPLot",640,640,false);
         plotState = PlotState.NONE;
@@ -47,6 +48,7 @@ public class Plot extends AbstractWindow{
         resized = false;
         fboCreated = false;
         clickInputQuery = new ClickInputQuery(this);
+        movement = null;
     }
     @Override
     protected void init(GL4 gl) {
@@ -92,12 +94,15 @@ public class Plot extends AbstractWindow{
                     if (result.isPresent() && result.get().data.isMovable()) {
                         objectClicked = result.get();
                         System.out.println(objectClicked.type.toString() + " " + objectClicked.data.getID());
+                        plotState = PlotState.POINT_DRAG;
+                        clickLocation = camera.invert(evt.getX() / (float) width * 2f - 1f, (height - evt.getY()) / (float) height * 2f - 1f);
                         switch (objectClicked.type) {
                             case Point:
-                                plotState = PlotState.POINT_DRAG;
+                                movement = new Movement(objectClicked.data, clickLocation.first, clickLocation.second);
                                 break;
-                            case Polygon:
+                            case Patch:
                                 // TODO
+                                movement = new Movement(objectClicked.data, clickLocation.first, clickLocation.second);
                                 break;
                             default:
                                 plotState = PlotState.CAMERA_DRAG;
@@ -160,17 +165,18 @@ public class Plot extends AbstractWindow{
                         break;
                     case POINT_DRAG:
                         location = camera.invert(evt.getX() / (float)width * 2f - 1f, (height - evt.getY()) / (float)height * 2f - 1f);
-                        //gPoint selected = pointDrawer.get(selectedPoint);
-                        gPoint selected = (gPoint)objectClicked.data;
+                        if(movement != null)movement.drag(this, location.first, location.second);
+                        /*gPoint selected = (gPoint)objectClicked.data;
                         selected.x = location.first;
                         selected.y = location.second;
                         updateDrawable(selected);
-                        selected.notifyPoint();
+                        selected.notifyPoint();*/
                         break;
                 }
                 break;
             case MOUSE_RELEASED:
                 if(plotState != PlotState.WAITING_INPUT)plotState = PlotState.NONE;
+                movement = null;
             case COMPONENT_RESIZED:
                 resized = true;
                 break;

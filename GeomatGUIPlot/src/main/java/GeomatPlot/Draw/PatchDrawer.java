@@ -6,7 +6,7 @@ import GeomatPlot.Mem.ManagedIntBuffer;
 import com.jogamp.opengl.GL4;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 
 import static com.jogamp.opengl.GL.*;
 import static com.jogamp.opengl.GL.GL_UNSIGNED_INT;
@@ -22,10 +22,9 @@ public class PatchDrawer extends Drawer{
     private final ManagedIntBuffer ibo;
     private int currentLength;
 
-    public PatchDrawer(GL4 gl) {
+    public PatchDrawer(GL4 gl, PatchLineDrawer patchLineDrawer) {
         currentLength = 0;
-        lineDrawer = new PatchLineDrawer(gl);
-        lineDrawer.overrideDrawID(getDrawID());
+        lineDrawer = patchLineDrawer;
 
         drawableList = new ArrayList<>();
 
@@ -52,36 +51,50 @@ public class PatchDrawer extends Drawer{
         gl.glVertexArrayVertexBuffer(vao, 0, polygonFaceBuffer.buffer, 0, gPolygon.BYTE);
         gl.glVertexArrayElementBuffer(vao, indexBuffer.buffer);
     }
+
     @Override
     protected void syncInner(GL4 gl, Integer first, Integer last) {
+        for (int i = first; i < last; ++i) {
+            gPatch current = (gPatch)drawableList.get(i);
+            lineDrawer.drawableList.set(i, current.getLine());
+        }
+        lineDrawer.syncInner(gl, first, last);
+
+        polygonFaceBuffer.update(gl,toPackableFloat(drawableList),first,last);
     }
+
+    @SuppressWarnings("unchecked")
     @Override
     protected void syncInner(GL4 gl) {
-        polygonFaceBuffer.add(gl, toPackableFloat(drawableList.subList(syncedDrawable, drawableList.size())));
-        int indexCount = 0;
-        for (int i = syncedDrawable; i < drawableList.size(); i++) {
-            gPatch current = (gPatch)drawableList.get(i);
-            gLine line = current.getLine();
-            lineDrawer.add(Collections.singletonList(line));
-            indexCount += 3 * current.indices.length;
-        }
+        List<Drawable> sublist = drawableList.subList(syncedDrawable,drawableList.size());
+        List<Drawable> lines = new ArrayList<>(sublist.size());
 
-        ArrayList<DrawElementsIndirectCommand> indirectCommands = new ArrayList<>(drawableList.size() - syncedDrawable);
+        int indexCount = 0;
+        for (gPatch patch:(List<gPatch>)(Object)sublist) {
+            lines.add(patch.getLine());
+            indexCount += patch.indices.length;
+        }
+        indexCount *= 3;
+
+        ArrayList<DrawElementsIndirectCommand> indirectCommands = new ArrayList<>(sublist.size());
         int[] indices = new int[indexCount];
         int position = 0;
-        for (int i = syncedDrawable; i < drawableList.size(); i++) {
-            gPatch current = (gPatch)drawableList.get(i);
-            indirectCommands.add(new DrawElementsIndirectCommand(current.indices.length * 3, 1, currentLength, 0, 0));
-            for (int j = 0; j < current.indices.length; j++) {
-                indices[position++] = current.indices[j][0] + currentLength;
-                indices[position++] = current.indices[j][1] + currentLength;
-                indices[position++] = current.indices[j][2] + currentLength;
+        for (gPatch patch:(List<gPatch>)(Object)sublist) {
+            indirectCommands.add(new DrawElementsIndirectCommand(patch.indices.length * 3, 1, currentLength, 0, 0));
+            for (int i = 0; i < patch.indices.length; ++i) {
+                indices[position++] = patch.indices[i][0] + currentLength;
+                indices[position++] = patch.indices[i][1] + currentLength;
+                indices[position++] = patch.indices[i][2] + currentLength;
             }
-            currentLength += current.indices.length * 3;
+            currentLength += patch.indices.length * 3;
         }
-        indexBuffer.add(gl, indices);
 
+
+        lineDrawer.add(lines);
         lineDrawer.sync(gl);
+
+        polygonFaceBuffer.add(gl, toPackableFloat(sublist));
+        indexBuffer.add(gl, indices);
 
         ibo.add(gl, toPackableInt(indirectCommands));
     }
@@ -91,7 +104,6 @@ public class PatchDrawer extends Drawer{
         gl.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, ibo.buffer);
         gl.glUseProgram(shader.ID);
         gl.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, null, syncedDrawable, 0);
-        lineDrawer.draw(gl);
     }
     @Override
     public Drawable.DrawableType requiredType() {

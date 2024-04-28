@@ -1,5 +1,7 @@
 package GeomatPlot.Draw;
 
+import GeomatPlot.Plot;
+
 import java.util.Vector;
 public class gPoint extends Drawable {
     public static final int ELEMENT_COUNT = 7;
@@ -59,7 +61,15 @@ public class gPoint extends Drawable {
         return DrawableType.Point;
     }
 
-    //MATLAB WTF
+    @Override
+    public void move(Plot plot, float dX, float dY) {
+        this.x += dX;
+        this.y += dY;
+        plot.updateDrawable(this);
+        notifyDrawable();
+    }
+
+    /*//MATLAB WTF
     private final Vector<Object> callbacks = new java.util.Vector<>();
     public synchronized void addMovingPointListener(MovingPointListener lis) {
         callbacks.addElement(lis);
@@ -78,16 +88,6 @@ public class gPoint extends Drawable {
             this.id = id;
         }
     }
-    /*public void notifyPoint(int id) {
-        Vector dataCopy;
-        synchronized(this) {
-            dataCopy = (Vector)callbacks.clone();
-        }
-        for (int i=0; i < dataCopy.size(); i++) {
-            MovingPointEvent event = new MovingPointEvent(this, id);
-            ((MovingPointListener)dataCopy.elementAt(i)).movingPoint(event);
-        }
-    }*/
     public void notifyPoint() {
         Vector dataCopy;
         synchronized(this) {
@@ -97,5 +97,5 @@ public class gPoint extends Drawable {
             MovingPointEvent event = new MovingPointEvent(this, getID());
             ((MovingPointListener)dataCopy.elementAt(i)).movingPoint(event);
         }
-    }
+    }*/
 }

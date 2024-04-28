@@ -12,7 +12,8 @@ public class DrawerContainer {
     private static final int bitmask = genBitmask();
     private final Drawer[] drawers;
     public DrawerContainer(GL4 gl) {
-        final Drawer[] initDrawers = {new PointDrawer(gl), new LineDrawer<gLine>(gl), new LabelDrawer(gl), new PatchDrawer(gl), new PolygonDrawer(gl)};
+        final PatchLineDrawer patchLineDrawer = new PatchLineDrawer(gl);
+        final Drawer[] initDrawers = {new PointDrawer(gl), new LineDrawer<gLine>(gl), new LabelDrawer(gl), new PatchDrawer(gl,patchLineDrawer), new PolygonDrawer(gl), patchLineDrawer};
         drawers = new Drawer[values.length];
         for (Drawer drawer : initDrawers) {
             drawers[drawer.requiredType().ordinal()] = drawer;
@@ -42,7 +43,9 @@ public class DrawerContainer {
         int ordinal  = typeID >>> Integer.BYTES * 8 - Drawer.ID_BIT_COUNT;
         int id = typeID & bitmask;
 
-        return Optional.of(new ObjectClicked(values[ordinal], drawers[ordinal].getDrawable(id)));
+        Drawable drawable = drawers[ordinal].getDrawable(id);
+
+        return Optional.of(new ObjectClicked(drawable.getType(), drawable));
     }
     private static int genBitmask() {
         char[] chars = new char[Integer.BYTES * 8];

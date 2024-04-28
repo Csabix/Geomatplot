@@ -17,6 +17,13 @@ public class gLine extends Drawable {
         this.dashed = dashed;
     }
 
+    public gLine(float[][] primaryColor, float[] width, boolean movable) {
+        super(movable);
+        this.primaryColor = primaryColor;
+        this.width = width;
+        this.dashed = false;
+    }
+
     @Override
     public float[] pack() {
         float[] data = new float[elementCount()];

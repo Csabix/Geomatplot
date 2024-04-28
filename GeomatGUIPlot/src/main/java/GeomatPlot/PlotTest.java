@@ -24,7 +24,7 @@ public class PlotTest {
         gPolygon polygon22 = new gPolygon(new float[]{0,1,1,0},new float[]{2,2,3,3},new int[][]{{0, 1, 2},{0,3,2}},true);
         Plot plot = new Plot();
         plot.addDrawable(patch);
-        plot.addDrawable(polygon22);
+        //plot.addDrawable(polygon22);
         shrek(plot);
         gPoint p0 = new gPoint(-1,0, true);
         gPoint p1 = new gPoint(5, 20, true);
@@ -80,6 +80,7 @@ public class PlotTest {
         }catch (Exception e) {
 
         }
+        patch.x[0] = -2;
         gLine l2 = new gLine(new float[]{0f,1f,2f},new float[]{0f,1f,2f},new float[][]{{0f, 1f, 0f}},new float[]{10f},false);
         plot.addDrawable(l2);
         gLine l3 = new gLine(new float[]{2f,3f},new float[]{0f,1f},new float[][]{{0f, 1f, 0f}},new float[]{10f,30f},true);
@@ -91,6 +92,7 @@ public class PlotTest {
         }catch (Exception e) {
 
         }
+        plot.updateDrawable(patch);
         plot.removeDrawable(l2);
     }
 

@@ -1,5 +1,7 @@
 package GeomatPlot.Draw;
 
+import GeomatPlot.Plot;
+
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.Arrays;
@@ -14,7 +16,7 @@ public class gPatch extends Drawable{
     public float[][] primaryColors;
     public float[][] borderColors;
     public int[][] indices;
-
+    private gPatchLine line;
 
     public gPatch(float[] x, float[] y, int[][] indices, float[][] primaryColors, float[][] borderColors, float faceAlpha, boolean movable) {
         super(movable);
@@ -30,16 +32,9 @@ public class gPatch extends Drawable{
         this(x,y,indices,new float[][]{{0.466f, 0.674f, 0.188f}}, new float[][]{{0f,0f,0f}}, 1f, movable);
     }
 
-    public gLine getLine() {
-        float[] xL = new float[x.length+1];
-        float[] yL = new float[x.length+1];
-        for (int i = 0; i < x.length; i++) {
-            xL[i] = x[i];
-            yL[i] = y[i];
-        }
-        xL[x.length] = x[0];
-        yL[y.length] = y[0];
-        return new gLine(xL,yL,borderColors,new float[]{5.f}, false);
+    public gPatchLine getLine() {
+        line = new gPatchLine(x,y,borderColors,5.f, this);
+        return line;
     }
 
     @Override
@@ -81,5 +76,16 @@ public class gPatch extends Drawable{
     @Override
     public DrawableType getType() {
         return Drawable.DrawableType.Patch;
+    }
+
+    @Override
+    public void move(Plot plot, float dX, float dY) {
+        for (int i = 0; i < x.length; i++) {
+            x[i] += dX;
+            y[i] += dY;
+            line.x[i] += dX;
+            line.y[i] += dY;
+        }
+        plot.updateDrawable(this);
     }
 }

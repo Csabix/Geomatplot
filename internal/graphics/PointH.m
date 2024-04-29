@@ -19,7 +19,7 @@ classdef PointH < handle
             obj.plot = plot;
             addlistener(obj,'Position','PostSet',@obj.updateBuffer);
             gPointH = handle(obj.gPoint,'CallbackProperties');
-            set(gPointH,'MovingPointCallback',@(~,~)notify(obj,'Moved'));
+            set(gPointH,'MovementCallback',@(~,~)notify(obj,'Moved'));
         end
         
         function position = get.Position(obj)

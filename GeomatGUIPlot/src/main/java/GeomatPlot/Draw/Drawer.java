@@ -8,6 +8,7 @@ import GeomatPlot.Mem.PackableInt;
 import GeomatPlot.Tuple;
 import com.jogamp.opengl.GL4;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,32 @@ public abstract class Drawer {
     protected void deleteInner(GL4 gl, int[] IDs) throws Exception {
         throw new Exception("Deletion not supported");
     };
+
+    protected void directDeleteCall(GL4 gl, int[] IDs) {
+        if (syncedDrawable < drawableList.size()) {
+            syncInner(gl);
+            syncedDrawable = drawableList.size();
+        }
+        try {
+            deleteInner(gl, IDs);
+            List<Drawable> drawables = new ArrayList<>(IDs.length);
+            for (int id : IDs) {
+                drawables.add(drawableList.get(id));
+            }
+
+            drawableList.removeAll(drawables);
+
+            nextID = 0;
+            for (Drawable drawable:drawableList) {
+                drawable.setID(nextID++);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        }
+        syncedDrawable = drawableList.size();
+    }
+
     public abstract Drawable.DrawableType requiredType();
     protected int getDrawID() {
         return drawID;
@@ -47,6 +74,7 @@ public abstract class Drawer {
                 }
             } catch (Exception e) {
                 System.out.println(e.getMessage());
+                e.printStackTrace();
             }
             toBeDeleted = null;
             syncedDrawable = drawableList.size();

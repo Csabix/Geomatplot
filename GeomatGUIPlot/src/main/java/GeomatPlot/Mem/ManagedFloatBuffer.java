@@ -10,19 +10,20 @@ import java.util.*;
 
 import static com.jogamp.opengl.GL.*;
 
-public class ManagedFloatBuffer {
-    public int capacity,position;
-    public final int buffer;
+public class ManagedFloatBuffer extends BaseManagedBuffer{
+    //public int capacity,position;
+    //public final int buffer;
 
-    public void clear() {
+    /*public void clear() {
         position = 0;
-    }
+    }*/
 
     public ManagedFloatBuffer(GL4 gl, int initialCapacity) {
-        capacity = initialCapacity;
+        super(gl, initialCapacity);
+        /*capacity = initialCapacity;
         position = 0;
         buffer = GLObject.createBuffers(gl,1)[0];
-        gl.glNamedBufferData(buffer, capacity, null, GL_STATIC_DRAW);
+        gl.glNamedBufferData(buffer, capacity, null, GL_STATIC_DRAW);*/
     }
 
     public ManagedFloatBuffer(GL4 gl) {
@@ -67,7 +68,7 @@ public class ManagedFloatBuffer {
         gl.glUnmapNamedBuffer(buffer);
     }
 
-    public void deleteRange(GL4 gl, int[] offsets, int range){
+    /*public void deleteRange(GL4 gl, int[] offsets, int range){
         int[] ranges = new int[offsets.length];
         Arrays.fill(ranges, range);
         deleteRange(gl, offsets, ranges);
@@ -75,6 +76,7 @@ public class ManagedFloatBuffer {
     public void deleteRange(GL4 gl, int[] offsets, int[] ranges) {
         assert(offsets.length == ranges.length);
         assert(offsets.length != 0);
+        int byteTotal = 0;
         // Get range
         int baseOffset = Integer.MAX_VALUE;
         for (int i = 0; i < offsets.length; ++i) {
@@ -84,6 +86,7 @@ public class ManagedFloatBuffer {
         OffsetRange[] offsetRanges = new OffsetRange[offsets.length];
         for (int i = 0; i < offsets.length; ++i) {
             offsetRanges[i] = (new OffsetRange(offsets[i] - baseOffset,ranges[i]));
+            byteTotal += ranges[i];
         }
         Arrays.sort(offsetRanges);
         // Merge
@@ -122,6 +125,7 @@ public class ManagedFloatBuffer {
         }
 
         gl.glUnmapNamedBuffer(buffer);
+        position -= byteTotal;
     }
     private static class OffsetRange implements Comparable<OffsetRange>{
         public Integer offset;
@@ -143,5 +147,5 @@ public class ManagedFloatBuffer {
         public int compareTo(OffsetRange offsetRange) {
             return this.offset.compareTo(offsetRange.offset);
         }
-    }
+    }*/
 }

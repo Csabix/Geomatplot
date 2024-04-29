@@ -65,7 +65,7 @@ function point = drawPoint(varargin)
                 color = [1 1 1];
         end
     end
-    jPoint = GeomatPlot.Draw.gPoint(single([position,color,borderColor]));
+    jPoint = GeomatPlot.Draw.gPoint(position(1),position(2), color, 20,0,true);
     plt.addDrawable(jPoint);
     point = PointH(jPoint,plt);
 end

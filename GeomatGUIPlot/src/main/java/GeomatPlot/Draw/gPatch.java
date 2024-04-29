@@ -16,7 +16,7 @@ public class gPatch extends Drawable{
     public float[][] primaryColors;
     public float[][] borderColors;
     public int[][] indices;
-    private gPatchLine line;
+    protected gPatchLine line;
 
     public gPatch(float[] x, float[] y, int[][] indices, float[][] primaryColors, float[][] borderColors, float faceAlpha, boolean movable) {
         super(movable);

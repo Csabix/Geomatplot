@@ -54,6 +54,7 @@ public class Plot extends AbstractWindow{
 
         resize(gl,canvas.getSurfaceWidth(),canvas.getSurfaceHeight());
     }
+    private boolean drag = true;
     @Override
     protected void processEvent(GL4 gl,AWTEvent event) {
         switch (event.getID()) {
@@ -73,12 +74,11 @@ public class Plot extends AbstractWindow{
                 MouseEvent evt = (MouseEvent)event;
 
                 if(clickInputQuery.isWaitingInput()) {
-                    synchronized(clickInputQuery) {
-                        clickInputQuery.setEvent(evt, camera);
-                        clickInputQuery.notify();
-                    }
+                    clickInputQuery.setEvent(evt, camera);
+                    drag = false;
                     break;
                 }
+                drag = true;
 
                 clickLocation = camera.invert(evt.getX() / (float) width * 2f - 1f, (height - evt.getY()) / (float) height * 2f - 1f);
 
@@ -97,6 +97,7 @@ public class Plot extends AbstractWindow{
                 }
                 break;
             case MOUSE_DRAGGED:
+                if(!drag)return;
                 evt = (MouseEvent)event;
                 Tuple<Float,Float> location;
 
@@ -115,6 +116,7 @@ public class Plot extends AbstractWindow{
                 break;
             case MOUSE_RELEASED:
                 movement = null;
+                break;
             case COMPONENT_RESIZED:
                 resized = true;
                 break;

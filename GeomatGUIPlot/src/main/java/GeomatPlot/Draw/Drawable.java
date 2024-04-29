@@ -6,7 +6,7 @@ import GeomatPlot.Plot;
 import java.util.Vector;
 
 public abstract class Drawable implements PackableFloat {
-    public enum DrawableType{Patch, PatchLine, Polygon, Line, Label, Point};
+    public enum DrawableType{Patch, Polygon, PatchLine, PolygonPoint, Line, Label, Point};
     private int ID;
     private final boolean movable;
     protected Drawable(boolean movable) {

@@ -77,7 +77,7 @@ public class LineDrawer<T extends  gLine> extends Drawer{
     @Override
     protected void deleteInner(GL4 gl, int[] IDs) throws Exception {
         int[] offsets = new int[IDs.length];
-        int[] lineranges = new int[IDs.length];
+        int[] lineRanges = new int[IDs.length];
         int resultIndex = 0;
         int currentOffset = 0;
         int currentID = 0;
@@ -86,14 +86,14 @@ public class LineDrawer<T extends  gLine> extends Drawer{
             if(resultIndex == IDs.length || currentID == IDs.length)break;
             if(drawable.getID() == IDs[currentID]) {
                 offsets[resultIndex] = currentOffset;
-                lineranges[resultIndex] = drawable.bytes();
+                lineRanges[resultIndex] = drawable.bytes();
                 ++resultIndex;
                 ++currentID;
             }
             currentOffset += drawable.bytes();
         }
 
-        lineBuffer.deleteRange(gl, offsets, lineranges);
+        lineBuffer.deleteRange(gl, offsets, lineRanges);
 
         for (int i = 0; i < IDs.length; i++) {
             offsets[i] = DrawArraysIndirectCommand.BYTES * IDs[i];

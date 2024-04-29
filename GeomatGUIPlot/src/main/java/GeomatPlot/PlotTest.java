@@ -9,22 +9,17 @@ import java.util.ArrayList;
 // https://undocumentedmatlab.com/articles/matlab-callbacks-for-java-events/
 public class PlotTest {
     public static void main(String[] args) {
-        /*Vertex a = new Vertex(); a.x = 0; a.y = 0;
-        Vertex b = new Vertex(); b.x = 5; a.y = 0;
-        Vertex c = new Vertex(); c.x = 5; c.y = 5;
-        List<Vertex> vertexList = Arrays.asList(a,b,c);
-        Delaunay delaunay = new Delaunay(vertexList);
-        delaunay.calc();
-        List<Vertex> asd = delaunay.triangulate();
-        for (Vertex v:asd) {
-            System.out.println(v.x + " " + v.y);
-        }*/
         gPatch patch = new gPatch(new float[]{0,1,1},new float[]{0,0,1},new int[][]{{0, 1, 2}},true);
+        gPatch patch2 = new gPatch(new float[]{0,1,1,0},new float[]{2,2,3,3},new int[][]{{0, 1, 2},{0,3,2}},true);
         gPolygon polygon2 = new gPolygon(new float[]{0,1,1},new float[]{0,0,1},new int[][]{{0, 1, 2}},true);
         gPolygon polygon22 = new gPolygon(new float[]{0,1,1,0},new float[]{2,2,3,3},new int[][]{{0, 1, 2},{0,3,2}},true);
+        gPolygon polygon23 = new gPolygon(new float[]{3,4,4,3},new float[]{2,2,3,3},new int[][]{{0, 1, 2},{0,3,2}},true);
         Plot plot = new Plot();
         plot.addDrawable(patch);
-        //plot.addDrawable(polygon22);
+        plot.addDrawable(patch2);
+        //plot.addDrawable(polygon2);
+        plot.addDrawable(polygon22);
+        plot.addDrawable(polygon23);
         shrek(plot);
         gPoint p0 = new gPoint(-1,0, true);
         gPoint p1 = new gPoint(5, 20, true);
@@ -47,7 +42,7 @@ public class PlotTest {
 
             }
         }*/
-        {
+        /*{
             ArrayList<gPoint> points = new ArrayList<>(100*100);
             for (int i = 0; i < 100; i++) {
                 for (int j = 0; j < 100; j++) {
@@ -57,7 +52,7 @@ public class PlotTest {
                     plot.removeDrawable(point);
                 }
             }
-            /*for (int i = 0; i < 100*100 - 20; i+=100) {
+            *//*for (int i = 0; i < 100*100 - 20; i+=100) {
                 try {
                     //Thread.sleep(100);
                 }catch (Exception e) {
@@ -66,8 +61,8 @@ public class PlotTest {
                 for (int j = 0; j < 20; j++) {
                     plot.removeDrawable(points.get(i+j));
                 }
-            }*/
-        }
+            }*//*
+        }*/
         plot.addDrawable(p1);
         // float[] x, float[] y, float[][] primaryColor, float[] width, boolean dashed
         gLine l1 = new gLine(new float[]{-1f,5f,10f,15f,20f,25f},new float[]{0f,20f,0f,20f,0f,20f},new float[][]{{0f, 0f, 0f}},new float[]{8f},true);
@@ -81,6 +76,7 @@ public class PlotTest {
 
         }
         patch.x[0] = -2;
+        plot.updateDrawable(patch);
         gLine l2 = new gLine(new float[]{0f,1f,2f},new float[]{0f,1f,2f},new float[][]{{0f, 1f, 0f}},new float[]{10f},false);
         plot.addDrawable(l2);
         gLine l3 = new gLine(new float[]{2f,3f},new float[]{0f,1f},new float[][]{{0f, 1f, 0f}},new float[]{10f,30f},true);
@@ -92,7 +88,8 @@ public class PlotTest {
         }catch (Exception e) {
 
         }
-        plot.updateDrawable(patch);
+        plot.removeDrawable(polygon22);
+        plot.removeDrawable(patch);
         plot.removeDrawable(l2);
     }
 

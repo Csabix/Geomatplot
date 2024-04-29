@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.jogamp.opengl.GL3.GL_PROGRAM_POINT_SIZE;
 
-public class PointDrawer extends Drawer{
+public class PointDrawer<T extends gPoint> extends Drawer{
     private static final int INITIAL_CAPACITY = 100 * gPoint.BYTES;
     private final ProgramObject shader;
     private final int vao;
@@ -46,8 +46,8 @@ public class PointDrawer extends Drawer{
 
         gl.glVertexArrayVertexBuffer(vao, 0, pointBuffer.buffer, 0, gPoint.BYTES);
     }
-    public gPoint get(int index) {
-        return (gPoint)drawableList.get(index);
+    public T get(int index) {
+        return (T)drawableList.get(index);
     }
 
     @Override

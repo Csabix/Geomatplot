@@ -36,6 +36,12 @@ classdef Plot < handle
             obj.JPlot.updateDrawable(drawable);
         end
 
+        function removeDrawable(obj,drawables)
+            for i = 1:numel(drawables)
+                obj.JPlot.removeDrawable(drawables(i));
+            end
+        end
+
         function p = clickInput(obj)
             p = obj.JPlot.clickInput;
             p = p';

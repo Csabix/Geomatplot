@@ -14,13 +14,14 @@ public class ClickInputQuery {
     public ClickInputQuery(Plot plt) {
         this.plt = plt;
     }
-    protected void setEvent(MouseEvent event, Camera camera) {
+    protected synchronized void setEvent(MouseEvent event, Camera camera) {
         button = event.getButton();
         modifiers = event.getModifiersEx();
         xyScreen = new int[]{event.getX(), plt.height - event.getY()};
         Tuple<Float, Float> coords = camera.invert(event.getX() / (float)plt.width * 2f - 1f, (plt.height - event.getY()) / (float)plt.height * 2f - 1f);
         xy = new float[]{coords.first, coords.second};
         waitingInput = false;
+        this.notifyAll();
     }
     public boolean isButton(int x) {
         // 1 Left, 2 Right, 3 Middle, etc...
@@ -35,18 +36,16 @@ public class ClickInputQuery {
     public boolean isDownCTRL() {
         return (modifiers & CTRL_DOWN_MASK) > 0;
     }
-    public void getInput() {
+    public synchronized void getInput() {
         plt.toFront();
         waitingInput = true;
         try {
-            synchronized (this) {
-                this.wait();
-            }
+            this.wait();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    public boolean isWaitingInput() {
+    public synchronized boolean isWaitingInput() {
         return waitingInput;
     }
 }

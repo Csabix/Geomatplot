@@ -13,7 +13,10 @@ public class DrawerContainer {
     private final Drawer[] drawers;
     public DrawerContainer(GL4 gl) {
         final PatchLineDrawer patchLineDrawer = new PatchLineDrawer(gl);
-        final Drawer[] initDrawers = {new PointDrawer(gl), new LineDrawer<gLine>(gl), new LabelDrawer(gl), new PatchDrawer(gl,patchLineDrawer), new PolygonDrawer(gl), patchLineDrawer};
+        final PolygonPointDrawer polygonPointDrawer = new PolygonPointDrawer(gl);
+        final Drawer[] initDrawers = {  new PointDrawer<gPoint>(gl), new LineDrawer<gLine>(gl), new LabelDrawer(gl),
+                                        new PatchDrawer(gl,patchLineDrawer), patchLineDrawer, polygonPointDrawer,
+                                        new PolygonDrawer(gl, patchLineDrawer, polygonPointDrawer)};
         drawers = new Drawer[values.length];
         for (Drawer drawer : initDrawers) {
             drawers[drawer.requiredType().ordinal()] = drawer;

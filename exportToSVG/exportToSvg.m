@@ -1,7 +1,7 @@
 function exportToSvg(g, location, dashedEnabled, dottedEnabled, interactive)
     
     userData = get(g, 'UserData');
-    if(isequal(userData, []))
+    if(~isequal(class(userData), 'Geomatplot'))
         fig = get(g,'parent');
         close(fig);
         return;

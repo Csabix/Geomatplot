@@ -1,5 +1,6 @@
 // dist_point2pointseq is already done +1 (needs to find out how to deal with matching the outputs)
 
+// DONE
 function midpoint_(list /*list of math.matrix (point coordinates)*/){
     let x = list[0];
     console.log(x);
@@ -20,6 +21,7 @@ function perpendicular_bisector(a,b /*matrices from point's coordinates*/){
     return math.add(math.dotMultiply(math.multiply(math.subtract(a, b),math.matrixFromRows([0,1],[-1,0])), math.subtract(0.5, math.matrixFromColumns([-1e8,-1e4,0,1,1e4,1e8]))), math.multiply(math.add(a,b), 0.5));
 }
 
+// DONE
 function equidistpoint(a,b,c /*three matrices from point's coordinates*/){
     let n = math.subtract(a, b);
     let m = math.subtract(b, c);

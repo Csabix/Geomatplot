@@ -1,5 +1,5 @@
 function ExportScript(userData, outFile)
-fprintf(outFile, '<script type="text/javascript" href="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"/>\n');
+fprintf(outFile, '<script type="text/javascript" href="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>\n');
 fprintf(outFile, '<script type="text/javascript"><![CDATA[\n');
 
 fprintf(outFile, GetBasicFunction('makeDraggable', []));
@@ -10,14 +10,13 @@ dependentFields = fieldnames(dependents);
 
 for i=1:numel(dependentFields)    %Iterating through dependent fields
 
-FieldBuffer = dependents.(dependentFields{i});  %actual field of the movables that we are currently working with
-disp(FieldBuffer.callback);
+FieldBuffer = dependents.(dependentFields{i});  %actual field of the dependents that we are currently working with
+
 
 % Temporarily I will start coding the callback export here.
 %   Should move it into separate function later on.
 
-    switch functions(FieldBuffer.callback).type
-    case "anonymous"
+    if isequal(functions(FieldBuffer.callback).type, 'anonymous')
         switch class(FieldBuffer)
         case "dlines"
             if isequal(size(FieldBuffer.inputs, 2),2) && ...
@@ -35,14 +34,14 @@ disp(FieldBuffer.callback);
             end % if
         case "dcircle"
             if isequal(class(FieldBuffer.inputs{2}),'dscalar')
-                fprintf(outFile, GetBasicFunction("dcircleDefaultCallback", {FieldBuffer.inputs{1}, FieldBuffer.inputs{2}, FieldBuffer}));
+                fprintf(outFile, GetBasicFunction("dcircleDefaultCallback", FieldBuffer.inputs, FieldBuffer.label));
             end % if
         end % inside switch
-    otherwise
-        if isequal(class(FieldBuffer), 'dscalar')
-            fprintf(outFile, GetBasicFunction(func2str(FieldBuffer.callback), {FieldBuffer.inputs{1}, FieldBuffer.inputs{2}, FieldBuffer}));
-        end % if
-    end % outside switch
+    end % if anonymous
+    
+    disp(FieldBuffer.callback);
+    fprintf(outFile, GetBasicFunction(func2str(FieldBuffer.callback), FieldBuffer.inputs, FieldBuffer.label));
+
 end % for loop
 fprintf(outFile, ']]></script>\n');
 end

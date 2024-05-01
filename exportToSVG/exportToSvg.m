@@ -1,10 +1,15 @@
 function exportToSvg(g, location, dashedEnabled, dottedEnabled, interactive)
     
+    if(~isequal(class(findobj), 'matlab.graphics.Graphics'))
+        throw(MException('MATLAB:notEnoughInputs','Error! There are no plots to export!\nHiba! Nincs exportálható adat'));
+    end
+    
     userData = get(g, 'UserData');
+    
     if(~isequal(class(userData), 'Geomatplot'))
         fig = get(g,'parent');
         close(fig);
-        return;
+        error('Error! This plot cannot be exported (not made with Geomatplot)\nHiba! Ez a koordinátarendszer nem Geomatplottal lett létrehozva');
     end
 
     rawData = DataSweeper(userData);

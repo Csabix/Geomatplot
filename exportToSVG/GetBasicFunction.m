@@ -1,4 +1,4 @@
-function retFunc = GetBasicFunction(name, inputs)
+function retFunc = GetBasicFunction(name, inputs, ownerLabel)
     switch name
         case 'makeDraggable'
         retFunc = "\tfunction makeDraggable(evt) {\n";
@@ -47,7 +47,7 @@ function retFunc = GetBasicFunction(name, inputs)
             
             a = inputs{1};
             b = inputs{2};
-            out = inputs{3}.label;
+            out = ownerLabel;
             retFunc = "temp = new MutationObserver((mutationList, observer) => {for (const mutation of mutationList) {if (mutation.type === 'attributes') {\n";
             retFunc = retFunc + "let a = math.matrixFromRows([document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cx'), document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cy')]);\n";
 
@@ -68,14 +68,42 @@ function retFunc = GetBasicFunction(name, inputs)
             retFunc = retFunc + "document.getElementById('"+string(out)+"').setAttributeNS(null, 'value', math.sqrt(math.min(math.add(math.dotPow(math.column(c, 0),2), math.dotPow(math.column(c, 1),2)))));}}});\n";
             retFunc = retFunc + "temp.observe(document.getElementById('"+string(a.label)+"'), config);temp.observe(document.getElementById('"+string(b.label)+"'), config);\n";
         
+        case 'equidistpoint'
+            a = string(inputs{1}.label);
+            b = string(inputs{2}.label);
+            c = string(inputs{3}.label);
+            out = string(ownerLabel);
+            retFunc = "temp = new MutationObserver((mutationList, observer) => {for (const mutation of mutationList) {if (mutation.type === 'attributes') {\n" + ...
+                      "a = math.matrixFromRows([document.getElementById('"+a+"').getAttributeNS(null, 'cx'),document.getElementById('"+a+"').getAttributeNS(null, 'cy')])\n" + ...
+			          "b = math.matrixFromRows([document.getElementById('"+b+"').getAttributeNS(null, 'cx'),document.getElementById('"+b+"').getAttributeNS(null, 'cy')])\n" + ...
+			          "c = math.matrixFromRows([document.getElementById('"+c+"').getAttributeNS(null, 'cx'),document.getElementById('"+c+"').getAttributeNS(null, 'cy')])\n" + ...
+			          "let n = math.subtract(a, b);let m = math.subtract(b, c);\n" + ...
+    		          "let v = math.multiply(0.5, math.divide(math.matrixFromColumns(math.multiply(math.add(a,b),math.transpose(n)), math.multiply(math.add(b,c),math.transpose(m))), math.matrixFromColumns(n,m)))\n" + ...
+			          "document.getElementById('"+out+"').setAttributeNS(null, 'cx', v.at(0)[0]);document.getElementById('"+out+"').setAttributeNS(null, 'cy', v.at(0)[1]);}}});\n" + ...
+                      "temp.observe(document.getElementById('"+a+"'), config);temp.observe(document.getElementById('"+b+"'), config);temp.observe(document.getElementById('"+c+"'), config);\n";
+        
+        case 'midpoint_'
+            out = string(ownerLabel);
+            retFunc = "temp = new MutationObserver((mutationList, observer) => {for (const mutation of mutationList) {if (mutation.type === 'attributes') {\n";
+            retFunc = retFunc + "let x = math.matrixFromRows([document.getElementById('"+string(inputs{1}.label)+"').getAttributeNS(null, 'cx'),document.getElementById('"+string(inputs{1}.label)+"').getAttributeNS(null, 'cy')])\n";
+            retFunc = retFunc + "let n = math.size(x)[0];let v = math.mean(x, 0);let n1;";
+            for i = 2:length(inputs)
+                retFunc = retFunc + "x = math.matrixFromRows([document.getElementById('"+string(inputs{i}.label)+"').getAttributeNS(null, 'cx'),document.getElementById('"+string(inputs{i}.label)+"').getAttributeNS(null, 'cy')])\n";
+                retFunc = retFunc + "n1 = math.size(x)[0];v = math.add(math.multiply(v, (n/(n+n1))), math.multiply(math.mean(x, 0), (n1/(n+n1))));n = n + n1;\n";    
+            end
+            retFunc = retFunc + "document.getElementById('"+out+"').setAttributeNS(null, 'cx', v[0]);document.getElementById('"+out+"').setAttributeNS(null, 'cy', v[1]);}}});\n";
+            for i = 1:length(inputs)
+                retFunc = retFunc + "temp.observe(document.getElementById('"+string(inputs{i}.label)+"'), config);";
+            end
+
         case 'dcircleDefaultCallback'
             a = inputs{1};
             b = inputs{2};
-            out = inputs{3};
+            out = ownerLabel;
             retFunc = "temp = new MutationObserver((mutationList, observer) => {for (const mutation of mutationList) {if (mutation.type === 'attributes') {\n";
-            retFunc = retFunc + "document.getElementById('"+string(out.label)+"').setAttributeNS(null, 'cx', document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cx'));\n";
-            retFunc = retFunc + "document.getElementById('"+string(out.label)+"').setAttributeNS(null, 'cy', document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cy'));\n";
-            retFunc = retFunc + "document.getElementById('"+string(out.label)+"').setAttributeNS(null, 'r', document.getElementById('"+string(b.label)+"').getAttributeNS(null, 'value'));}}});\n";
+            retFunc = retFunc + "document.getElementById('"+string(out)+"').setAttributeNS(null, 'cx', document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cx'));\n";
+            retFunc = retFunc + "document.getElementById('"+string(out)+"').setAttributeNS(null, 'cy', document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cy'));\n";
+            retFunc = retFunc + "document.getElementById('"+string(out)+"').setAttributeNS(null, 'r', document.getElementById('"+string(b.label)+"').getAttributeNS(null, 'value'));}}});\n";
             retFunc = retFunc + "temp.observe(document.getElementById('"+string(a.label)+"'), config);temp.observe(document.getElementById('"+string(b.label)+"'), config);\n";
 
         otherwise

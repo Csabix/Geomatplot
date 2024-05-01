@@ -16,7 +16,7 @@ methods (Access = public)
         folder = mfilename('fullpath');
         folder = folder(1:end-length(mfilename));
         %addpath([folder '/internal/'], [folder '/examples/']);
-        addpath(genpath([folder '/internal/']), [folder '/examples/']);
+        addpath(genpath([folder './internal']), [folder '/examples/']);
         if nargin == 0
             o.ax = cplt;
         end

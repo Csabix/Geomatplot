@@ -36,7 +36,7 @@ public class ManagedFloatBuffer extends BaseManagedBuffer{
             bytes +=  e.bytes();
         }
 
-        if(bytes + position > capacity) {
+        if(bytes + position >= capacity) {
             capacity = BufferHelper.getNewCapacity(capacity, bytes + position);
             BufferHelper.resizeBuffer(gl, buffer, position, capacity, GL_STATIC_DRAW);
         }
@@ -61,6 +61,9 @@ public class ManagedFloatBuffer extends BaseManagedBuffer{
         for(PackableFloat e : updateRange) {
             bytes += e.bytes();
         }
+
+        System.out.println(offset);
+        System.out.println(bytes);
 
         ByteBuffer byteBuffer = gl.glMapNamedBufferRange(buffer, offset, bytes, GL_MAP_WRITE_BIT);
         FloatBuffer floatBuffer = byteBuffer.asFloatBuffer();

@@ -11,6 +11,7 @@ public abstract class Drawable implements PackableFloat {
     private final boolean movable;
     protected Drawable(boolean movable) {
         this.movable = movable;
+        this.ID = -1;
     }
     public void setID(int ID) {
         this.ID = ID;
@@ -20,9 +21,7 @@ public abstract class Drawable implements PackableFloat {
     }
     public abstract float[] pack();
     public abstract int elementCount(); // Total float count
-    public abstract int elementCountVertex(); // Float count per vertex
     public abstract int bytes();
-    public abstract int bytesVertex();
     public abstract DrawableType getType();
     public boolean isMovable() {
         return movable;

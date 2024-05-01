@@ -23,7 +23,7 @@ import static com.jogamp.opengl.GL3ES3.GL_SHADER_STORAGE_BUFFER;
 // https://www.codeproject.com/Articles/226569/Drawing-polylines-by-tessellation
 
 public class LineDrawer<T extends  gLine> extends Drawer{
-    private static final Integer INITIAL_CAPACITY = 100 * gLine.VERTEX_BYTE;
+    private static final Integer INITIAL_CAPACITY = 1 * gLine.VERTEX_BYTE;
     ProgramObject shader;
     private final ManagedFloatBuffer lineBuffer;
     private final ManagedIntBuffer indirectDrawArraysCommandBuffer;

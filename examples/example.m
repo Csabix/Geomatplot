@@ -19,6 +19,7 @@ S=Midpoint('S',A,B,C,'k',7);        % Barycenter of the triangle labelled S
 PerpendicularBisector(A,B,'--')
 PerpendicularBisector(B,C,'--')
 PerpendicularBisector(C,A,'--')
+%%
 [~,K] = Circle(A,B,C,'--');        % Magenta dashed circumcircle of the triangle
 %%Text(K,"K") % add text at position
 %%

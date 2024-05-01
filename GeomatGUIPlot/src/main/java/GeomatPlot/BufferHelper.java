@@ -4,7 +4,7 @@ import com.jogamp.opengl.GL4;
 
 public class BufferHelper {
     public static int getNewCapacity(int oldCapacity, int position) {
-        while (position > oldCapacity) {
+        while (position >= oldCapacity) {
             oldCapacity *= 2;
         }
         return oldCapacity;

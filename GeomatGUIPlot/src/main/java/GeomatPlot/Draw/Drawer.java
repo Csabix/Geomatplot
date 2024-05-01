@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 
 public abstract class Drawer {
     public static final int ID_BIT_COUNT = 8;
-    private int drawID = requiredType().ordinal() << (Integer.BYTES * 8 - ID_BIT_COUNT);
-    private DeleteEvent toBeDeleted = null;
+    private final int drawID = requiredType().ordinal() << (Integer.BYTES * 8 - ID_BIT_COUNT);
     protected List<Drawable> drawableList;
+    private DeleteEvent toBeDeleted = null;
     protected int syncedDrawable = 0;
     protected int nextID = 0;
     protected abstract void syncInner(GL4 gl, Integer first, Integer last); // [first, last]
@@ -54,9 +54,6 @@ public abstract class Drawer {
     public abstract Drawable.DrawableType requiredType();
     protected int getDrawID() {
         return drawID;
-    }
-    protected void overrideDrawID(int drawID) {
-        this.drawID = drawID;
     }
     public void sync(GL4 gl) {
         if (syncedDrawable < drawableList.size()) {

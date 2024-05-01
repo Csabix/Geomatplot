@@ -1,12 +1,14 @@
 classdef LineH < handle
     properties (Dependent=true,SetObservable=true)
-        XData
-        YData
+        Position,
+        PrimaryColor,
+        Width,
+        Dashed
     end
 
     properties
         gLine
-        plot
+        plot Plot
         UserData
     end
 
@@ -18,24 +20,56 @@ classdef LineH < handle
         function obj = LineH(gLine,plot)
             obj.gLine = gLine;
             obj.plot = plot;
-            addlistener(obj,'XData','PostSet',@obj.updateBuffer);
-            addlistener(obj,'YData','PostSet',@obj.updateBuffer);
+            addlistener(obj,["Position","PrimaryColor","Width","Dashed"],'PostSet',@obj.updateBuffer);
+            %addlistener(obj,'YData','PostSet',@obj.updateBuffer);
         end
         
-        function x = get.XData(obj)
-            x = obj.gLine.x;
+        function position = get.Position(obj)
+            position = [obj.gLine.x,obj.gLine.y];
         end
         
-        function set.XData(obj,x)
-            obj.gLine.x = x;
+        function set.Position(obj,position)
+            s1 = size(position);
+            s2 = size(obj.gLine.x);
+            
+            if (s1(1) == s2(1))
+                obj.gLine.x = position(:,1);
+                obj.gLine.y = position(:,2);
+            else
+                x = position(:,1);
+                y = position(:,2);
+                c = obj.gLine.primaryColor;
+                w = obj.gLine.width;
+                d = obj.gLine.dashed;
+                newLine = GeomatPlot.Draw.gLine( single(x), single(y), single(c), single(w), d);
+                obj.plot.removeDrawable(obj.gLine);
+                obj.gLine = newLine;
+                obj.plot.addDrawable(obj.gLine);
+            end
         end
 
-        function y = get.YData(obj)
-            y = obj.gLine.y;
+        function primaryColor = get.PrimaryColor(obj)
+            primaryColor = obj.gLine.primaryColor;
         end
-        
-        function set.YData(obj,y)
-            obj.gLine.y = y;
+
+        function set.PrimaryColor(obj, primaryColor)
+            obj.gLine.primaryColor = primaryColor;
+        end
+
+        function width = get.Width(obj)
+            width = obj.gLine.width;
+        end
+
+        function set.Width(obj, width)
+            obj.gLine.width = width;
+        end
+
+        function dashed = get.Dashed(obj)
+            dashed = obj.gLine.dashed;
+        end
+
+        function set.Dashed(obj, dashed)
+            obj.gLine.dashed = dashed;
         end
 
         function updateBuffer(obj,~,~)

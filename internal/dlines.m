@@ -5,7 +5,8 @@ methods
         args = namedargs2cell(args);
         %fig = line(parent.ax,0,0,args{:});
         len = numel(inputs);
-        fig = drawLine(parent.ax,zeros(1,len),zeros(1,len),args{:});
+        %fig = drawLine(parent.ax,zeros(1,len),zeros(1,len),args{:});
+        fig = drawLine(parent.ax,0, 0,args{:});
         o = o@dpointlineseq(parent,label,fig,inputs,callback,hidden);
     end
 end

@@ -1,11 +1,13 @@
 classdef dpointlineseq < dependent
 methods
     function v = value(o)
-        v = [o.fig.XData(:) o.fig.YData(:)];
+        %v = [o.fig.XData(:) o.fig.YData(:)];
+        v = o.fig.Position;
     end
     function updatePlot(o,xdata,ydata)
-        o.fig.XData = xdata;
-        o.fig.YData = ydata;
+        %o.fig.XData = xdata;
+        %o.fig.YData = ydata;
+        o.fig.Position = [xdata,ydata];
     end
 end
 methods (Static)

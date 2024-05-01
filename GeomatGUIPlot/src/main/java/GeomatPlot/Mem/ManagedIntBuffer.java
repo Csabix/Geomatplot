@@ -33,12 +33,13 @@ public class ManagedIntBuffer extends BaseManagedBuffer{
     }
 
     public void add(GL4 gl, List<PackableInt> elements) {
+        if (elements.size() == 0) return;
         int bytes = 0;
         for(PackableInt e : elements) {
             bytes +=  e.bytes();
         }
 
-        if(bytes + position > capacity) {
+        if(bytes + position >= capacity) {
             capacity = BufferHelper.getNewCapacity(capacity, bytes + position);
             BufferHelper.resizeBuffer(gl, buffer, position, capacity, GL_STATIC_DRAW);
         }

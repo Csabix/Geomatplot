@@ -1,7 +1,7 @@
-function exportToSvg(g, location, dashedEnabled, dottedEnabled, interactive)
+function exportsvg(g, location, dashedEnabled, dottedEnabled, interactive, scale)
     
     if(~isequal(class(findobj), 'matlab.graphics.Graphics'))
-        throw(MException('MATLAB:notEnoughInputs','Error! There are no plots to export!\nHiba! Nincs exportálható adat'));
+        error('Error! There are no plots to export!\nHiba! Nincs exportálható adat');
     end
     
     userData = get(g, 'UserData');
@@ -12,7 +12,7 @@ function exportToSvg(g, location, dashedEnabled, dottedEnabled, interactive)
         error('Error! This plot cannot be exported (not made with Geomatplot)\nHiba! Ez a koordinátarendszer nem Geomatplottal lett létrehozva');
     end
 
-    rawData = DataSweeper(userData);
+    rawData = ExtractUserData(userData);
     rawDataSize = size(rawData);
     
     outFile = fopen(strcat(location,'/export.svg'),'w');
@@ -26,12 +26,12 @@ function exportToSvg(g, location, dashedEnabled, dottedEnabled, interactive)
     
     for i=1:rawDataSize(2)
 
-        fprintf(outFile, "%s\n", TypeMatcher(rawData{i}, 500 / minWidth, dashedEnabled, dottedEnabled));
+        fprintf(outFile, "%s\n", ConvertType(rawData{i}, 500 / minWidth, dashedEnabled, dottedEnabled));
         
     end
 
     if(interactive)
-        ExportScript(userData, outFile);
+        ExportCallbacks(userData, outFile);
     end
     fprintf(outFile, '</svg>');
     fclose(outFile);

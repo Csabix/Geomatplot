@@ -1,3 +1,31 @@
+/**
+ * 
+ * needed functions
+ * [x] midpoint_
+ * [x] dist_point2pointseq
+ * [x] perpendicular_bisector
+ * [x] equidistpoint
+ * [x] angle_bisector3
+ * [ ] angle_bisector4
+ * [ ] closest_point2pointseq
+ * [ ] closest_point2circle
+ * [ ] closest_point2polyline
+ * [ ] dist_point2circle
+ * [ ] dist_point2polyline
+ * [ ] mirror_point2point
+ * [ ] mirror_point2segment
+ * [ ] mirror_point2pointseq
+ * [ ] mirror_point2circle
+ * [ ] mirror_point2polyline
+ * [ ] perpline2point
+ * [ ] perpline2segment
+ * 
+ * [ ] Vectorokat meg kell oldani
+ * [ ] Intersects ??
+ * [ ] dcurve functions ??
+ * [ ] internallcallback ??
+ */
+
 // dist_point2pointseq is already done +1 (needs to find out how to deal with matching the outputs)
 
 // DONE

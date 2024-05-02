@@ -1,4 +1,4 @@
-function elementDataStruct = DepDataCollector(FieldBuffer, FieldID)
+function elementDataStruct = ExtractDependentElementData(FieldBuffer, FieldID)
     
     switch class(FieldBuffer)
         case "dpoint"       %mpoint will be a specific circle in svg so we collect data according

@@ -1,4 +1,4 @@
-function retFunc = GetBasicFunction(name, inputs, ownerLabel)
+function retFunc = GetDefinedCallback(name, inputs, ownerLabel)
     switch name
         case 'makeDraggable'
         retFunc = "\tfunction makeDraggable(evt) {\n";

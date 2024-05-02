@@ -1,4 +1,4 @@
-function svgLine = TypeMatcher(plotData, scale, dashedEnabled, dottedEnabled)
+function svgLine = ConvertType(plotData, scale, dashedEnabled, dottedEnabled)
 
     switch plotData.type
         case 'mpoint'

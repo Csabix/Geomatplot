@@ -1,8 +1,8 @@
-function ExportScript(userData, outFile)
+function ExportCallbacks(userData, outFile)
 fprintf(outFile, '<script type="text/javascript" href="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>\n');
 fprintf(outFile, '<script type="text/javascript"><![CDATA[\n');
 
-fprintf(outFile, GetBasicFunction('makeDraggable', []));
+fprintf(outFile, GetDefinedCallback('makeDraggable', []));
 fprintf(outFile, 'const config = { attributes: true, childList: false, subtree: false };');
 fprintf(outFile, 'let temp;');
 dependents = userData.deps;
@@ -34,13 +34,16 @@ FieldBuffer = dependents.(dependentFields{i});  %actual field of the dependents 
             end % if
         case "dcircle"
             if isequal(class(FieldBuffer.inputs{2}),'dscalar')
-                fprintf(outFile, GetBasicFunction("dcircleDefaultCallback", FieldBuffer.inputs, FieldBuffer.label));
+                fprintf(outFile, GetDefinedCallback("dcircleDefaultCallback", FieldBuffer.inputs, FieldBuffer.label));
             end % if
+        otherwise
+            % do something with abstract function
+
         end % inside switch
     end % if anonymous
     
     disp(FieldBuffer.callback);
-    fprintf(outFile, GetBasicFunction(func2str(FieldBuffer.callback), FieldBuffer.inputs, FieldBuffer.label));
+    fprintf(outFile, GetDefinedCallback(func2str(FieldBuffer.callback), FieldBuffer.inputs, FieldBuffer.label));
 
 end % for loop
 fprintf(outFile, ']]></script>\n');

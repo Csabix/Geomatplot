@@ -1,4 +1,4 @@
-function outList = DataSweeper(userData)
+function outList = ExtractUserData(userData)
     
     % this function is only for collecting the data raw, and then returning
     %   a list of the corrected, data. This function should never meddle
@@ -21,7 +21,7 @@ function outList = DataSweeper(userData)
 
         elementDataStruct = struct();                   %empty struct for collected data, assigned based on class
         FieldBuffer = dependents.(dependentFields{i});  %actual field of the movables that we are currently working with
-        elementDataStruct = DepDataCollector(FieldBuffer, dependentFields{i});
+        elementDataStruct = ExtractDependentElementData(FieldBuffer, dependentFields{i});
 
         outList{i} = elementDataStruct;    
 
@@ -33,7 +33,7 @@ function outList = DataSweeper(userData)
         
         elementDataStruct = struct();           %empty struct for collected data, assigned based on class
         FieldBuffer = movables.(movableFields{i});   %actual field of the movables that we are currently working with
-        elementDataStruct = MovDataCollector(FieldBuffer, movableFields{i});
+        elementDataStruct = ExtractMovableElementData(FieldBuffer, movableFields{i});
 
         outList{(numel(dependentFields) + i)} = elementDataStruct;
         % all the collected data assigned to an index, the indexes are

@@ -1,4 +1,4 @@
-function elementDataStruct = MovDataCollector(FieldBuffer, FieldID)
+function elementDataStruct = ExtractMovableElementData(FieldBuffer, FieldID)
     
     switch class(FieldBuffer)
         case "mpoint"       %mpoint will be a specific circle in svg so we collect data according

@@ -56,6 +56,7 @@ function equidistpoint(a,b,c /*three matrices from point's coordinates*/){
     return math.multiply(0.5, math.divide(math.matrixFromColumns(math.multiply(math.add(a,b),math.transpose(n)), math.multiply(math.add(b,c),math.transpose(m))), math.matrixFromColumns(n,m))) //0.5*[(a+b)*n' (b+c)*m']/[n;m]'
 }
 
+// DONE
 function angle_bisector3(a,b,c /*three matrices from point's coordinates*/){
     let ab = math.subtract(a,b);
     let cb = math.subtract(c,b);

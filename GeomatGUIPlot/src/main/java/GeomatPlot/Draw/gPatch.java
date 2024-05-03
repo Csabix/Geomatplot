@@ -59,18 +59,8 @@ public class gPatch extends Drawable{
     }
 
     @Override
-    public int elementCountVertex() {
-        return ELEMENT_COUNT;
-    }
-
-    @Override
     public int bytes() {
         return x.length * BYTE;
-    }
-
-    @Override
-    public int bytesVertex() {
-        return BYTE;
     }
 
     @Override
@@ -87,5 +77,6 @@ public class gPatch extends Drawable{
             line.y[i] += dY;
         }
         plot.updateDrawable(this);
+        notifyDrawable();
     }
 }

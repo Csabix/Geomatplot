@@ -10,12 +10,6 @@ public class gPoint extends Drawable {
     public float[] primaryColor;
     public float width;
     public float type;
-    /*public gPoint(List<Float> xy, List<Float> rgb, List<Float> brgb, boolean movable) {
-        x = xy.get(0);y = xy.get(1);
-        r = rgb.get(0);g = rgb.get(1);b = rgb.get(2);
-        br = brgb.get(0);bg = brgb.get(1);bb = brgb.get(2);
-        this.movable = movable;
-    }*/
     public gPoint(float x, float y, float[] primaryColor, float width, float type, boolean movable) {
         super(movable);
         this.x = x;
@@ -30,7 +24,6 @@ public class gPoint extends Drawable {
     public gPoint(float x, float y) {
         this(x, y, false);
     }
-    public gPoint(){super(false);}
     @Override
     public float[] pack() {
         return new float[]{x,y,primaryColor[0],primaryColor[1],primaryColor[2], width,type};
@@ -42,17 +35,7 @@ public class gPoint extends Drawable {
     }
 
     @Override
-    public int elementCountVertex() {
-        return ELEMENT_COUNT;
-    }
-
-    @Override
     public int bytes() {
-        return BYTES;
-    }
-
-    @Override
-    public int bytesVertex() {
         return BYTES;
     }
 

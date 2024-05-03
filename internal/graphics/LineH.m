@@ -53,6 +53,9 @@ classdef LineH < handle
         end
 
         function set.PrimaryColor(obj, primaryColor)
+            if ~isnumeric(primaryColor)
+                primaryColor = parseColor(primaryColor);
+            end
             obj.gLine.primaryColor = primaryColor;
         end
 

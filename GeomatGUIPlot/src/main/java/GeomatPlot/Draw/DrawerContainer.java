@@ -3,6 +3,8 @@ package GeomatPlot.Draw;
 import GeomatPlot.Event.CreateEvent;
 import GeomatPlot.Event.DeleteEvent;
 import GeomatPlot.Event.UpdateEvent;
+import GeomatPlot.Font.FontMap;
+import GeomatPlot.Plot;
 import com.jogamp.opengl.GL4;
 
 import java.util.Optional;
@@ -11,12 +13,12 @@ public class DrawerContainer {
     private static final Drawable.DrawableType[] values = Drawable.DrawableType.values(); // Caching
     private static final int bitmask = genBitmask();
     private final Drawer[] drawers;
-    public DrawerContainer(GL4 gl) {
+    public DrawerContainer(GL4 gl, Plot window, FontMap fontMap) {
         final PatchLineDrawer patchLineDrawer = new PatchLineDrawer(gl);
         final PolygonPointDrawer polygonPointDrawer = new PolygonPointDrawer(gl);
-        final Drawer[] initDrawers = {  new PointDrawer<gPoint>(gl), new LineDrawer<gLine>(gl), new LabelDrawer(gl),
+        final Drawer[] initDrawers = {  new PointDrawer<gPoint>(gl), new LineDrawer<gLine>(gl), new LabelDrawer(gl,fontMap),
                                         new PatchDrawer(gl,patchLineDrawer), patchLineDrawer, polygonPointDrawer,
-                                        new PolygonDrawer(gl, patchLineDrawer, polygonPointDrawer)};
+                                        new PolygonDrawer(gl, patchLineDrawer, polygonPointDrawer), new FunctionDrawer(gl, window)};
         drawers = new Drawer[values.length];
         for (Drawer drawer : initDrawers) {
             drawers[drawer.requiredType().ordinal()] = drawer;
@@ -33,8 +35,8 @@ public class DrawerContainer {
             if(drawer != null)drawer.sync(gl);
         }
     }
-    public void callSync(GL4 gl, UpdateEvent event) {
-        drawers[event.type.ordinal()].sync(gl, event);
+    public void callUpdate(UpdateEvent event) {
+        drawers[event.type.ordinal()].update(event);
     }
     public void callDraw(GL4 gl) {
         for (Drawer drawer : drawers) {

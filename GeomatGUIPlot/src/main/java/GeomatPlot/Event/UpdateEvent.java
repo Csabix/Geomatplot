@@ -5,6 +5,7 @@ import GeomatPlot.Draw.Drawable;
 import GeomatPlot.Tuple;
 
 import java.awt.AWTEvent;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,6 +19,13 @@ public class UpdateEvent extends AWTEvent {
         drawables = new LinkedList<>();
         drawables.add(drawable);
         type = drawable.getType();
+    }
+
+    public UpdateEvent(AbstractWindow w, Drawable[] drawablesInit) {
+        super(w, UPDATE_EVENT);
+        drawables = new LinkedList<>();
+        Collections.addAll(drawables, drawablesInit);
+        type = drawablesInit[0].getType();
     }
 
     public void merge(UpdateEvent rhs) {

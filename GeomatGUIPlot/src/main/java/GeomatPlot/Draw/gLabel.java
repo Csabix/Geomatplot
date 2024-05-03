@@ -15,10 +15,7 @@ public class gLabel extends Drawable {
         this.y = y;
         this.text = text;
     }
-    public gLabel(){
-        super(false);
-        text = "";
-    }
+
     @Override
     public float[] pack() {
         List<Letter> letters = fontMap.createLabel(text);
@@ -28,26 +25,22 @@ public class gLabel extends Drawable {
         }
         return data;
     }
+
     @Override
     public int elementCount() {
         return Letter.ELEMENT_COUNT * letterCount();
     }
-    @Override
-    public int elementCountVertex() {
-        return Letter.ELEMENT_COUNT;
-    }
+
     @Override
     public int bytes() {
         return Letter.BYTES * letterCount();
     }
-    @Override
-    public int bytesVertex() {
-        return Letter.BYTES;
-    }
+
     @Override
     public DrawableType getType() {
         return DrawableType.Label;
     }
+
     public int letterCount() {
         int sum = 0;
         for(char c : text.toCharArray()) {

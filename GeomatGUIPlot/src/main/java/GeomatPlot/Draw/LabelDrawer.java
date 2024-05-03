@@ -19,9 +19,9 @@ public class LabelDrawer extends Drawer {
     private final ProgramObject shader;
     private final ManagedFloatBuffer labelBuffer;
     private int drawCount;
-    public LabelDrawer(GL4 gl) {
-        fontMap = new FontMap(gl);
-        drawableList = new ArrayList<>();
+    public LabelDrawer(GL4 gl, FontMap fontMap) {
+        this.fontMap = fontMap;
+        syncedDrawables = new ArrayList<>();
         drawCount = 0;
 
         shader = new ProgramObjectBuilder(gl)
@@ -32,31 +32,67 @@ public class LabelDrawer extends Drawer {
 
         labelBuffer = new ManagedFloatBuffer(gl, INITIAL_CAPACITY);
     }
+
     @Override
     public void add(CreateEvent event) {
         super.add(event);
-        if(event.type == requiredType())event.drawables.forEach(d -> ((gLabel)d).fontMap = fontMap);
+        event.drawables.forEach(d -> ((gLabel)d).fontMap = fontMap);
     }
+
     @Override
     public void drawInner(GL4 gl) {
+        if(fontMap.newFont) {
+            drawCount = 0;
+            labelBuffer.clear();
+            fontMap.newFont = false;
+            fontMap.generateBitmap(gl);
+            syncInner(gl, 0);
+        }
+
         gl.glBindBufferBase(GL_SHADER_STORAGE_BUFFER,1,labelBuffer.buffer);
         shader.use(gl);
         gl.glDrawArrays(GL_TRIANGLES,0,drawCount);
     }
-    @Override
-    public void syncInner(GL4 gl) {
-        for(int i = syncedDrawable; i < drawableList.size(); ++i) drawCount += ((gLabel)drawableList.get(i)).letterCount() * 6;
 
-        labelBuffer.add(gl, toPackableFloat(drawableList.subList(syncedDrawable,drawableList.size())));
+    @Override
+    public void syncInner(GL4 gl, int start) {
+        if(fontMap.newFont) return;
+
+        List<Drawable> newElements = syncedDrawables.subList(start, syncedDrawables.size());
+        for (Drawable drawable:newElements)
+            drawCount += ((gLabel)drawable).letterCount() * 6;
+
+        labelBuffer.add(gl, toPackableFloat(newElements));
     }
 
     @Override
-    public void syncInner(GL4 gl, Integer first, Integer last) {
-        labelBuffer.update(gl, toPackableFloat(drawableList), first, last);
+    public void syncInner(GL4 gl, int first, int last) {
+        labelBuffer.update(gl, toPackableFloat(syncedDrawables), first, last);
     }
 
     @Override
     public Drawable.DrawableType requiredType() {
         return Drawable.DrawableType.Label;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void deleteInner(GL4 gl, int[] IDs) {
+        int[] offsets = new int[IDs.length];
+        int[] ranges = new int[IDs.length];
+
+        int currentOffset = 0;
+        int index = 0;
+        for (gLabel label:(List<gLabel>)(Object)syncedDrawables) {
+            int bytes = label.bytes();
+            if(index < IDs.length && IDs[index] == label.getID()) {
+                drawCount -= label.letterCount() * 6;
+                offsets[index] = currentOffset;
+                ranges[index] = bytes;
+            }
+            currentOffset += bytes;
+        }
+
+        labelBuffer.deleteRange(gl, offsets, ranges);
     }
 }

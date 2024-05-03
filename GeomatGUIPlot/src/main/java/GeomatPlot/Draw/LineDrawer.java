@@ -3,15 +3,9 @@ package GeomatPlot.Draw;
 import GeomatPlot.*;
 import GeomatPlot.Mem.ManagedFloatBuffer;
 import GeomatPlot.Mem.ManagedIntBuffer;
-import GeomatPlot.Mem.PackableFloat;
 import com.jogamp.opengl.GL4;
 
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import static com.jogamp.opengl.GL.*;
@@ -23,13 +17,13 @@ import static com.jogamp.opengl.GL3ES3.GL_SHADER_STORAGE_BUFFER;
 // https://www.codeproject.com/Articles/226569/Drawing-polylines-by-tessellation
 
 public class LineDrawer<T extends  gLine> extends Drawer{
-    private static final Integer INITIAL_CAPACITY = 1 * gLine.VERTEX_BYTE;
+    private static final Integer INITIAL_CAPACITY = 100 * gLine.VERTEX_BYTE;
     ProgramObject shader;
     private final ManagedFloatBuffer lineBuffer;
     private final ManagedIntBuffer indirectDrawArraysCommandBuffer;
     private int nextIndex;
     public LineDrawer(GL4 gl) {
-        drawableList = new ArrayList<>();
+        syncedDrawables = new ArrayList<>();
 
         shader = new ProgramObjectBuilder(gl)
                 .vertex("/Line.vert")
@@ -43,26 +37,26 @@ public class LineDrawer<T extends  gLine> extends Drawer{
         indirectDrawArraysCommandBuffer = new ManagedIntBuffer(gl, 100 * DrawArraysIndirectCommand.BYTES);
     }
     @Override
-    protected void syncInner(GL4 gl, Integer first, Integer last) {
-        lineBuffer.update(gl,toPackableFloat(drawableList),first,last);
+    protected void syncInner(GL4 gl, int first, int last) {
+        lineBuffer.update(gl,toPackableFloat(syncedDrawables),first,last);
     }
 
     @Override
-    protected void syncInner(GL4 gl) {
-        List<Tuple<Integer, Integer>> ranges = new ArrayList<>(drawableList.size() - syncedDrawable);
-        for (int i = syncedDrawable; i < drawableList.size(); i++) {
-            int indSize = ((((T)drawableList.get(i)).x.length - 1) * 6);
+    protected void syncInner(GL4 gl, int start) {
+        List<Tuple<Integer, Integer>> ranges = new ArrayList<>(syncedDrawables.size() - start);
+        for (int i = start; i < syncedDrawables.size(); i++) {
+            int indSize = ((((T)syncedDrawables.get(i)).x.length - 1) * 6);
             ranges.add(new Tuple<>(nextIndex, indSize));
             nextIndex += indSize + 18;
         }
 
-        List<DrawArraysIndirectCommand> commands = new ArrayList<>(drawableList.size() - syncedDrawable);
+        List<DrawArraysIndirectCommand> commands = new ArrayList<>(syncedDrawables.size() - start);
         for (Tuple<Integer, Integer> range: ranges) {
             commands.add(new DrawArraysIndirectCommand(range.second,range.first));
         }
 
         indirectDrawArraysCommandBuffer.add(gl, toPackableInt(commands));
-        lineBuffer.add(gl, toPackableFloat(drawableList.subList(syncedDrawable, drawableList.size())));
+        lineBuffer.add(gl, toPackableFloat(syncedDrawables.subList(start, syncedDrawables.size())));
     }
 
     @Override
@@ -71,18 +65,18 @@ public class LineDrawer<T extends  gLine> extends Drawer{
         shader.use(gl);
         gl.glUniform1i(shader.getUniformLocation(gl, "drawerID"), getDrawID());
         gl.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectDrawArraysCommandBuffer.buffer);
-        gl.glMultiDrawArraysIndirect(GL_TRIANGLES, 0, syncedDrawable, 0);
+        gl.glMultiDrawArraysIndirect(GL_TRIANGLES, 0, syncedDrawables.size(), 0);
     }
 
     @Override
-    protected void deleteInner(GL4 gl, int[] IDs) throws Exception {
+    protected void deleteInner(GL4 gl, int[] IDs) {
         int[] offsets = new int[IDs.length];
         int[] lineRanges = new int[IDs.length];
         int resultIndex = 0;
         int currentOffset = 0;
         int currentID = 0;
 
-        for (Drawable drawable:drawableList) {
+        for (Drawable drawable:syncedDrawables) {
             if(resultIndex == IDs.length || currentID == IDs.length)break;
             if(drawable.getID() == IDs[currentID]) {
                 offsets[resultIndex] = currentOffset;
@@ -103,9 +97,9 @@ public class LineDrawer<T extends  gLine> extends Drawer{
 
         currentID = 0;
         nextIndex = 0;
-        List<Tuple<Integer, Integer>> ranges = new ArrayList<>(drawableList.size() - IDs.length);
-        for (int i = 0; i < drawableList.size(); i++) {
-            T current = (T)drawableList.get(i);
+        List<Tuple<Integer, Integer>> ranges = new ArrayList<>(syncedDrawables.size() - IDs.length);
+        for (int i = 0; i < syncedDrawables.size(); i++) {
+            T current = (T)syncedDrawables.get(i);
             if(currentID < IDs.length && current.getID() == IDs[currentID]) {
                 ++currentID;
                 continue;
@@ -115,7 +109,7 @@ public class LineDrawer<T extends  gLine> extends Drawer{
             nextIndex += indSize + 18;
         }
 
-        List<DrawArraysIndirectCommand> commands = new ArrayList<>(drawableList.size() - IDs.length);
+        List<DrawArraysIndirectCommand> commands = new ArrayList<>(syncedDrawables.size() - IDs.length);
         for (Tuple<Integer, Integer> range: ranges) {
             commands.add(new DrawArraysIndirectCommand(range.second,range.first));
         }

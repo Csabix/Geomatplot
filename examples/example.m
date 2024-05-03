@@ -1,5 +1,4 @@
 %% Triangle
-%clf; disp Triangle
 
 A = Point([0.0 0.0]);     % draggable point, automatically labelled A
 B = Point([1.0 0.0]);     % automatic labels are applied if no label is given
@@ -7,43 +6,33 @@ C = Point([0.6 .55]);
 ab = Segment(A,B,'b',2);  % a blue segment from A and B
 bc = Segment(B,C,'b',2);  %         with LineWidth of 2
 cd = Segment(C,A,'b',2);
-%%
+
 Segment(A,Midpoint(B,C),'--')
 Segment(B,Midpoint(C,A),'--')
 Segment(C,Midpoint(A,B),'--')
 S=Midpoint('S',A,B,C,'k',7);        % Barycenter of the triangle labelled S
-%%
-%PerpendicularBisector(A,B,':')
-%PerpendicularBisector(B,C,':')
-%PerpendicularBisector(C,A,':')
-PerpendicularBisector(A,B,'--')
-PerpendicularBisector(B,C,'--')
-PerpendicularBisector(C,A,'--')
-%%
-[~,K] = Circle(A,B,C,'--');        % Magenta dashed circumcircle of the triangle
-%%Text(K,"K") % add text at position
-%%
-%la = AngleBisector(A,B,C,':');
-%lb = AngleBisector(B,C,A,':');
-%lc = AngleBisector(C,A,B,':');
-la = AngleBisector(A,B,C,'--');
-lb = AngleBisector(B,C,A,'--');
-lc = AngleBisector(C,A,B,'--');
-%Circle(Intersect('O',la,lb),ab,'c');% (inscribed) circle touching segment AB
-%%
-%ma = PerpendicularLine(A,B,C,':');
-%mb = PerpendicularLine(B,C,A,':');
-%mc = PerpendicularLine(C,A,B,':');
-ma = PerpendicularLine(A,B,C,'--');
-mb = PerpendicularLine(B,C,A,'--');
-mc = PerpendicularLine(C,A,B,'--');
-%M = Intersect('M',ma,mb);
-%Segment(M,K,'r')                    % Euler line
+
+PerpendicularBisector(A,B,':')
+PerpendicularBisector(B,C,':')
+PerpendicularBisector(C,A,':')
+[~,K] = Circle(A,B,C,'m--');        % Magenta dashed circumcircle of the triangle
+%Text(K,"K") % add text at position
+
+la = AngleBisector(A,B,C,':');
+lb = AngleBisector(B,C,A,':');
+lc = AngleBisector(C,A,B,':');
+Circle(Intersect('O',la,lb),ab,'c');% (inscribed) circle touching segment AB
+
+ma = PerpendicularLine(A,B,C,':');
+mb = PerpendicularLine(B,C,A,':');
+mc = PerpendicularLine(C,A,B,':');
+M = Intersect('M',ma,mb);
+Segment(M,K,'r')                    % Euler line
 
 %ylim([-0.2 0.6]); xlim([-.1 1.1])
 
 %% Polygon Sphere trace
-clf; disp 'Sphere Trace'
+%clf; disp 'Sphere Trace'
 
 % You can move, create, delete vertices of the following polygon:
 f = Polygon([-1 0;1 0;1 1;0.7 0.7;0.3 0.5;0 0.9;-0.5 0.3;-1 0.3]);
@@ -53,14 +42,14 @@ q0 = Point('q0',[.5 ,1.05],'r',5);  % ray 'direction'
 v0 = Eval((q0-p0)/Distance(p0,q0)); % Operators: point-point=vector, vector/scalar = vector
 Ray(p0,v0,'r',1.5)
 
-p = p0; n=10; % Sphere tracing illustration:
+p = p0; n=15; % Sphere tracing illustration:
 for i = 1:n
     d = Distance(p,f); % distance to polygon yields a dependent scalar value
     Circle(p,d,'Color',[i/n 1-i/n 0])
     p = (p + v0*d)';   % vector*scalar=vector, point+vector=point, ' same as Eval
 end
 
-xlim([-1.5 1.3]); ylim([0 1.7])
+%xlim([-1.5 1.3]); ylim([0 1.7])
 
 %% Image
 clf; disp 'Curve & Image'

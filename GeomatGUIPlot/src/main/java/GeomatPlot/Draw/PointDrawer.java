@@ -2,11 +2,9 @@ package GeomatPlot.Draw;
 
 import GeomatPlot.*;
 import GeomatPlot.Mem.ManagedFloatBuffer;
-import GeomatPlot.Mem.PackableFloat;
 import com.jogamp.opengl.GL4;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.jogamp.opengl.GL3.GL_PROGRAM_POINT_SIZE;
 
@@ -17,7 +15,7 @@ public class PointDrawer<T extends gPoint> extends Drawer{
     private final ManagedFloatBuffer pointBuffer;
     public PointDrawer(GL4 gl) {
         gl.glEnable(GL_PROGRAM_POINT_SIZE);
-        drawableList = new ArrayList<>();
+        syncedDrawables = new ArrayList<>();
 
         shader = new ProgramObjectBuilder(gl)
                 .vertex("/Point.vert")
@@ -47,17 +45,17 @@ public class PointDrawer<T extends gPoint> extends Drawer{
         gl.glVertexArrayVertexBuffer(vao, 0, pointBuffer.buffer, 0, gPoint.BYTES);
     }
     public T get(int index) {
-        return (T)drawableList.get(index);
+        return (T)syncedDrawables.get(index);
     }
 
     @Override
-    protected void syncInner(GL4 gl, Integer first, Integer last) {
-        pointBuffer.update(gl, toPackableFloat(drawableList), first, last);
+    protected void syncInner(GL4 gl, int first, int last) {
+        pointBuffer.update(gl, toPackableFloat(syncedDrawables), first, last);
     }
 
     @Override
-    protected void syncInner(GL4 gl) {
-        pointBuffer.add(gl, toPackableFloat(drawableList.subList(syncedDrawable, drawableList.size())));
+    protected void syncInner(GL4 gl, int start) {
+        pointBuffer.add(gl, toPackableFloat(syncedDrawables.subList(start, syncedDrawables.size())));
     }
 
     @Override
@@ -65,7 +63,7 @@ public class PointDrawer<T extends gPoint> extends Drawer{
         shader.use(gl);
         gl.glUniform1i(shader.getUniformLocation(gl, "drawerID"), getDrawID());
         gl.glBindVertexArray(vao);
-        gl.glDrawArrays(gl.GL_POINTS,0,syncedDrawable);
+        gl.glDrawArrays(gl.GL_POINTS,0,syncedDrawables.size());
     }
 
     @Override

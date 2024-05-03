@@ -5,8 +5,8 @@ import GeomatPlot.Plot;
 
 import java.util.Vector;
 
-public abstract class Drawable implements PackableFloat {
-    public enum DrawableType{Patch, Polygon, PatchLine, PolygonPoint, Line, Label, Point};
+public abstract class Drawable implements PackableFloat, Comparable<Drawable> {
+    public enum DrawableType{Function, Patch, Polygon, PatchLine, PolygonPoint, Line, Label, Point};
     private int ID;
     private final boolean movable;
     protected Drawable(boolean movable) {
@@ -58,5 +58,10 @@ public abstract class Drawable implements PackableFloat {
             MovementEvent event = new MovementEvent(this, getID());
             ((MovementListener)dataCopy.elementAt(i)).movement(event);
         }
+    }
+
+    @Override
+    public int compareTo(Drawable drawable) {
+        return Integer.compare(ID, drawable.ID);
     }
 }

@@ -35,4 +35,9 @@ public class ProgramObjectBuilder {
     public ProgramObject build(){
         return new ProgramObject(gl,stageList);
     }
+
+    public ProgramObjectBuilder fragmentUserDefined(String path){
+        stageList.add(new ProgramObject.ShaderStage(gl.GL_FRAGMENT_SHADER,path,false));
+        return this;
+    }
 }

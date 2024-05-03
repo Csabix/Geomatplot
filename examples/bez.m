@@ -1,6 +1,6 @@
 
 %% Focal-directrix parabola to quadratic Bézier representation
-clf; tiledlayout(1,2,'Padding','tight'); nexttile
+%clf; tiledlayout(1,2,'Padding','tight'); nexttile
 
 p1 = Point('p1',[0 0.2]);
 p2 = Point('p2',[1 0.2]);
@@ -20,14 +20,14 @@ Curve(b0,b1,b2,fun      ,'r:')
 
 %% Quadratic Bézier to focal-directrix parabola representation
 b0 = b0.value; b1 = b1.value; b2 = b2.value;
-nexttile; cla;
+%nexttile; cla;
 
 b0 = Point('b0',b0,'r');
 b1 = Point('b1',b1,'r');
 b2 = Point('b2',b2,'r');
 
 a = (b0-b1)+(b2-b1);
-Vector(b1,b1+a,'--')
+%Vector(b1,b1+a,'--')
 fb0 = Mirror(b0 + a, PerpendicularLine(b0,b1,':'), 'k',5,'LabelVisible','off');
 fb2 = Mirror(b2 + a, PerpendicularLine(b2,b1,':'), 'k',5,'LabelVisible','off');
 

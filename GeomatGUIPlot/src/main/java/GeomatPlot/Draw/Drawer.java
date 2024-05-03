@@ -5,105 +5,151 @@ import GeomatPlot.Event.DeleteEvent;
 import GeomatPlot.Event.UpdateEvent;
 import GeomatPlot.Mem.PackableFloat;
 import GeomatPlot.Mem.PackableInt;
-import GeomatPlot.Tuple;
 import com.jogamp.opengl.GL4;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
+
 
 public abstract class Drawer {
     public static final int ID_BIT_COUNT = 8;
     private final int drawID = requiredType().ordinal() << (Integer.BYTES * 8 - ID_BIT_COUNT);
-    protected List<Drawable> drawableList;
-    private DeleteEvent toBeDeleted = null;
-    protected int syncedDrawable = 0;
-    protected int nextID = 0;
-    protected abstract void syncInner(GL4 gl, Integer first, Integer last); // [first, last]
-    protected abstract void syncInner(GL4 gl);
+    protected List<Drawable> syncedDrawables;
+    private List<Drawable> drawablesToAdd = null;
+    private List<Drawable> drawablesToRemove = null;
+    private List<Drawable> drawablesToUpdate = null;
+
+    protected abstract void syncInner(GL4 gl, int first, int last); // [first, last[
+
+    protected abstract void syncInner(GL4 gl, int start);
+
     protected abstract void drawInner(GL4 gl);
-    protected void deleteInner(GL4 gl, int[] IDs) throws Exception {
-        throw new Exception("Deletion not supported");
+
+    protected void deleteInner(GL4 gl, int[] IDs) {
+        throw new RuntimeException("Deletion not supported");
     };
 
-    protected void directDeleteCall(GL4 gl, int[] IDs) {
-        if (syncedDrawable < drawableList.size()) {
-            syncInner(gl);
-            syncedDrawable = drawableList.size();
-        }
-        try {
-            deleteInner(gl, IDs);
-            List<Drawable> drawables = new ArrayList<>(IDs.length);
-            for (int id : IDs) {
-                drawables.add(drawableList.get(id));
-            }
-
-            drawableList.removeAll(drawables);
-
-            nextID = 0;
-            for (Drawable drawable:drawableList) {
-                drawable.setID(nextID++);
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        }
-        syncedDrawable = drawableList.size();
-    }
-
     public abstract Drawable.DrawableType requiredType();
+
     protected int getDrawID() {
         return drawID;
     }
+
     public void sync(GL4 gl) {
-        if (syncedDrawable < drawableList.size()) {
-            syncInner(gl);
-            syncedDrawable = drawableList.size();
-        }
-        if (toBeDeleted != null) {
-            int[] IDs = toBeDeleted.getIDs();
-            try {
-                deleteInner(gl, IDs);
-                drawableList.removeAll(toBeDeleted.drawables);
-                nextID = 0;
-                for (Drawable drawable:drawableList) {
-                    drawable.setID(nextID++);
-                }
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                e.printStackTrace();
-            }
-            toBeDeleted = null;
-            syncedDrawable = drawableList.size();
-        }
+        if(drawablesToRemove != null && drawablesToRemove.size() != 0) deleteDrawables(gl);
+
+        if(drawablesToAdd != null && drawablesToAdd.size() != 0)addDrawables(gl);
+
+        if(drawablesToUpdate != null && drawablesToUpdate.size() != 0)updateDrawables(gl);
     }
-    public void sync(GL4 gl, UpdateEvent event) {
+
+    public void update(UpdateEvent event) {
         if(event.type != requiredType()) return;
-        Tuple<Integer,Integer> range = event.range();
-        syncInner(gl, range.first, range.second);
+        update(event.drawables);
     }
+    public void update(List<Drawable> drawables) {
+        drawablesToUpdate = drawables;
+    }
+
     public void add(CreateEvent event) {
         if(event.type != requiredType()) return;
         add(event.drawables);
     }
     public void add(List<Drawable> drawables) {
-        for (Drawable newDrawable : drawables) {
-            newDrawable.setID(nextID++);
-        }
-        this.drawableList.addAll(drawables);
+        drawablesToAdd = drawables;
     }
+
     public void remove(DeleteEvent event) {
         if(event.type != requiredType()) return;
-        toBeDeleted = event;
+        remove(event.drawables);
     }
+    public void remove(List<Drawable> drawables) {
+        drawablesToRemove = drawables;
+    }
+
     public void draw(GL4 gl) {
-        if (syncedDrawable > 0) {
+        if (syncedDrawables.size() > 0) {
             drawInner(gl);
         }
     }
 
+    private void deleteDrawables(GL4 gl) {
+        List<Drawable> needToDelete = new LinkedList<>();
+        List<Drawable> noNeedToDelete = new LinkedList<>();
+        // Filter out elements we don't have in the buffer
+        for (Drawable drawable:drawablesToRemove) {
+            if(drawable.getID() != -1) {
+                needToDelete.add(drawable);
+            } else {
+                noNeedToDelete.add(drawable);
+            }
+        }
+        // We don't need to add them, or update them
+        if(drawablesToAdd != null)drawablesToAdd.removeAll(noNeedToDelete);
+        if(drawablesToUpdate != null) {
+            drawablesToUpdate.removeAll(noNeedToDelete);
+            drawablesToUpdate.removeAll(needToDelete);
+        }
+
+        if(needToDelete.size() != 0)deleteInner(gl, getIDs(needToDelete));
+        for (Drawable drawable:needToDelete) {
+            drawable.setID(-1);
+        }
+
+
+        TreeSet<Drawable> treeSet = new TreeSet<>(syncedDrawables);
+        needToDelete.forEach(treeSet::remove);
+        syncedDrawables = new ArrayList<>(treeSet);
+        //syncedDrawables.removeAll(needToDelete);
+
+        int nextID = 0;
+        for (Drawable drawable:syncedDrawables) {
+            drawable.setID(nextID++);
+        }
+
+        drawablesToRemove = null;
+    }
+
+    private void addDrawables(GL4 gl) {
+        int start = syncedDrawables.size();
+        int nextID = start;
+        for (Drawable drawable:drawablesToAdd) {
+            drawable.setID(nextID++);
+        }
+        syncedDrawables.addAll(drawablesToAdd);
+        syncInner(gl, start);
+        // We just added them we don't need to update them
+        if(drawablesToUpdate != null) drawablesToUpdate.removeAll(drawablesToAdd);
+        drawablesToAdd = null;
+    }
+
+    private void updateDrawables(GL4 gl) {
+        int min = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
+        for (Drawable drawable:drawablesToUpdate) {
+            int id = drawable.getID();
+            if(id > max) max = id;
+            if(id < min) min = id;
+        }
+        syncInner(gl, min, max + 1);
+
+        drawablesToUpdate = null;
+    }
+
+    private int[] getIDs(List<Drawable> drawables) {
+        int[] IDs = new int[drawables.size()];
+
+        int position = 0;
+        for (Drawable drawable:drawables) {
+            IDs[position++] = drawable.getID();
+        }
+
+        Arrays.sort(IDs);
+
+        return IDs;
+    }
+
     public Drawable getDrawable(int id) {
-        return drawableList.get(id);
+        return syncedDrawables.get(id);
     }
 
     @SuppressWarnings("unchecked")

@@ -64,18 +64,8 @@ public class gLine extends Drawable {
     }
 
     @Override
-    public int elementCountVertex() {
-        return VERTEX_SIZE;
-    }
-
-    @Override
     public int bytes() {
         return VERTEX_BYTE * (x.length + 2);
-    }
-
-    @Override
-    public int bytesVertex() {
-        return VERTEX_BYTE;
     }
 
     @Override

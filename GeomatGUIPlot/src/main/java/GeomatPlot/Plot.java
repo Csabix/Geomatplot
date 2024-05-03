@@ -33,6 +33,7 @@ public class Plot extends AbstractWindow{
     private final IntBuffer readValue = GLBuffers.newDirectIntBuffer(1);
     public final ClickInputQuery clickInputQuery;
     private Movement movement;
+    private FontMap fontMap;
     public Plot(){
         super("GeomatPLot",640,640,false);
         clickLocation = new Tuple<>(0f,0f);
@@ -43,14 +44,15 @@ public class Plot extends AbstractWindow{
     }
     @Override
     protected void init(GL4 gl) {
-        gl.glClearColor(1,0,0,1);
+        gl.glClearColor(1,1,1,0);
         gl.glEnable(GL_BLEND);
         gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         gl.glLineWidth(2f);
 
         camera = new Camera(gl, width, height, 10, 0, 0);
 
-        drawerContainer = new DrawerContainer(gl);
+        fontMap = new FontMap(gl);
+        drawerContainer = new DrawerContainer(gl,this, fontMap);
 
         resize(gl,canvas.getSurfaceWidth(),canvas.getSurfaceHeight());
     }
@@ -65,7 +67,7 @@ public class Plot extends AbstractWindow{
                 drawerContainer.callAdd((CreateEvent)event);
                 break;
             case UpdateEvent.UPDATE_EVENT:
-                drawerContainer.callSync(gl, (UpdateEvent)event);
+                drawerContainer.callUpdate((UpdateEvent)event);
                 break;
             case DeleteEvent.DELETE_EVENT:
                 drawerContainer.callRemove((DeleteEvent)event);
@@ -134,7 +136,7 @@ public class Plot extends AbstractWindow{
         drawerContainer.callSync(gl);
         camera.sync(gl);
     }
-    private static final FloatBuffer colorClear = GLBuffers.newDirectFloatBuffer(new float[]{1f,0f,0f,0f});
+    private static final FloatBuffer colorClear = GLBuffers.newDirectFloatBuffer(new float[]{1f,1f,1f,0f});
     private static final IntBuffer indexClear = GLBuffers.newDirectIntBuffer(new int[]{-1});
     @Override
     protected void draw(GL4 gl) {
@@ -156,10 +158,21 @@ public class Plot extends AbstractWindow{
     public void addDrawable(Drawable drawable) {
         callEvent(new CreateEvent(this,drawable));
     }
+    public void addDrawable(Drawable[] drawables) {
+        callEvent(new CreateEvent(this, drawables));
+    }
     public void updateDrawable(Drawable drawable) {
         callEvent(new UpdateEvent(this,drawable));
     }
-    public void removeDrawable(Drawable drawable){callEvent(new DeleteEvent(this, drawable));}
+    public void updateDrawable(Drawable[] drawables) {
+        callEvent(new UpdateEvent(this,drawables));
+    }
+    public void removeDrawable(Drawable drawable){
+        callEvent(new DeleteEvent(this, drawable));
+    }
+    public void removeDrawable(Drawable[] drawables){
+        callEvent(new DeleteEvent(this, drawables));
+    }
     private void resize(GL4 gl,int sWidth, int sHeight) {
         gl.glViewport(0,0,sWidth,sHeight);
         camera.setWidth(sWidth);
@@ -192,5 +205,15 @@ public class Plot extends AbstractWindow{
         gl.glNamedFramebufferDrawBuffers(fbo,2, new int[]{GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT0+1},0);
 
         fboCreated = true;
+
+        this.updateDrawable(new gFunction());
+    }
+
+    public void setFont(String path, boolean bold, boolean italic, int size) {
+        fontMap.setFont(path, bold, italic, size);
+    }
+
+    public int getFBO() {
+        return fbo;
     }
 }

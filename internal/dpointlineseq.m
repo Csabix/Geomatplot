@@ -7,6 +7,14 @@ methods
     function updatePlot(o,xdata,ydata)
         %o.fig.XData = xdata;
         %o.fig.YData = ydata;
+        if isrow(xdata)
+            xdata = xdata';
+        end
+
+        if isrow(ydata)
+            ydata = ydata';
+        end
+
         o.fig.Position = [xdata,ydata];
     end
 end

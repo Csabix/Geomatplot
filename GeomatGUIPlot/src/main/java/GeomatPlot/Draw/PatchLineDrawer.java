@@ -14,6 +14,6 @@ public class PatchLineDrawer extends LineDrawer<gPatchLine>{
 
     @Override
     public Drawable getDrawable(int id) {
-        return ((gPatchLine)drawableList.get(id)).parent;
+        return ((gPatchLine)syncedDrawables.get(id)).parent;
     }
 }

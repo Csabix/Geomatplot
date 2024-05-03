@@ -28,7 +28,7 @@ public class PatchDrawer extends Drawer{
         lineDrawer = patchLineDrawer;
         currentVertexCount = 0;
 
-        drawableList = new ArrayList<>();
+        syncedDrawables = new ArrayList<>();
 
         shader = new ProgramObjectBuilder(gl)
                 .vertex("/PolygonBG.vert")
@@ -54,29 +54,78 @@ public class PatchDrawer extends Drawer{
         gl.glVertexArrayElementBuffer(vao, indexBuffer.buffer);
     }
 
-    @Override
-    protected void syncInner(GL4 gl, Integer first, Integer last) {
+    /*@Override
+    protected void syncInner(GL4 gl, int first, int last) {
         int lFirst = Integer.MAX_VALUE;
         int lLast = Integer.MIN_VALUE;
         for (int i = first; i < last; ++i) {
-            gPatch current = (gPatch)drawableList.get(i);
+            gPatch current = (gPatch)syncedDrawables.get(i);
             gPatchLine line = current.line;
             int id = line.getID();
             if(id < lFirst)lFirst = id;
             if(id > lLast)lLast = id;
             line = current.getLine();
             line.setID(id);
-            lineDrawer.drawableList.set(id, line);
+            lineDrawer.syncedDrawables.set(id, line);
         }
         lineDrawer.syncInner(gl, lFirst, lLast + 1);
 
-        polygonFaceBuffer.update(gl,toPackableFloat(drawableList),first,last);
+        polygonFaceBuffer.update(gl,toPackableFloat(syncedDrawables),first,last);
+    }*/
+
+    @Override
+    protected void syncInner(GL4 gl, int first, int last) {
+        /*List<Drawable> lines = new ArrayList<>(last - first);
+        List<Drawable> subList = syncedDrawables.subList(first, last);
+        for (Drawable drawable:subList) {
+            lines.add(((gPatch)drawable).line);
+        }
+        lineDrawer.update(lines);*/
+
+        int lFirst = Integer.MAX_VALUE;
+        int lLast = Integer.MIN_VALUE;
+        for (int i = first; i < last; ++i) {
+            gPatch current = (gPatch)syncedDrawables.get(i);
+            gPatchLine line = current.line;
+            int id = line.getID();
+            if(id < lFirst)lFirst = id;
+            if(id > lLast)lLast = id;
+            line = current.getLine();
+            line.setID(id);
+            lineDrawer.syncedDrawables.set(id, line);
+        }
+        lineDrawer.syncInner(gl, lFirst, lLast + 1);
+
+        polygonFaceBuffer.update(gl,toPackableFloat(syncedDrawables),first,last);
+
+        int indexCount = 0;
+        for (gPatch drawable:(List<gPatch>)(Object)syncedDrawables) {
+            indexCount += drawable.indices.length * 3;
+        }
+
+        currentIndexCount = 0;
+        currentVertexCount = 0;
+        int[] indices = new int[indexCount];
+        int position = 0;
+        for (gPatch patch:(List<gPatch>)(Object)syncedDrawables) {
+            for (int i = 0; i < patch.indices.length; ++i) {
+                indices[position++] = patch.indices[i][0] + currentVertexCount;
+                indices[position++] = patch.indices[i][1] + currentVertexCount;
+                indices[position++] = patch.indices[i][2] + currentVertexCount;
+            }
+            currentVertexCount += patch.x.length;
+            currentIndexCount += patch.indices.length * 3;
+        }
+
+        indexBuffer.clear();
+        indexBuffer.add(gl, indices);
+
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void syncInner(GL4 gl) {
-        List<Drawable> sublist = drawableList.subList(syncedDrawable,drawableList.size());
+    protected void syncInner(GL4 gl, int start) {
+        List<Drawable> sublist = syncedDrawables.subList(start,syncedDrawables.size());
         List<Drawable> lines = new ArrayList<>(sublist.size());
 
         int indexCount = 0;
@@ -116,7 +165,7 @@ public class PatchDrawer extends Drawer{
         gl.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, ibo.buffer);
         gl.glUseProgram(shader.ID);
         gl.glUniform1i(shader.getUniformLocation(gl, "drawerID"), getDrawID());
-        gl.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, null, syncedDrawable, 0);
+        gl.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, null, syncedDrawables.size(), 0);
     }
 
     @Override
@@ -126,15 +175,15 @@ public class PatchDrawer extends Drawer{
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void deleteInner(GL4 gl, int[] IDs) throws Exception {
-        int[] lineIDs = new int[IDs.length];
-        for (int i = 0; i < IDs.length; ++i) {
-            lineIDs[i] = ((gPatch)drawableList.get(i)).line.getID();
+    protected void deleteInner(GL4 gl, int[] IDs) {
+        List<Drawable> lines = new ArrayList<>(IDs.length);
+        for (int id : IDs) {
+            lines.add(((gPatch) syncedDrawables.get(id)).line);
         }
-        lineDrawer.directDeleteCall(gl, lineIDs);
+        lineDrawer.remove(lines);
+        lineDrawer.sync(gl);
 
-        //List<gPatch> discards = new ArrayList<>(IDs.length);
-        List<gPatch> keeps = new ArrayList<>(drawableList.size() - IDs.length);
+        List<gPatch> keeps = new ArrayList<>(syncedDrawables.size() - IDs.length);
 
         int currentPolyOffset = 0;
         int[] polyOffsets = new int[IDs.length];
@@ -143,7 +192,7 @@ public class PatchDrawer extends Drawer{
         int indexCount = 0;
 
         int currentID = 0;
-        for (gPatch drawable:(List<gPatch>)(Object)drawableList) {
+        for (gPatch drawable:(List<gPatch>)(Object)syncedDrawables) {
             if(currentID < IDs.length && drawable.getID() == IDs[currentID]) {
                 //discards.add(drawable);
                 polyOffsets[currentID] = currentPolyOffset;

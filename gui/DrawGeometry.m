@@ -21,7 +21,7 @@ classdef DrawGeometry
             Circle(o,data{1},data{2});
         end
 
-        function drawMidpoint2(o,data)
+        function drawMidpoint(o,data)
             Midpoint(o,data{1},data{2});
         end
 

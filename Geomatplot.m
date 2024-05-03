@@ -86,7 +86,7 @@ methods (Access = public)
                 o.drawFcn(o,o.clickData);
                 o.clickData = [];
             case -1 %Error state
-                o.errorFcn(); %Temporary
+                o.errorFcn(o,o.clickData);
                 o.clickData = [];
         end
     end

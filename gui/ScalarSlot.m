@@ -85,7 +85,6 @@ classdef ScalarSlot < handle
         end
         
         function minValueChanged(o,evt)
-            %update current values(slider,editfield,scalar)
             o.limits(1) = evt.Value;
             o.maxText.Limits = [o.limits(1) Inf];
             o.intervalChanged();
@@ -103,7 +102,7 @@ classdef ScalarSlot < handle
         end
 
         function editLabelChanged(o,src,evt)
-            if ~PropertiesPanel.renameLabel(o.scalarHandle,evt.Value)
+            if ~Utils.renameLabel(o.scalarHandle,evt.Value)
                 src.Value = o.scalarHandle.label;
             end
         end

@@ -39,7 +39,7 @@ classdef AcceptTypes
             accepted = AcceptTypes.acceptGeometryByPattern(data,pattern);
         end
 
-        function accepted = acceptMidpoint2(data)
+        function accepted = acceptMidpoint(data)
             accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base'});
         end
 
@@ -53,14 +53,15 @@ classdef AcceptTypes
 
         function accepted = acceptPolygon(data)
             types = {'point_base','dpointseq','polygon_base'};
+            AcceptTypes.setSelected(data{end},true);
             check_type = @(x) any(cellfun(@(type) isa(x,type), types));
-            if AcceptTypes.checkForDuplicates(data(1:end-1)) || ~all(cellfun(check_type, data))
+            if ((length(data) < 4 ||~isequal(data{1},data{end})) && Utils.checkForDuplicates(data)) ...
+               || Utils.checkForDuplicates(data(1:end-1)) || ~all(cellfun(check_type, data))
                 AcceptTypes.resetDataSelection(data);
                 accepted = -1; 
                 return;
             end
 
-            AcceptTypes.setSelected(data{end},true);
             accepted = numel(data) >= 4 && data{1} == data{end};
             if accepted; AcceptTypes.resetDataSelection(data); end    
         end
@@ -121,19 +122,19 @@ classdef AcceptTypes
 
         function accepted = acceptSegmentSequenceLines(data,shouldAccept)
             types = {'point_base','dpointseq','polygon_base'};
-            checks = mod(length(data),2) == 1;
+            checks = mod(length(data),2) == 1 || isempty(data);
             accepted = AcceptTypes.acceptSequencedInputGeometry(data,shouldAccept,types,checks);  
         end
 
         function accepted = acceptSegmentSequenceTriangles(data,shouldAccept)
             types = {'point_base','dpointseq','polygon_base'};
-            checks = mod(length(data),3) ~= 0;
+            checks = mod(length(data),3) ~= 0 || isempty(data);
             accepted = AcceptTypes.acceptSequencedInputGeometry(data,shouldAccept,types,checks);  
         end
 
         function accepted = acceptCentroidPoint(data,shouldAccept)
             types = {'drawing'};
-            check = false;
+            check = length(data) < 2;
             for i = 1:length(data)
                 l = data{i};
                 if isa(l,'dcurve') || isa(l,'dimage') || isa(l,'dnumeric'); check = true; break; end
@@ -153,7 +154,7 @@ classdef AcceptTypes
             AcceptTypes.setSelected(data{end},true);
 
             if numel(data) ~= length(pattern); accepted = 0;
-            elseif AcceptTypes.checkForDuplicates(data) || ~AcceptTypes.checkInputPattern(data,pattern); accepted = -1; end
+            elseif Utils.checkForDuplicates(data) || ~AcceptTypes.checkInputPattern(data,pattern); accepted = -1; end
 
             if accepted ~= 0; AcceptTypes.resetDataSelection(data); end            
         end
@@ -166,7 +167,7 @@ classdef AcceptTypes
                 accepted = 1;
 
                 if numel(data) ~= length(pattern); accepted = 0;
-                elseif AcceptTypes.checkForDuplicates(data) || ~AcceptTypes.checkInputPattern(data,pattern); accepted = -1;
+                elseif Utils.checkForDuplicates(data) || ~AcceptTypes.checkInputPattern(data,pattern); accepted = -1;
                 else; break; 
                 end
             end
@@ -176,21 +177,16 @@ classdef AcceptTypes
         end
 
         function accepted = acceptSequencedInputGeometry(data,shouldAccept,types,additionalDataChecks)
-            if isempty(data) || ~shouldAccept
-                accepted = 0; 
-                if ~shouldAccept; AcceptTypes.setSelected(data{end},true); end
-                return; 
-            end
             check_type = @(x) any(cellfun(@(type) isa(x,type), types));
-                
-            if additionalDataChecks || AcceptTypes.checkForDuplicates(data) || ...
-                ~all(cellfun(check_type, data))
+            if ~shouldAccept; AcceptTypes.setSelected(data{end},true); end
+            accepted = 0;
+            if  Utils.checkForDuplicates(data) || (~isempty(data) && ~all(cellfun(check_type, data)))
                 accepted = -1; 
-            else
-                accepted = 1;
+            elseif shouldAccept
+                accepted = 2 * (~additionalDataChecks) - 1;
             end
 
-            AcceptTypes.resetDataSelection(data);   
+            if accepted ~= 0; AcceptTypes.resetDataSelection(data); end
         end
 
         function match = checkInputPattern(data,pattern)
@@ -206,18 +202,6 @@ classdef AcceptTypes
                     match = match && cmatch;
                 else
                    match = match && isa(in,pat);
-                end
-            end
-        end
-
-        function hasDuplicates = checkForDuplicates(list)
-            hasDuplicates = false;
-            for i = 1:numel(list)
-                for j = (i + 1):numel(list)
-                    if isequal(list{i}, list{j})
-                        hasDuplicates = true;
-                        return;
-                    end
                 end
             end
         end

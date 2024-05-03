@@ -234,7 +234,7 @@ classdef PropertiesPanel < handle
         end
 
         function setLabel(o,src,evt)
-            if ~PropertiesPanel.renameLabel(o.geometry,evt.Value)
+            if ~Utils.renameLabel(o.geometry,evt.Value)
                 src.Value = o.geometry.label;
             end
         end
@@ -260,47 +260,5 @@ classdef PropertiesPanel < handle
             grid.ColumnWidth = size{2};
             grid.Padding = padding;
         end
-
-        function struct = renameField(struct,oldLabel,newLabel)
-            struct.(newLabel) = struct.(oldLabel);
-            struct = rmfield(struct, oldLabel);
-        end
-
-        function changeGeomatplotLabel(Geomatplot,oldLabel,newLabel)
-            if isfield(Geomatplot.movs,oldLabel)
-                Geomatplot.movs = PropertiesPanel.renameField(Geomatplot.movs,oldLabel,newLabel);
-                depFields = fieldnames(Geomatplot.deps);
-                for i = 1:length(depFields)
-                    dep = Geomatplot.deps.(depFields{i});
-                    if isfield(dep.movs,oldLabel)
-                        dep.movs = PropertiesPanel.renameField(dep.movs,oldLabel,newLabel);
-                    end
-                end
-            elseif isfield(Geomatplot.deps,oldLabel)
-                Geomatplot.deps = PropertiesPanel.renameField(Geomatplot.deps,oldLabel,newLabel);
-                movFields = fieldnames(Geomatplot.movs);
-                for i = 1:length(movFields)
-                    mov = Geomatplot.movs.(movFields{i});
-                    if isfield(mov.deps,oldLabel)
-                        mov.deps = PropertiesPanel.renameField(mov.deps,oldLabel,newLabel);
-                    end
-                end
-            end
-        end
     end % static private
-
-    methods(Access=public,Static,Hidden)
-        function renamed = renameLabel(geometry,newLabel)
-            oldLabel = geometry.label;
-            go = geometry.parent;
-            renamed = ~go.isLabel(newLabel);
-            if renamed
-                PropertiesPanel.changeGeomatplotLabel(go,oldLabel,newLabel);
-                if isprop(geometry.fig,'Label'); geometry.fig.Label = newLabel; end
-                geometry.label = newLabel;
-            else
-                errordlg('This label already exists!','Label Rename Error','modal');
-            end
-        end
-    end % static public hidden
 end

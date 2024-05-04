@@ -1,5 +1,5 @@
 function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, dottedEnabled)
-
+    disp(plotData.type);
     switch plotData.type
         case 'mpoint'
             
@@ -36,17 +36,26 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
                 svgLine = strcat('<line id="', plotData.title,'" x1="', string(xData(1)), '" y1="', string(yData(1)), '" x2="', string(xData(2)), '" y2="', string(yData(2)), '"');
                 svgLine = strcat(svgLine, ' stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" stroke-width="', string(width),'" ',style,' />');
 
-            elseif isequal(mod(size(plotData.XData, 2), 2), 0) & isequal(size(plotData.XData), size(plotData.YData))
-
+            else
+                if isequal(plotData.title, 'angbi4')
+                    disp("HERE!");
+                end
                 xData = TransformCoordinateDataFromFig(plotData.XData, false, scale, shiftX);
                 yData = TransformCoordinateDataFromFig(plotData.YData, true, scale, shiftY);
+                disp(xData);
 
                 [r,g,b] = GetRGBFromFigColor(plotData.Color);
-
                 svgLine = strcat('<g id="',plotData.title,'">');
+                j=1;
                 for i=1:(size(xData, 2) - 1)
-                    svgLine = strcat(svgLine, '<line id="',string(i),'" x1="', string(xData(i)), '" y1="', string(yData(i)), '" x2="', string(xData(i+1)), '" y2="', string(yData(i+1)), '"');
-                    svgLine = strcat(svgLine, ' stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" stroke-width="', string(width),'" ',style,' />');
+                    disp(xData(i));
+                    disp(xData(i+1));
+                    if ~isnan(xData(i)) && ~isnan(xData(i+1))
+                        svgLine = strcat(svgLine, '<line id="',string(j),'" x1="', string(xData(i)), '" y1="', string(yData(i)), '" x2="', string(xData(i+1)), '" y2="', string(yData(i+1)), '"');
+                        svgLine = strcat(svgLine, ' stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" stroke-width="', string(width),'" ',style,' />');
+                        j = j + 1;
+                    end
+                    
                 end
                 svgLine = strcat(svgLine,'</g>');
            end
@@ -79,7 +88,7 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
 end
 
 function returnCoordData = TransformCoordinateDataFromFig(coordData, flip, scale, shift)
-    returnCoordData = zeros(numel(coordData));
+    returnCoordData = zeros(size(coordData));
     for i=1:numel(coordData)
         returnCoordData(i) = TransformCoordinate(coordData(i), flip, scale, shift);
     end

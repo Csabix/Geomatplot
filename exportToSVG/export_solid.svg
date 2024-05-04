@@ -81,65 +81,67 @@
 <script type="text/javascript" href="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
 <script type="text/javascript"><![CDATA[
 	
-    let A = document.getElementById("A");
-    let B = document.getElementById("B");
-    let C = document.getElementById("C");
+let A = document.getElementById("A");
+let B = document.getElementById("B");
+let C = document.getElementById("C");
 
-    function makeDraggable(evt) {
-		var svg = evt.target;
-		svg.addEventListener('mousedown', startDrag);
-		svg.addEventListener('mousemove', drag);
-		svg.addEventListener('mouseup', endDrag);
-		svg.addEventListener('mouseleave', endDrag);
-		let selectedElement;
-		function startDrag(evt) {
-			if (evt.target.classList.contains('draggable')) {
-				selectedElement = evt.target;
-				offset = getMousePosition(evt);
-				offset.x -= parseFloat(selectedElement.getAttributeNS(null, 'cx'));
-				offset.y -= parseFloat(selectedElement.getAttributeNS(null, 'cy'));
-			}
-		}
-		function drag(evt) {
-			if (selectedElement) {
-				evt.preventDefault();
-				let coord = getMousePosition(evt);
-                
-                selectedElement.setAttributeNS(null, 'cx', coord.x - offset.x);
-				selectedElement.setAttributeNS(null, 'cy', coord.y - offset.y);
-			}
-		}
-		function endDrag(evt) {
-			selectedElement = null;
-		}
-		function getMousePosition(evt) {
-			let CTM = svg.getScreenCTM();
-			return {
-				x: (evt.clientX - CTM.e) / CTM.a,
-				y: (evt.clientY - CTM.f) / CTM.d
-			};
-		}
-	}
+function makeDraggable(evt) {
+    var svg = evt.target;
+    svg.addEventListener('mousedown', startDrag);
+    svg.addEventListener('mousemove', drag);
+    svg.addEventListener('mouseup', endDrag);
+    svg.addEventListener('mouseleave', endDrag);
+    let selectedElement;
+    let offset = { x: 0, y: 0 };
+    function startDrag(evt) {
+        if (evt.target.classList.contains('draggable')) {
+            selectedElement = evt.target;
+            offset = getMousePosition(evt);
+            offset.x -= parseFloat(selectedElement.getAttributeNS(null, 'cx'));
+            offset.y -= parseFloat(selectedElement.getAttributeNS(null, 'cy'));
+        }
+    }
+    function drag(evt) {
+        if (selectedElement) {
+            evt.preventDefault();
+            let coord = getMousePosition(evt);
+            
+            selectedElement.setAttributeNS(null, 'cx', coord.x - offset.x);
+            selectedElement.setAttributeNS(null, 'cy', coord.y - offset.y);
+        }
+    }
+    function endDrag(evt) {
+        selectedElement = null;
+    }
+    function getMousePosition(evt) {
+        // let CTM = svg.getScreenCTM();
+        let CTM = matrix;
+        return {
+            x: (evt.clientX - CTM.e) / CTM.a,
+            y: (evt.clientY - CTM.f) / CTM.d
+        };
+    }
+}
 
 let svgCanvas = document.getElementById("canvas");
 console.log(svgCanvas.viewBox);
 document.addEventListener('contextmenu', event => {event.preventDefault(); console.log(event.which)});
 let viewPort = document.getElementById("viewport");
 let drag = false;
-let offset = { x: 0, y: 0 };
+let dragOffset = { x: 0, y: 0 };
 let factor = .1;
 let matrix = new DOMMatrix();
 let scale;
 svgCanvas.addEventListener('pointerdown', function (event) {
     if(event.which !== 3){return;}
     drag = true;
-    offset = { x: event.offsetX, y: event.offsetY };
+    dragOffset = { x: event.offsetX, y: event.offsetY };
 });
 svgCanvas.addEventListener('pointermove', function (event) {
     if (drag) {
-        let tx = event.offsetX - offset.x;
-        let ty = event.offsetY - offset.y;
-        offset = {
+        let tx = event.offsetX - dragOffset.x;
+        let ty = event.offsetY - dragOffset.y;
+        dragOffset = {
             x: event.offsetX,
             y: event.offsetY
         };
@@ -154,14 +156,14 @@ svgCanvas.addEventListener('pointerup', function (event) {
 svgCanvas.addEventListener('wheel', function (event) {
     let zoom = event.deltaY > 0 ? -1 : 1;
     scale = 1 + factor * zoom;
-    offset = {
+    dragOffset = {
         x: event.offsetX,
         y: event.offsetY
     };
     matrix.preMultiplySelf(new DOMMatrix()
-        .translateSelf(offset.x, offset.y)
+        .translateSelf(dragOffset.x, dragOffset.y)
         .scaleSelf(scale, scale)
-        .translateSelf(-offset.x, -offset.y));
+        .translateSelf(-dragOffset.x, -dragOffset.y));
     viewPort.style.transform = matrix.toString();
 });
 
@@ -312,6 +314,22 @@ function angle_bisector3(a,b,c /*three matrices from point's coordinates*/){
     let ab = math.subtract(a,b);
     let cb = math.subtract(c,b);
     return math.add(b, math.dotMultiply(math.add(math.divide(ab, math.sqrt(math.dot(math.transpose(ab),math.transpose(ab)))), math.divide(cb, math.sqrt(math.dot(math.transpose(cb),math.transpose(cb))))),math.matrixFromColumns([-1e8,-1e4,0,1,1e4,1e8])));
+}
+function angle_bisector4(a, b, c, d /*matrices from point's coordinates*/){
+    //a = a.value; b = b.value; c = c.value; d = d.value;
+
+    //na = (b-a)*[0 1;-1 0];
+    let na = math.multiply(math.subtract(b,a),math.matrixFromRows([0,1],[-1,0]))
+    //nb = (d-c)*[0 1;-1 0];
+    let nb = math.multiply(math.subtract(d,c),math.matrixFromRows([0,1],[-1,0]))
+    //p0 = ([na;nb]\[na*a';nb*c'])';
+    let p0 = math.transpose(math.lusolve(math.matrixFromRows(na,nb), math.matrixFromRows(math.multiply(na,math.transpose(a)),math.multiply(nb, math.transpose(c)))));
+    //v1 = na/sqrt(na*na')+nb/sqrt(nb*nb'); %v2 = v1*[0 1;-1 0];
+    let v1 = math.add(math.divide(na,math.sqrt(math.multiply(na, math.transpose(na)).at(0)[0])), math.divide(nb,math.sqrt(math.multiply(nb, math.transpose(nb)).at(0)[0])));
+    let v2 = math.multiply(v1, math.matrixFromRows([0,1],[-1,0]));
+    //vv = p0 + [v1.*[-1e8;-1e4;0;1;1e4;1e8];NaN NaN; v1*[0 1;-1 0].*[-1e8;-1e4;0;1;1e4;1e8]];
+    let vv = math.add(p0,math.concat(math.dotMultiply(v1,math.matrixFromColumns([-1e8,-1e4,0,1,1e4,1e8])),math.dotMultiply(v2,math.matrixFromColumns([-1e8,-1e4,0,1,1e4,1e8])), 0));
+    return vv;
 }
 
 ]]></script>

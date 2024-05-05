@@ -75,10 +75,10 @@ function elementDataStruct = ExtractDependentElementData(FieldBuffer, FieldID)
             %elementDataStruct.Position = elementCoords;
             %elementDataStruct.Color = elementColor;
 
-        case "dpointseq"
+        %case "dpointseq"
 
-            elementDataStruct.type = "dpointseq";
-            elementDataStruct.title = FieldID;
+            %elementDataStruct.type = "dpointseq";
+            %elementDataStruct.title = FieldID;
             
             %elementCoords = FieldBuffer.fig.Position;
             %elementColor = FieldBuffer.fig.Color;
@@ -91,11 +91,15 @@ function elementDataStruct = ExtractDependentElementData(FieldBuffer, FieldID)
             elementDataStruct.type = "dpolygon";
             elementDataStruct.title = FieldID;
             
-            %elementCoords = FieldBuffer.fig.Position;
-            %elementColor = FieldBuffer.fig.Color;
+            elementDataStruct.XData = FieldBuffer.fig.XData;
+            elementDataStruct.YData = FieldBuffer.fig.YData;
 
-            %elementDataStruct.Position = elementCoords;
-            %elementDataStruct.Color = elementColor;
+            elementDataStruct.FaceColor = FieldBuffer.fig.FaceColor;
+            elementDataStruct.FaceAlpha = FieldBuffer.fig.FaceAlpha;
+
+            elementDataStruct.EdgeColor = FieldBuffer.fig.EdgeColor;
+            elementDataStruct.LineStyle = FieldBuffer.fig.LineStyle;
+            elementDataStruct.LineWidth = FieldBuffer.fig.LineWidth;
 
         case "dscalar"
             elementDataStruct.type = "dscalar";

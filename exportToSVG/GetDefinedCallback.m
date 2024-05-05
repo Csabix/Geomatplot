@@ -1,49 +1,19 @@
 function retFunc = GetDefinedCallback(name, inputs, ownerLabel)
     switch name
         case 'makeDraggable'
-        retFunc = "\tfunction makeDraggable(evt) {\n";
-        retFunc = retFunc + "\t\tvar svg = evt.target;\n";
-        retFunc = retFunc + "\t\tsvg.addEventListener('mousedown', startDrag);\n";
-        retFunc = retFunc + "\t\tsvg.addEventListener('mousemove', drag);\n";
-        retFunc = retFunc + "\t\tsvg.addEventListener('mouseup', endDrag);\n";
-        retFunc = retFunc + "\t\tsvg.addEventListener('mouseleave', endDrag);\n";
-    
-        retFunc = retFunc + "\t\tlet selectedElement;\n";
-    
-        retFunc = retFunc + "\t\tfunction startDrag(evt) {\n";
-            retFunc = retFunc + "\t\t\tif (evt.target.classList.contains('draggable')) {\n";
-                retFunc = retFunc + "\t\t\t\tselectedElement = evt.target;\n";
-                retFunc = retFunc + "\t\t\t\toffset = getMousePosition(evt);\n";
-                retFunc = retFunc + "\t\t\t\toffset.x -= parseFloat(selectedElement.getAttributeNS(null, 'cx'));\n";
-                retFunc = retFunc + "\t\t\t\toffset.y -= parseFloat(selectedElement.getAttributeNS(null, 'cy'));\n";
-            retFunc = retFunc + "\t\t\t}\n";
-        retFunc = retFunc + "\t\t}\n";
-        retFunc = retFunc + "\t\tfunction drag(evt) {\n";
-            retFunc = retFunc + "\t\t\tif (selectedElement) {\n";
-                retFunc = retFunc + "\t\t\t\tevt.preventDefault();\n";
-                retFunc = retFunc + "\t\t\t\tlet coord = getMousePosition(evt);\n";
-                retFunc = retFunc + "\t\t\t\tselectedElement.setAttributeNS(null, 'cx', coord.x - offset.x);\n";
-                retFunc = retFunc + "\t\t\t\tselectedElement.setAttributeNS(null, 'cy', coord.y - offset.y);\n";
-    
-            retFunc = retFunc + "\t\t\t}\n";
-        retFunc = retFunc + "\t\t}\n";
-        retFunc = retFunc + "\t\tfunction endDrag(evt) {\n";
-            retFunc = retFunc + "\t\t\tselectedElement = null;\n";
-        retFunc = retFunc + "\t\t}\n";
-    
-        retFunc = retFunc + "\t\tfunction getMousePosition(evt) {\n";
-            retFunc = retFunc + "\t\t\tlet CTM = svg.getScreenCTM();\n";
-            retFunc = retFunc + "\t\t\treturn {\n";
-                retFunc = retFunc + "\t\t\t\tx: (evt.clientX - CTM.e) / CTM.a,\n";
-                retFunc = retFunc + "\t\t\t\ty: (evt.clientY - CTM.f) / CTM.d\n";
-            retFunc = retFunc + "\t\t\t};\n";
-        retFunc = retFunc + "\t\t}\n";
-    retFunc = retFunc + "\t}\n";
+        retFunc = "function makeDraggable(evt) {\n" + ...
+        "var svg = evt.target;svg.addEventListener('mousedown', startDrag);svg.addEventListener('mousemove', drag);\n" + ...
+        "svg.addEventListener('mouseup', endDrag);svg.addEventListener('mouseleave', endDrag);let selectedElement;\n" + ...
+        "function startDrag(evt) {if (evt.target.classList.contains('draggable')) {\n" + ...
+        "selectedElement = evt.target;offset = getMousePosition(evt);\n" + ...
+        "offset.x -= parseFloat(selectedElement.getAttributeNS(null, 'cx'));offset.y -= parseFloat(selectedElement.getAttributeNS(null, 'cy'));}}\n" + ...
+        "function drag(evt) {if (selectedElement) {evt.preventDefault();let coord = getMousePosition(evt);\n" + ...
+        "selectedElement.setAttributeNS(null, 'cx', coord.x - offset.x);selectedElement.setAttributeNS(null, 'cy', coord.y - offset.y);}}\n" + ...
+        "function endDrag(evt) {selectedElement = null;}\n" + ...
+        "function getMousePosition(evt) {let CTM = svg.getScreenCTM();return {x: (evt.clientX - CTM.e) / CTM.a,y: (evt.clientY - CTM.f) / CTM.d};}}\n";
 
         case 'dist_point2pointseq'
-            % not the best, it always writes the output to value attribute,
-            % there should be a function determining which attribute to
-            % change
+            % Testing needed as well for the other pointseq functions
             
             a = inputs{1};
             b = inputs{2};
@@ -66,8 +36,29 @@ function retFunc = GetDefinedCallback(name, inputs, ownerLabel)
             end % end of second input type check
             retFunc = retFunc + "let c = math.subtract(a, b);\n";
             retFunc = retFunc + "document.getElementById('"+string(out)+"').setAttributeNS(null, 'value', math.sqrt(math.min(math.add(math.dotPow(math.column(c, 0),2), math.dotPow(math.column(c, 1),2)))));}}});\n";
-            retFunc = retFunc + "temp.observe(document.getElementById('"+string(a.label)+"'), config);temp.observe(document.getElementById('"+string(b.label)+"'), config);\n";
+            retFunc = retFunc + "temp.observe(document.getElementById('"+string(a.label)+"'), config);\n";
             % MINDENT FIGYELNI KELL OBSERVERREL
+            if (isequal(class(b), 'dpointseq'))
+                % observe all points of pointseq
+                
+                for k = 1:length(b.inputs) % have to get all the points in pointseq and make a matrix
+                    retFunc = retFunc + "temp.observe(document.getElementById('"+string(b.inputs{k}.label)+"'), config);";
+                end
+                
+            else % in case second input is a point
+                retFunc = retFunc + "temp.observe(document.getElementById('"+string(b.label)+"'), config);\n";
+            end % end of second input type check
+
+        case 'closest_point2circle'
+            a = string(inputs{1}.label);
+            b = string(inputs{2}.label);
+            retFunc = "temp = new MutationObserver((mutationList, observer) => {for (const mutation of mutationList) {if (mutation.type === 'attributes') {\n" + ...
+            "let p = math.matrixFromRows([document.getElementById('"+a+"').getAttributeNS(null, 'cx'),document.getElementById('"+a+"').getAttributeNS(null, 'cy')])\n" + ...
+            "let cp = math.matrixFromRows([document.getElementById('"+b+"').getAttributeNS(null, 'cx'),document.getElementById('"+b+"').getAttributeNS(null, 'cy')])\n" + ...
+            "let cr = document.getElementById('"+b+"').getAttributeNS(null, 'r');p = math.subtract(p,cp);\n" + ...
+            "p = math.add(math.multiply(math.divide(cr, math.sqrt(math.add(math.pow(p[0][0],2),math.pow(p[0][1],2)))),p),cp);" + ...
+            "document.getElementById('"+ownerLabel+"').setAttributeNS(null, 'cx', p[0][0]);document.getElementById('"+ownerLabel+"').setAttributeNS(null, 'cy', p[0][1]);}}});\n" + ...
+            "temp.observe(document.getElementById('"+a+"'), config);temp.observe(document.getElementById('"+b+"'), config);\n";
 
         case 'equidistpoint'
             a = string(inputs{1}.label);
@@ -138,11 +129,11 @@ function retFunc = GetDefinedCallback(name, inputs, ownerLabel)
             b = inputs{2};
             out = ownerLabel;
             retFunc = "temp = new MutationObserver((mutationList, observer) => {for (const mutation of mutationList) {if (mutation.type === 'attributes') {\n";
-            retFunc = retFunc + "let a = math.matrixFromRows([document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cx'), document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cy')]);\n";
+            retFunc = retFunc + "let p = math.matrixFromRows([document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cx'), document.getElementById('"+string(a.label)+"').getAttributeNS(null, 'cy')]);\n";
 
             if (isequal(class(b), 'dpointseq'))
                 % collect all points in a matrix HAVE TO TEST THIS
-                retFunc = retFunc + "let b = math.matrixFromRows(";
+                retFunc = retFunc + "let s = math.matrixFromRows(";
                 for k = 1:length(b.inputs) % have to get all the points in pointseq and make a matrix
                     retFunc = retFunc + "[document.getElementById('"+string(b.inputs{k}.label)+"').getAttributeNS(null, 'cx'), document.getElementById('"+string(b.inputs{k}.label)+"').getAttributeNS(null, 'cy')]";
                     if isequal(k, length(b.inputs)) == false
@@ -151,11 +142,24 @@ function retFunc = GetDefinedCallback(name, inputs, ownerLabel)
                 end
                 retFunc = retFunc + ");\n";
             else % in case second input is a point
-                retFunc = retFunc + "let b = math.matrixFromRows([document.getElementById('"+string(b.label)+"').getAttributeNS(null, 'cx'), document.getElementById('"+string(b.label)+"').getAttributeNS(null, 'cy')]);\n";
+                retFunc = retFunc + "let s = math.matrixFromRows([document.getElementById('"+string(b.label)+"').getAttributeNS(null, 'cx'), document.getElementById('"+string(b.label)+"').getAttributeNS(null, 'cy')]);\n";
             end % end of second input type check
             retFunc = retFunc + "s = math.subtract(s, p);let helpArr = math.add(math.dotPow(math.column(s,0),2),math.dotPow(math.column(s,1),2));" + ...
-                "let min = math.min(helpArr);let id = helpArr.findIndex(x => x == min);p = math.add(s[id],p);"
-            % MINDENT FIGYELNI KELL OBSERVERREL
+                "let min = math.min(helpArr);let id = helpArr.findIndex(x => x == min);p = math.add(s[id],p);\n" + ...
+                "document.getElementById('"+out+"').setAttributeNS(null, 'cx', p[0][0]);document.getElementById('"+out+"').setAttributeNS(null, 'cy', p[0][1]);}}});\n" + ...
+                "temp.observe(document.getElementById('"+string(a.label)+"'), config);";
+            
+            if (isequal(class(b), 'dpointseq'))
+                % observe all points of pointseq
+                
+                for k = 1:length(b.inputs) % have to get all the points in pointseq and make a matrix
+                    retFunc = retFunc + "temp.observe(document.getElementById('"+string(b.inputs{k}.label)+"'), config);";
+                end
+                
+            else % in case second input is a point
+                retFunc = retFunc + "temp.observe(document.getElementById('"+string(b.label)+"'), config);\n";
+            end % end of second input type check
+
         case 'perpendicular_bisector'
             a = string(inputs{1}.label);
             b = string(inputs{2}.label);
@@ -166,9 +170,7 @@ function retFunc = GetDefinedCallback(name, inputs, ownerLabel)
             "let line = document.getElementById('"+ownerLabel+"');let segments = line.querySelectorAll('line');" + ...
             "for (let i = 0; i < v.length-1; ++i) {segments[i].setAttributeNS(null, 'x1', v[i][0]);segments[i].setAttributeNS(null, 'y1', v[i][1]);" + ...
             "segments[i].setAttributeNS(null, 'x2', v[i+1][0]);segments[i].setAttributeNS(null, 'y2', v[i+1][1]);}}}});\n" + ...
-            "temp.observe(document.getElementById('"+a+"'), config);temp.observe(document.getElementById('"+b+"'), config);\n" + ...
-            "document.getElementById('"+ownerLabel+"').setAttributeNS(null, 'cx', v[0]);document.getElementById('"+ownerLabel+"').setAttributeNS(null, 'cy', v[1]);}}});\n" + ...
-            "";
+            "temp.observe(document.getElementById('"+a+"'), config);temp.observe(document.getElementById('"+b+"'), config);\n";
         
         case 'dcircleDefaultCallback'
             a = inputs{1};

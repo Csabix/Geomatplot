@@ -17,11 +17,10 @@ function elementDataStruct = ExtractMovableElementData(FieldBuffer, FieldID)
             elementDataStruct.type = "mpolygon";
             elementDataStruct.title = FieldID;
             
-            elementCoords = FieldBuffer.fig.Position;
-            elementColor = FieldBuffer.fig.Color;
+            elementDataStruct.Position = FieldBuffer.fig.Position;
 
-            elementDataStruct.Position = elementCoords;
-            elementDataStruct.Color = elementColor;
+            elementDataStruct.Color = FieldBuffer.fig.Color;
+            elementDataStruct.LineWidth = FieldBuffer.fig.LineWidth;
 
         otherwise
             error("Invalid movable type, or not yet documented movable type");

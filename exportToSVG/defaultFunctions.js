@@ -7,8 +7,8 @@
  * [x] equidistpoint
  * [x] angle_bisector3
  * [x] angle_bisector4
- * [ ] closest_point2pointseq
- * [ ] closest_point2circle
+ * [x] closest_point2pointseq
+ * [x] closest_point2circle
  * [ ] closest_point2polyline
  * [ ] dist_point2circle
  * [ ] dist_point2polyline
@@ -87,4 +87,22 @@ function angle_bisector4(a,b,c,d){
         segments[j].setAttributeNS(null, 'y2', vv[i+1][1]);
         ++j;
     }
+}
+
+// DONE
+function closest_point2pointseq(s, p /* p could be a pointseq, handled in matlab */){
+    s = math.subtract(s, p);
+    let helpArr = math.add(math.dotPow(math.column(s,0),2),math.dotPow(math.column(s,1),2));
+    let min = math.min(helpArr);
+    let id = helpArr.findIndex(x => x == min);
+    p = math.add(s[id],p);
+}
+
+// DONE
+function closest_point2circle(p, c){
+    let cp = math.matrixFromRows([document.getElementById(c).getAttributeNS(null, 'cx'), document.getElementById(c).getAttributeNS(null, 'cy')]);
+    let cr = document.getElementById(c).getAttributeNS(null, 'r');
+    let p = math.matrixFromRows([document.getElementById(p).getAttributeNS(null, 'cx'), document.getElementById(p).getAttributeNS(null, 'cy')]);
+    p = math.subtract(p,cp);
+    p = math.add(math.multiply(math.divide(cr, math.sqrt(math.add(math.pow(p[0][0],2),math.pow(p[0][1],2)))),p),cp);
 }

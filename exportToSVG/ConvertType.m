@@ -11,6 +11,26 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
             svgLine = strcat('<circle id="', plotData.title,'" class="draggable" r="5" cx="', string(cx), '" cy="', string(cy));
             svgLine = strcat(svgLine, '" fill="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
         
+        case 'mpolygon'
+
+            % Need to make a group here that groups the polygon and it's
+            % points, and make the polygon repsonsive to the points
+            
+            xData = TransformCoordinateDataFromFig(plotData.Position(:,1), false, scale, shiftX);
+            yData = TransformCoordinateDataFromFig(plotData.Position(:,2), true, scale, shiftY);
+
+            [r,g,b] = GetRGBFromFigColor(plotData.Color);
+
+            svgLine = strcat('<polygon points="');
+            for k=1:numel(xData)
+                svgLine = strcat(svgLine, string(xData(k)), ',', string(yData(k)),{' '});
+                %if isequal(k, numel(xData)) == false
+                %    svgLine = strcat(svgLine);
+                %end
+            end
+            svgLine = strcat(svgLine, '" style="fill:rgba(', string(r), ', ', string(g), ', ', string(b), ', ', string(0.1));
+            svgLine = strcat(svgLine,');stroke:rgb(', string(r), ', ', string(g), ', ', string(b), ');stroke-width:',string(plotData.LineWidth),'"/>');
+        
         case 'dpoint'
             
             cx = TransformCoordinate(plotData.Position(1), false, scale, shiftX);
@@ -37,9 +57,6 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
                 svgLine = strcat(svgLine, ' stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" stroke-width="', string(width),'" ',style,' />');
 
             else
-                if isequal(plotData.title, 'angbi4')
-                    disp("HERE!");
-                end
                 xData = TransformCoordinateDataFromFig(plotData.XData, false, scale, shiftX);
                 yData = TransformCoordinateDataFromFig(plotData.YData, true, scale, shiftY);
                 disp(xData);
@@ -81,6 +98,27 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
 
             svgLine = strcat('<circle id="', plotData.title,'" r="0" cx="0" cy="0"');
             svgLine = strcat(svgLine, ' value="', string(value),'" visibility="hidden" />');
+
+        case 'dpolygon'
+
+            xData = TransformCoordinateDataFromFig(plotData.XData, false, scale, shiftX);
+            yData = TransformCoordinateDataFromFig(plotData.YData, true, scale, shiftY);
+
+            [faceR,faceG,faceB] = GetRGBFromFigColor(plotData.FaceColor);
+            [edgeR,edgeG,edgeB] = GetRGBFromFigColor(plotData.EdgeColor);
+
+            style = LineStyleMatcher(plotData.LineStyle, dashedEnabled, dottedEnabled);
+
+            svgLine = strcat('<polygon points="');
+            for k=1:numel(xData)
+                svgLine = strcat(svgLine, string(xData(k)), ',', string(yData(k)),{' '});
+                %if isequal(k, numel(xData)) == false
+                %    svgLine = strcat(svgLine);
+                %end
+            end
+            svgLine = strcat(svgLine, '" style="fill:rgba(', string(faceR), ', ', string(faceG), ', ', string(faceB),', ', string(plotData.FaceAlpha));
+            svgLine = strcat(svgLine,');stroke:rgb(', string(edgeR), ', ', string(edgeG), ', ', string(edgeB), ');stroke-width:',string(plotData.LineWidth),'"', style,'/>');
+        
 
         otherwise
             svgLine = "";

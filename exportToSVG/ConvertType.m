@@ -21,7 +21,7 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
 
             [r,g,b] = GetRGBFromFigColor(plotData.Color);
 
-            svgLine = strcat('<polygon points="');
+            svgLine = strcat('<polygon id="', plotData.title,'" points="');
             for k=1:numel(xData)
                 svgLine = strcat(svgLine, string(xData(k)), ',', string(yData(k)),{' '});
                 %if isequal(k, numel(xData)) == false
@@ -109,7 +109,7 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
 
             style = LineStyleMatcher(plotData.LineStyle, dashedEnabled, dottedEnabled);
 
-            svgLine = strcat('<polygon points="');
+            svgLine = strcat('<polygon id="', plotData.title,'" points="');
             for k=1:numel(xData)
                 svgLine = strcat(svgLine, string(xData(k)), ',', string(yData(k)),{' '});
                 %if isequal(k, numel(xData)) == false

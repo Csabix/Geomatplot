@@ -46,6 +46,7 @@ FieldBuffer = dependents.(dependentFields{i});  %actual field of the dependents 
     fprintf(outFile, GetDefinedCallback(func2str(FieldBuffer.callback), FieldBuffer.inputs, FieldBuffer.label));
 
 end % for loop
+% mpolygon callbacks needed
 fprintf(outFile, ']]></script>\n');
 end
 

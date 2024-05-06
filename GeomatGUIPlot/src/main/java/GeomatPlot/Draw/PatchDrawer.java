@@ -224,7 +224,7 @@ public class PatchDrawer extends Drawer{
         }
 
         indexBuffer.clear();
-        indexBuffer.add(gl, indices);
+        if(indices.length != 0)indexBuffer.add(gl, indices);
 
         ibo.clear();
         ibo.add(gl, toPackableInt(indirectCommands));

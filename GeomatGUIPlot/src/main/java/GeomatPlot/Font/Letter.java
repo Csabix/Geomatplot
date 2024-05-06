@@ -9,10 +9,10 @@ public class Letter {
         this.info = c;
         this.offset = xOffset;
     }
-    public float[] pack(float x, float y) {
+    public float[] pack(float x, float y, float oX, float oY) {
         float[] data = new float[ELEMENT_COUNT];
-        data[0 ] = offset;
-        data[1 ] = 0;
+        data[0 ] = offset + oX;
+        data[1 ] = oY;
         data[2 ] = info.width;
         data[3 ] = info.height;
         data[4 ] = info.u;

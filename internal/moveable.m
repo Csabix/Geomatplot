@@ -9,12 +9,16 @@ properties (Hidden)
     stop_timing_num (1,1) double = 0;
 end
 methods
-    function o = moveable(parent,label,fig)
+    function o = moveable(parent,label,fig, varargin)
         o = o@drawing(parent,label,fig);
         o.parent.movs.(label) = o;
         o.fig.UserData = o;
         o.deps = struct;
-        addlistener(o.fig,'Moved' ,@moveable.update);
+        if isempty(varargin)
+            addlistener(o.fig,'Moved' ,@moveable.update);
+        else
+            addlistener(o.fig,'Moved' ,varargin{1});
+        end
         %addlistener(o.fig,'ROIMoved' ,@moveable.update); % todo @update ?
         %addlistener(o.fig,'MovingROI',@moveable.update);
     end

@@ -49,9 +49,19 @@ public class gLine extends Drawable {
             data[i * VERTEX_SIZE + 6] = dashed?distTotal:Float.NaN;
             //data[i * VERTEX_SIZE + 7] = ... ;
 
+            /*long l = Double.doubleToRawLongBits(distTotal);
+            int a = (int) l;
+            int b = (int) (l >> 32);
+
+            float f1 = Float.intBitsToFloat(a);
+            float f2 = Float.intBitsToFloat(b);
+
+            data[i * VERTEX_SIZE + 6] = f2;
+            data[i * VERTEX_SIZE + 7] = f1;
+            */
             if(ind < x.length - 1) {
-                double dX = x[ind] - x[ind + 1];
-                double dY = y[ind] - y[ind + 1];
+                double dX = (double)x[ind] - (double)x[ind + 1];
+                double dY = (double)y[ind] - (double)y[ind + 1];
                 distTotal += (float)Math.sqrt(dX * dX + dY * dY);
             }
         }

@@ -9,11 +9,14 @@ public class gLabel extends Drawable {
     private final String text;
     public FontMap fontMap;
     public float x,y; // Anchor
-    public gLabel(int x, int y, String text) {
+    public float oX,oY;
+    public gLabel(float x, float y, String text) {
         super(false);
         this.x = x;
         this.y = y;
         this.text = text;
+        oX = 0;
+        oY = 0;
     }
 
     @Override
@@ -21,7 +24,7 @@ public class gLabel extends Drawable {
         List<Letter> letters = fontMap.createLabel(text);
         float[] data = new float[elementCount()];
         for (int i = 0; i < letters.size(); i++) {
-            System.arraycopy(letters.get(i).pack(x,y), 0, data, i * Letter.ELEMENT_COUNT, Letter.ELEMENT_COUNT);
+            System.arraycopy(letters.get(i).pack(x,y,oX,oY), 0, data, i * Letter.ELEMENT_COUNT, Letter.ELEMENT_COUNT);
         }
         return data;
     }

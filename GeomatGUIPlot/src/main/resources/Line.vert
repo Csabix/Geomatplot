@@ -43,6 +43,7 @@ void main() {
     vec2 a = normalize((lines[i-1].position - position));
     vec2 b = normalize((lines[i+1].position - position));
     float x = lines[i].primaryColorWidth.w / sqrt((1.0 - dot(a,b)) / 2.0); // Smaller the angle the more we need to offset
+    x = min(x, 5 * lines[i].primaryColorWidth.w);
 
     a = vec2(-a.y,a.x);
     b = vec2(b.y,-b.x);
@@ -55,7 +56,7 @@ void main() {
 
     gl_Position = vec4((position - v - translate) * scale,0.1,1.0);
 
-    lineLength_out = isnan(lines[i].length) ? 0 : ( lines[i].length + lenOffset ) * scale.y;
+    lineLength_out = isnan(lines[i].length) ? 0 : ( lines[i].length + lenOffset ) *scale.y;
     primaryColor_out = lines[i].primaryColorWidth.xyz;
     sideDistance_out = mapIndex % 2 == 1 ? -1.0f : 1.0f;
     id_out = gl_DrawID | drawerID;

@@ -13,10 +13,8 @@ classdef dcurve < dlines
             if nargin >= 6; o.Resolution = resolution; end
             o.setUpdateCallback(callback);
         end
-        function update(o,detail_level)
-            if nargin < 2; detail_level = 1; end
-            detail_level = 1; % TODO For now
-            t = linspace(0,1,o.Resolution*detail_level)';
+        function update(o,~)
+            t = linspace(0,1,o.Resolution)';
             o.call(t);
         end
     end

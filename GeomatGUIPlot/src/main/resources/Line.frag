@@ -10,7 +10,7 @@ layout(location=1) out int id_out;
 
 void main() {
     float alphaSide = 1.3 - abs(sideDistance_in);
-    float alphaLenght = abs(0.5 - fract(lineLength_in * 10.0f)) / 0.3 - 0.2;
+    float alphaLenght = float(abs(0.5 - fract(lineLength_in * 10.0)) / 0.3 - 0.2);
 
     color_out = vec4(primaryColor_in,min(alphaSide, alphaLenght));
     id_out = id_in;

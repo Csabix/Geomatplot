@@ -3,6 +3,7 @@ properties
 	parent  (1,1) Geomatplot
 	label	(1,:) char           % indetifier
 	fig                          % plot handle to ROI or matlab plot
+    labelfig
     defined (1,1) logical = true
 end
 
@@ -13,6 +14,7 @@ methods
         o.parent = parent;
         o.label = label;
         o.fig = fig;
+        o.labelfig = labelH(parent.ax, label);
         o.fig.UserData = o;
     end
     function s = string(o,r)

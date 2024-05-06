@@ -2,21 +2,38 @@ package GeomatPlot.Draw;
 
 import GeomatPlot.Plot;
 
+import java.util.Arrays;
+
 public class gPolygon extends gPatch{
     public gPolygonPoint[] points;
+    public int[] notControlPoint;
+
+    public gPolygon(float[] x, float[] y, int[][] indices, float[][] primaryColors, float[][] borderColors, float faceAlpha, boolean movable, int[] notControlPoint) {
+        super(x, y, indices, primaryColors, borderColors, faceAlpha, movable);
+        this.notControlPoint = notControlPoint;
+    }
 
     public gPolygon(float[] x, float[] y, int[][] indices, float[][] primaryColors, float[][] borderColors, float faceAlpha, boolean movable) {
-        super(x, y, indices, primaryColors, borderColors, faceAlpha, movable);
+        this(x, y, indices, primaryColors, borderColors, faceAlpha, movable, new int[]{});
     }
 
     public gPolygon(float[] x, float[] y, int[][] indices, boolean movable) {
         super(x, y, indices, movable);
+        this.notControlPoint = new int[]{};
     }
 
     public gPolygonPoint[] getPoints() {
-        points = new gPolygonPoint[x.length];
+        points = new gPolygonPoint[x.length - notControlPoint.length];
+        int indx = 0;
         for (int i = 0; i < x.length; ++i) {
-            points[i] = new gPolygonPoint(this, x[i], y[i], new float[]{0,0,1}, 10.f, true, i);
+            boolean controlPoint = true;
+            for (int j : notControlPoint) {
+                if(i == j) {
+                    controlPoint = false;
+                    break;
+                }
+            }
+            if(controlPoint)points[indx++] = new gPolygonPoint(this, x[i], y[i], new float[]{0,0,1}, 10.f, true, i);
         }
         return points;
     }

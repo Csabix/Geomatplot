@@ -9,6 +9,7 @@ function point = drawPoint(varargin)
     defaultPosition = [];
     defaultMovable = true;
     defaultMarkerSize = 5;
+    %defaultLabel = "";
 
     p = inputParser;
     p.KeepUnmatched = true;
@@ -17,6 +18,7 @@ function point = drawPoint(varargin)
     addParameter(p,"Color",defaultColor);
     addParameter(p,"Movable",defaultMovable);
     addParameter(p,"MarkerSize",defaultMarkerSize);
+    %addParameter(p,"Label",defaultLabel);
 
     parse(p,varargin{:});
 
@@ -33,5 +35,8 @@ function point = drawPoint(varargin)
     jPoint = GeomatPlot.Draw.gPoint(position(1),position(2), color, p.Results.MarkerSize * 3,0,p.Results.Movable);
     plt.addDrawable(jPoint);
     point = PointH(jPoint,plt);
+    %label = labelH(plt, p.Results.Label, position);
+
+    %point = PointH(jPoint,plt, label);
 end
 

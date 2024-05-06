@@ -2,17 +2,54 @@ package GeomatPlot;
 
 import GeomatPlot.Draw.*;
 
+import javax.swing.*;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 
 // https://undocumentedmatlab.com/articles/matlab-callbacks-for-java-events/
 public class PlotTest {
     public static void main(String[] args) {
         Plot plot = new Plot();
-        pointTest(plot);
+        //pointTest(plot);
         //lineTest(plot);
         //functionTest(plot);
         //labelTest(plot);
+        //polygonTest(plot);
+        /*double v = 1134241.111f;
+        long l = Double.doubleToRawLongBits(v);
+        int a = (int) l;
+        int b = (int) (l >> 32);
+
+        float f1 = Float.intBitsToFloat(a);
+        float f2 = Float.intBitsToFloat(b);
+        System.out.println(f1);
+        System.out.println(f2);
+
+        long l2 = b;
+        l2 = l2 << 32;
+        l2 |= a;
+        System.out.println(l);
+        System.out.println(l2);
+        System.out.println(Double.longBitsToDouble(l2));*/
+    }
+
+    static void polygonTest(Plot plot) {
+        gPolygon p1 = new gPolygon(new float[]{0,1,1,0},new float[]{2,2,3,3},new int[][]{{0, 1, 2},{0,3,2}},true);
+        gPolygon p2 = new gPolygon(new float[]{1,2,2,1},new float[]{2,2,3,3},new int[][]{{0, 1, 2},{0,3,2}},true);
+        gPolygon p3 = new gPolygon(new float[]{1,2,2,1},new float[]{2,2,3,3},new int[][]{{0, 1, 2},{0,3,2}},new float[][]{{0f,1f,0f}},new float[][]{{0f,0f,0f}},1f,true,new int[]{0});
+        /*plot.addDrawable(p1);
+        callSleep(1000);
+        plot.updateDrawable(p1);
+        callSleep(1000);
+        plot.removeDrawable(p1);
+        callSleep(1000);
+        plot.addDrawable(p2);
+        plot.removeDrawable(p2);
+        callSleep(1000);*/
+        plot.addDrawable(p3);
+        callSleep(1000);
+        plot.removeDrawable(p3);
     }
 
     static void labelTest(Plot plot) {

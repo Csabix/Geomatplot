@@ -8,6 +8,7 @@ classdef PointH < handle
 
     properties
         gPoint
+        label
         plot Plot
         UserData
     end
@@ -20,6 +21,7 @@ classdef PointH < handle
         function obj = PointH(gPoint,plot)
             obj.gPoint = gPoint;
             obj.plot = plot;
+            %obj.label = label;
             addlistener(obj,["Position","PrimaryColor","Width","Type"],'PostSet',@obj.updateBuffer);
             gPointH = handle(obj.gPoint,'CallbackProperties');
             set(gPointH,'MovementCallback',@(~,~)notify(obj,'Moved'));
@@ -37,6 +39,7 @@ classdef PointH < handle
         function set.Position(obj,position)
             obj.gPoint.x = position(1);
             obj.gPoint.y = position(2);
+            %obj.label.Position = position;
         end
 
         function color = get.PrimaryColor(obj)

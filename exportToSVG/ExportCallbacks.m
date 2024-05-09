@@ -3,7 +3,7 @@ fprintf(outFile, '<script type="text/javascript" href="https://cdnjs.cloudflare.
 fprintf(outFile, '<script type="text/javascript"><![CDATA[\n');
 
 fprintf(outFile, GetDefinedCallback('makeDraggable', []));
-fprintf(outFile, 'const config = { attributes: true, childList: false, subtree: false };');
+fprintf(outFile, 'const config = { attributes: true, childList: false, subtree: true };');
 fprintf(outFile, 'let temp;');
 dependents = userData.deps;
 dependentFields = fieldnames(dependents);
@@ -42,11 +42,22 @@ FieldBuffer = dependents.(dependentFields{i});  %actual field of the dependents 
         end % inside switch
     end % if anonymous
     
-    disp(FieldBuffer.callback);
     fprintf(outFile, GetDefinedCallback(func2str(FieldBuffer.callback), FieldBuffer.inputs, FieldBuffer.label));
 
 end % for loop
-% mpolygon callbacks needed
+
+% mpolygon callback can only be done this way sadly
+moveables = userData.movs;
+moveableFields = fieldnames(moveables);
+
+for i=1:numel(moveableFields)
+
+    FieldBuffer = moveables.(moveableFields{i});
+    if isequal(class(FieldBuffer), 'mpolygon')
+        fprintf(outFile, GetDefinedCallback("mpolygon", {}, FieldBuffer.label));
+    end % if
+end % moveable
+
 fprintf(outFile, ']]></script>\n');
 end
 

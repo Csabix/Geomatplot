@@ -1,5 +1,5 @@
 function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, dottedEnabled)
-    disp(plotData.type);
+
     switch plotData.type
         case 'mpoint'
             
@@ -21,7 +21,9 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
 
             [r,g,b] = GetRGBFromFigColor(plotData.Color);
 
-            svgLine = strcat('<polygon id="', plotData.title,'" points="');
+            
+            svgLine = strcat('<g id="',plotData.title,'">');
+            svgLine = strcat(svgLine, '<polygon points="');
             for k=1:numel(xData)
                 svgLine = strcat(svgLine, string(xData(k)), ',', string(yData(k)),{' '});
                 %if isequal(k, numel(xData)) == false
@@ -30,6 +32,11 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
             end
             svgLine = strcat(svgLine, '" style="fill:rgba(', string(r), ', ', string(g), ', ', string(b), ', ', string(0.1));
             svgLine = strcat(svgLine,');stroke:rgb(', string(r), ', ', string(g), ', ', string(b), ');stroke-width:',string(plotData.LineWidth),'"/>');
+            for k=1:numel(xData)
+                svgLine = strcat(svgLine, '<circle id="', string(k),'" class="draggable" r="5" cx="', string(xData(k)), '" cy="', string(yData(k)));
+                svgLine = strcat(svgLine, '" fill="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
+            end
+            svgLine = strcat(svgLine,'</g>');
         
         case 'dpoint'
             
@@ -59,14 +66,12 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
             else
                 xData = TransformCoordinateDataFromFig(plotData.XData, false, scale, shiftX);
                 yData = TransformCoordinateDataFromFig(plotData.YData, true, scale, shiftY);
-                disp(xData);
 
                 [r,g,b] = GetRGBFromFigColor(plotData.Color);
                 svgLine = strcat('<g id="',plotData.title,'">');
                 j=1;
                 for i=1:(size(xData, 2) - 1)
-                    disp(xData(i));
-                    disp(xData(i+1));
+                    
                     if ~isnan(xData(i)) && ~isnan(xData(i+1))
                         svgLine = strcat(svgLine, '<line id="',string(j),'" x1="', string(xData(i)), '" y1="', string(yData(i)), '" x2="', string(xData(i+1)), '" y2="', string(yData(i+1)), '"');
                         svgLine = strcat(svgLine, ' stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" stroke-width="', string(width),'" ',style,' />');

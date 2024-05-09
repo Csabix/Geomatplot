@@ -1,12 +1,14 @@
 function exportsvg(g, location, dashedEnabled, dottedEnabled, interactive, scale, shiftX, shiftY)
     
-    if(~isequal(class(findobj), 'matlab.graphics.Graphics'))
+    userData = get(g, 'UserData');
+    
+    if isempty(get(g, 'UserData'))
+        fig = get(g,'parent');
+        close(fig);
         error("Error! There are no plots to export!\nHiba! Nincs exportálható adat");
     end
     
-    userData = get(g, 'UserData');
-    
-    if(~isequal(class(userData), 'Geomatplot'))
+    if ~isequal(class(userData), 'Geomatplot')
         fig = get(g,'parent');
         close(fig);
         error("Error! This plot cannot be exported (not made with Geomatplot)\nHiba! Ez a koordinátarendszer nem Geomatplottal lett létrehozva");

@@ -123,14 +123,13 @@ function makeDraggable(evt) {
     }
 }
 
-let svgCanvas = document.getElementById("canvas");
-console.log(svgCanvas.viewBox);
 document.addEventListener('contextmenu', event => {event.preventDefault(); console.log(event.which)});
+let svgCanvas = document.getElementById("canvas");
 let viewPort = document.getElementById("viewport");
-let drag = false;
-let dragOffset = { x: 0, y: 0 };
-let factor = .1;
 let matrix = new DOMMatrix();
+let dragOffset = { x: 0, y: 0 };
+let drag = false;
+let factor = .1;
 let scale;
 svgCanvas.addEventListener('pointerdown', function (event) {
     if(event.which !== 3){return;}
@@ -168,7 +167,7 @@ svgCanvas.addEventListener('wheel', function (event) {
 });
 
 
-const config = { attributes: true, childList: false, subtree: false };let temp;temp = new MutationObserver((mutationList, observer) => {for (const mutation of mutationList) {if (mutation.type === 'attributes') {if(mutation.attributeName === 'cx'){
+const config = { attributes: true, childList: false, subtree: true };let temp;temp = new MutationObserver((mutationList, observer) => {for (const mutation of mutationList) {if (mutation.type === 'attributes') {if(mutation.attributeName === 'cx'){
 document.getElementById('seg1').setAttributeNS(null, 'x1', document.getElementById('A').getAttributeNS(null, mutation.attributeName));
 document.getElementById('seg1').setAttributeNS(null, 'x2', document.getElementById('B').getAttributeNS(null, mutation.attributeName));
 }if(mutation.attributeName === 'cy'){

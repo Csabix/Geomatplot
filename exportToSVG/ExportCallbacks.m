@@ -3,6 +3,7 @@ fprintf(outFile, '<script type="text/javascript" href="https://cdnjs.cloudflare.
 fprintf(outFile, '<script type="text/javascript"><![CDATA[\n');
 
 fprintf(outFile, GetDefinedCallback('makeDraggable', []));
+fprintf(outFile, GetDefinedCallback('dragScreen', []));
 fprintf(outFile, 'const config = { attributes: true, childList: false, subtree: true };');
 fprintf(outFile, 'let temp;');
 dependents = userData.deps;

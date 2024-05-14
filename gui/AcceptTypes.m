@@ -146,6 +146,14 @@ classdef AcceptTypes
             pattern = {{'point_base','dcircle','dlines','polygon_base'},'point_base','point_base'};
             accepted = AcceptTypes.acceptGeometryByPattern(data,pattern);
         end
+
+        function accepted = acceptBezier2(data)
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base'});
+        end
+
+        function accepted = acceptBezier3(data)
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base','point_base'});
+        end
     end % static public
 
     methods(Access = private,Static)

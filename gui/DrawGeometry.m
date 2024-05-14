@@ -85,6 +85,16 @@ classdef DrawGeometry
         function drawMirrorSegment(o,data)
             Mirror(o,data{1},data{2},data{3});
         end
+
+        function drawBezier2(o,data)
+           fun = @(t,p0,p1,p2)  p0.*(1-t).^2 + 2*p1.*t.*(1-t) + p2.*t.^2;
+           Curve(o,data{1},data{2},data{3},fun);
+        end
+
+        function drawBezier3(o,data)
+            fun = @(t,p0,p1,p2,p3)  p0.*(1-t).^3 + 3*p1.*t.*(1-t).^2 + 3*p2.*(1-t).*t.^2 + p3.*t.^3;
+            Curve(o,data{1},data{2},data{3},data{4},fun);
+        end
     end % static public
 end
 

@@ -1,5 +1,5 @@
 function exportsvg(g, location, dashedEnabled, dottedEnabled, interactive, scale, shiftX, shiftY)
-    
+
     userData = get(g, 'UserData');
     
     if isempty(get(g, 'UserData'))

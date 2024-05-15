@@ -21,7 +21,7 @@ function outList = ExtractUserData(userData)
 
         elementDataStruct = struct();                   %empty struct for collected data, assigned based on class
         FieldBuffer = dependents.(dependentFields{i});  %actual field of the movables that we are currently working with
-        elementDataStruct = ExtractDependentElementData(FieldBuffer, dependentFields{i});
+        elementDataStruct = GetElementData(FieldBuffer, dependentFields{i});
 
         outList{i} = elementDataStruct;    
 
@@ -33,7 +33,7 @@ function outList = ExtractUserData(userData)
         
         elementDataStruct = struct();           %empty struct for collected data, assigned based on class
         FieldBuffer = movables.(movableFields{i});   %actual field of the movables that we are currently working with
-        elementDataStruct = ExtractMovableElementData(FieldBuffer, movableFields{i});
+        elementDataStruct = GetElementData(FieldBuffer, movableFields{i});
 
         outList{(numel(dependentFields) + i)} = elementDataStruct;
         % all the collected data assigned to an index, the indexes are

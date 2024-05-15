@@ -8,7 +8,7 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
             
             [r,g,b] = GetRGBFromFigColor(plotData.Color);
             
-            svgLine = strcat('<circle id="', plotData.title,'" class="draggable" r="5" cx="', string(cx), '" cy="', string(cy));
+            svgLine = strcat('<circle id="', plotData.label,'" class="draggable" r="5" cx="', string(cx), '" cy="', string(cy));
             svgLine = strcat(svgLine, '" fill="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
         
         case 'mpolygon'
@@ -22,7 +22,7 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
             [r,g,b] = GetRGBFromFigColor(plotData.Color);
 
             
-            svgLine = strcat('<g id="',plotData.title,'">');
+            svgLine = strcat('<g id="',plotData.label,'">');
             svgLine = strcat(svgLine, '<polygon points="');
             for k=1:numel(xData)
                 svgLine = strcat(svgLine, string(xData(k)), ',', string(yData(k)),{' '});
@@ -45,7 +45,7 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
             
             [r,g,b] = GetRGBFromFigColor(plotData.Color);
             
-            svgLine = strcat('<circle id="', plotData.title,'" r="5" cx="', string(cx), '" cy="', string(cy));
+            svgLine = strcat('<circle id="', plotData.label,'" r="5" cx="', string(cx), '" cy="', string(cy));
             svgLine = strcat(svgLine, '" fill="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
         
         case 'dlines'
@@ -60,7 +60,7 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
 
                 [r,g,b] = GetRGBFromFigColor(plotData.Color);
                 
-                svgLine = strcat('<line id="', plotData.title,'" x1="', string(xData(1)), '" y1="', string(yData(1)), '" x2="', string(xData(2)), '" y2="', string(yData(2)), '"');
+                svgLine = strcat('<line id="', plotData.label,'" x1="', string(xData(1)), '" y1="', string(yData(1)), '" x2="', string(xData(2)), '" y2="', string(yData(2)), '"');
                 svgLine = strcat(svgLine, ' stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" stroke-width="', string(width),'" ',style,' />');
 
             else
@@ -68,7 +68,7 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
                 yData = TransformCoordinateDataFromFig(plotData.YData, true, scale, shiftY);
 
                 [r,g,b] = GetRGBFromFigColor(plotData.Color);
-                svgLine = strcat('<g id="',plotData.title,'">');
+                svgLine = strcat('<g id="',plotData.label,'">');
                 j=1;
                 for i=1:(size(xData, 2) - 1)
                     
@@ -91,7 +91,7 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
     
             [r,g,b] = GetRGBFromFigColor(plotData.Color);
 
-            svgLine = strcat('<circle id="', plotData.title,'" r="', string(radius),'" cx="', string(cx), '" cy="', string(cy));
+            svgLine = strcat('<circle id="', plotData.label,'" r="', string(radius),'" cx="', string(cx), '" cy="', string(cy));
             svgLine = strcat(svgLine, '" fill="none" stroke-width="2" stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
        
         case 'dscalar'
@@ -101,7 +101,7 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
 
             value = plotData.val * scale;
 
-            svgLine = strcat('<circle id="', plotData.title,'" r="0" cx="0" cy="0"');
+            svgLine = strcat('<circle id="', plotData.label,'" r="0" cx="0" cy="0"');
             svgLine = strcat(svgLine, ' value="', string(value),'" visibility="hidden" />');
 
         case 'dpolygon'
@@ -114,7 +114,7 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
 
             style = LineStyleMatcher(plotData.LineStyle, dashedEnabled, dottedEnabled);
 
-            svgLine = strcat('<polygon id="', plotData.title,'" points="');
+            svgLine = strcat('<polygon id="', plotData.label,'" points="');
             for k=1:numel(xData)
                 svgLine = strcat(svgLine, string(xData(k)), ',', string(yData(k)),{' '});
                 %if isequal(k, numel(xData)) == false

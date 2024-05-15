@@ -51,32 +51,17 @@ function exportsvg(g, location, dashedEnabled, dottedEnabled, interactive, scale
     end
 
     rawData = ExtractUserData(userData);
-    rawDataSize = size(rawData);
     
     CorrectLocationName(location);
     outFile = fopen(location,'w');
-    
-    fprintf(outFile, '<svg id="canvas" xmlns="http://www.w3.org/2000/svg" onload="makeDraggable(evt)">\n');
-    fprintf(outFile, '<style>.draggable {cursor: move;}</style>');
-    fprintf(outFile, '<g id="viewport">');
 
     xWidth = g.XLim(2) - g.XLim(1);
     yWidth = g.YLim(2) - g.YLim(1);
 
     minWidth = min([xWidth, yWidth]);
+
+    CreateSVG(outFile, rawData, dashedEnabled, dottedEnabled, interactive,  (scale / minWidth), shiftX, shiftY);
     
-    for i=1:rawDataSize(2)
-
-        fprintf(outFile, "%s\n", ConvertType(rawData{i}, scale / minWidth, shiftX, shiftY, dashedEnabled, dottedEnabled));
-        
-    end
-
-    fprintf(outFile, '</g>');
-
-    if(interactive)
-        ExportCallbacks(userData, outFile);
-    end
-    fprintf(outFile, '</svg>');
     fclose(outFile);
     
 end

@@ -38,7 +38,7 @@ function [h,O,r,alpha,beta] = CircularArc(varargin)
         r_ = Distance(parent,inputs(1:2));
         beta_ = dscalar(parent, parent.getNextLabel('small'), inputs(1:2), @base_angle);
         alpha_ = dscalar(parent, parent.getNextLabel('small'), inputs, @angle_between);
-    elseif drawing.isInputPatternMatching(inputs,{'point_base','point_base','dscalar'})
+    elseif drawing.isInputPatternMatching(inputs,{'point_base','point_base','scalar_base'})
     % (center, starting_point, angle)
         c_ = inputs{1};
         r_ = Distance(parent,inputs(1:2));

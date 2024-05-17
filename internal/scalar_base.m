@@ -1,5 +1,4 @@
-classdef escalar < expression_base
-
+classdef scalar_base < drawing
 methods
     function c = plus(a,b)
         arguments
@@ -7,8 +6,9 @@ methods
             b   (1,1) {mustBeA(b,["escalar","scalar_base","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
-        [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'+',[1 1]);
-        c = escalar(parent,inputs,constants,expression,operator);
+        if isa(a,'scalar_base'); a = escalar.fromDrawing(a);
+        elseif isa(b,'scalar_base'); b = escalar.fromDrawing(b); end
+        c = a + b;
     end
     function c = minus(a,b)
         arguments
@@ -16,8 +16,9 @@ methods
             b   (1,1) {mustBeA(b,["escalar","scalar_base","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
-        [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'-',[1 1]);
-        c = escalar(parent,inputs,constants,expression,operator);
+        if isa(a,'scalar_base'); a = escalar.fromDrawing(a);
+        elseif isa(b,'scalar_base'); b = escalar.fromDrawing(b); end
+        c = a - b;
     end
     function c = times(a,b)
         c = mtimes(a,b);
@@ -28,8 +29,9 @@ methods
             b   (1,1) {mustBeA(b,["escalar","scalar_base","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
-        [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'*',[1 1]);
-        c = escalar(parent,inputs,constants,expression,operator);
+        if isa(a,'scalar_base'); a = escalar.fromDrawing(a);
+        elseif isa(b,'scalar_base'); b = escalar.fromDrawing(b); end
+        c = a * b;
     end
     function c = mrdivide(a,b)
         arguments
@@ -37,8 +39,9 @@ methods
             b   (1,1) {mustBeA(b,["escalar","scalar_base","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
-        [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'/',[1 1]);
-        c = escalar(parent,inputs,constants,expression,operator);
+        if isa(a,'scalar_base'); a = escalar.fromDrawing(a);
+        elseif isa(b,'scalar_base'); b = escalar.fromDrawing(b); end
+        c = a / b;
     end
     function c = power(a,b)
         c = mpower(a,b);
@@ -49,20 +52,9 @@ methods
             b   (1,1) {mustBeA(b,["escalar","scalar_base","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
-        [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'^',[1 1]);
-        c = escalar(parent,inputs,constants,expression,operator);
-    end
-    function d = evalimpl(o,label)
-        [inputs,callback] = o.createCallback();
-        d = dscalar(o.parent,label,inputs,callback);
-    end
-end
-methods (Static)
-    function s = fromDrawing(d)
-        arguments
-            d (1,1) scalar_base
-        end
-        s = escalar(d.parent, {d}, {}, d.label);
+        if isa(a,'scalar_base'); a = escalar.fromDrawing(a);
+        elseif isa(b,'scalar_base'); b = escalar.fromDrawing(b); end
+        c = a ^ b;
     end
 end
 end

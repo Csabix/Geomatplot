@@ -14,8 +14,10 @@ methods
         o.parent.movs.(label) = o;
         o.fig.UserData = o;
         o.deps = struct;
-        addlistener(o.fig,'ROIMoved' ,@moveable.update); % todo @update ?
-        addlistener(o.fig,'MovingROI',@moveable.update);
+        if isa(o.fig,'imroi')
+            addlistener(o.fig,'ROIMoved' ,@moveable.update); % todo @update ?
+            addlistener(o.fig,'MovingROI',@moveable.update);
+        end
     end
     function addCallback(o,dep)
         o.deps.(dep.label) = dep;

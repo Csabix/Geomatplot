@@ -34,7 +34,7 @@ function [h,O,r] = Circle(varargin)
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
         c_ = dpoint(parent,parent.getNextLabel('center'),inputs,@equidistpoint);
         r_ = Distance(parent,{c_,inputs{1}});
-    elseif drawing.isInputPatternMatching(inputs,{'point_base','dscalar'})
+    elseif drawing.isInputPatternMatching(inputs,{'point_base','scalar_base'})
         c_ = inputs{1}; r_ = inputs{2};
     elseif drawing.isInputPatternMatching(inputs,{'point_base',{'point_base','dpointlineseq','polygon_base'}})
         c_ = inputs{1};

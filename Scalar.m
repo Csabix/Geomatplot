@@ -1,9 +1,11 @@
 function h = Scalar(varargin)
-% Scalar creates a dependent scalar value obejct
+% Scalar creates a moveable or dependent scalar value object
+%   Scalar(A) creates a moveable scalar. When it's value is changed
+%       it will update all dependent drawings.
 %   Scalar({A,B..},callback) creates a dependent scalar with a given
 %       callback of the form
 %           callback(A,B,...) -> s
-%       where A,B,... are n>=1 number of any Geomaplot handles, and their
+%       where A,B,... are n>=1 number of any Geomatplot handles, and their
 %       values will be passed to the given callback. For example, if A is a
 %       point, then its position vector [x y] will be  given to the
 %       callback to calculate with. The output is expected to  be a scalar
@@ -26,13 +28,19 @@ function h = Scalar(varargin)
         scalar_expr = inputs{1};
         [inputs,callback] = scalar_expr.createCallback();
         assert(parent == scalar_expr.parent);
-    elseif length(varargin) == 1 && isa(varargin{1},'function_handle')
-        for j = 1:length(inputs)
-            if isa(inputs{j},'expression_base'); inputs{j} = inputs{j}.eval(); end
+    elseif length(varargin) == 1
+        if isa(varargin{1},'function_handle')
+            isdependent = true;
+            for j = 1:length(inputs)
+                if isa(inputs{j},'expression_base'); inputs{j} = inputs{j}.eval(); end
+            end
+            [usercallback,~] = parse_callback(inputs,varargin{:});
+            n = abs(nargout(usercallback));
+            callback = [];
+        elseif isa(varargin{1},'double')
+            isdependent = false;
+            val = varargin{1};
         end
-        [usercallback,~] = parse_callback(inputs,varargin{:});
-        n = abs(nargout(usercallback));
-        callback = [];
     else
         throw(MException('Scalar:invalidInputPattern','Unknown overload.'))
     end
@@ -44,11 +52,15 @@ function h = Scalar(varargin)
         end
         [varargout{1:n}] = usercallback(params{:});
     end
-    
-    if isempty(callback)
-        callback = @internalcallback;
+
+    if isdependent
+        if isempty(callback)
+            callback = @internalcallback;
+        end
+        h_ = dscalar(parent,label,inputs,callback);
+    else
+        h_ = mscalar(parent,label,val);
     end
-    h_ = dscalar(parent,label,inputs,callback);
     
     if nargout == 1; h = h_; end
 end

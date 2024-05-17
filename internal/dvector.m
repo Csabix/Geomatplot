@@ -48,8 +48,8 @@ methods
     end
     function c = mtimes(a,b)
         arguments
-            a   (1,1) {mustBeA(a,["evector","dvector","escalar","dscalar","numeric"])}
-            b   (1,1) {mustBeA(b,["evector","dvector","escalar","dscalar","numeric"])}
+            a   (1,1) {mustBeA(a,["evector","dvector","escalar","scalar_base","numeric"])}
+            b   (1,1) {mustBeA(b,["evector","dvector","escalar","scalar_base","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
         if isa(a,'dvector'); a = evector.fromDrawing(a);
@@ -58,8 +58,8 @@ methods
     end
     function c = mrdivide(a,b)
         arguments
-            a   (1,1) {mustBeA(a,["evector","dvector","escalar","dscalar","numeric"])}
-            b   (1,1) {mustBeA(b,["evector","dvector","escalar","dscalar","numeric"])}
+            a   (1,1) {mustBeA(a,["evector","dvector","escalar","scalar_base","numeric"])}
+            b   (1,1) {mustBeA(b,["evector","dvector","escalar","scalar_base","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
         if isa(a,'dvector'); a = evector.fromDrawing(a);

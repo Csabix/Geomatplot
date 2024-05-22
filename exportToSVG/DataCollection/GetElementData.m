@@ -44,6 +44,7 @@ function elementDataStruct = GetElementData(FieldBuffer, FieldID)
             elementDataStruct.center = FieldBuffer.center.fig.Position;
             elementDataStruct.radius = FieldBuffer.radius.val;
             elementDataStruct.Color = FieldBuffer.fig.Color;
+            elementDataStruct.LineStyle = FieldBuffer.fig.LineStyle;
 
             elementDataStruct.callback = FieldBuffer.callback;
             elementDataStruct.inputs = FieldBuffer.inputs;

@@ -89,10 +89,11 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
     
             radius = plotData.radius * scale;
     
+            style = LineStyleMatcher(plotData.LineStyle, dashedEnabled, dottedEnabled);
             [r,g,b] = GetRGBFromFigColor(plotData.Color);
 
             svgLine = strcat('<circle id="', plotData.label,'" r="', string(radius),'" cx="', string(cx), '" cy="', string(cy));
-            svgLine = strcat(svgLine, '" fill="none" stroke-width="2" stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" />');
+            svgLine = strcat(svgLine, '" fill="none" stroke-width="2" stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" ',style,' />');
        
         case 'dscalar'
 

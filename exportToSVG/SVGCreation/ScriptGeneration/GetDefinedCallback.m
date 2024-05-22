@@ -14,7 +14,7 @@ function retFunc = GetDefinedCallback(name, inputs, ownerLabel)
 
         case 'dragScreen'
             
-            retFunc = "document.addEventListener('contextmenu', event => {event.preventDefault(); console.log(event.which)});\n" + ...
+            retFunc = "document.addEventListener('contextmenu', event => {event.preventDefault();});\n" + ...
                 "let svgCanvas = document.getElementById('canvas');" + ...
                 "let viewPort = document.getElementById('viewport');" + ...
                 "let matrix = new DOMMatrix();\n" + ...
@@ -233,7 +233,7 @@ function retFunc = GetDefinedCallback(name, inputs, ownerLabel)
             retFunc = retFunc + "temp.observe(document.getElementById('"+string(a.label)+"'), config);temp.observe(document.getElementById('"+string(b.label)+"'), config);\n";
 
         otherwise
-            retFunc = "\n";
+            retFunc = "//Unknown callback\n";
     end
 end
 

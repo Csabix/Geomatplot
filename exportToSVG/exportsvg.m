@@ -22,7 +22,7 @@ function exportsvg(g, location, dashedEnabled, dottedEnabled, interactive, scale
     shiftXDefault = 250;
     shiftYDefault = 500;
 
-    if ~exist('location','var') || isempty(location)
+    if ~exist('location','var') || isempty(location) || isequal(location, '')
         location=locationDefault;
     end
 
@@ -51,25 +51,27 @@ function exportsvg(g, location, dashedEnabled, dottedEnabled, interactive, scale
     end
 
     rawData = ExtractUserData(userData);
+    disp(location);
     
-    CorrectLocationName(location);
+    location = CorrectLocationName(location);
     outFile = fopen(location,'w');
 
     xWidth = g.XLim(2) - g.XLim(1);
     yWidth = g.YLim(2) - g.YLim(1);
 
-    minWidth = min([xWidth, yWidth]);
-
-    CreateSVG(outFile, rawData, dashedEnabled, dottedEnabled, interactive,  (scale / minWidth), shiftX, shiftY);
+    maxWidth = max([xWidth, yWidth]);
+    CreateSVG(outFile, rawData, dashedEnabled, dottedEnabled, interactive,  (scale / maxWidth), shiftX, shiftY);
     
     fclose(outFile);
     
 end
 
-function CorrectLocationName(location)
-    if numel(location) <= 3
-        strcat(location, '.svg');
+function loc = CorrectLocationName(location)
+    if isfolder(location)
+        loc = strcat(location, 'export.svg');
+    elseif numel(location) <= 3
+        loc = strcat(location, '.svg');
     elseif ~isequal(location(numel(location)-3:numel(location)), '.svg')
-        strcat(location, '.svg');
+        loc = strcat(location, '.svg');
     end
 end

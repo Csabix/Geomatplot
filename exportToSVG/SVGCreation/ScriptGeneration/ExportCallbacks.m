@@ -11,7 +11,7 @@ for i=1:size(data, 2)
 
     fieldBuffer = data{i};
 
-    if isequal(fieldBuffer.type, 'mpoint')
+    if isequal(fieldBuffer.type, 'mpoint') || isequal(fieldBuffer.type, 'none')
         continue;
     end
 
@@ -28,7 +28,7 @@ for i=1:size(data, 2)
         fprintf(file, temp);
     elseif isequal(fieldBuffer.type, 'dcircle') && isequal(class(fieldBuffer.inputs{2}),'dscalar')
         fprintf(file, GetDefinedCallback("dcircleDefaultCallback", fieldBuffer.inputs, fieldBuffer.label));
-    elseif isequal(class(fieldBuffer), 'mpolygon')
+    elseif isequal(fieldBuffer.type, 'mpolygon')
         fprintf(file, GetDefinedCallback("mpolygon", {}, fieldBuffer.label));
     else
         fprintf(file, GetDefinedCallback(func2str(fieldBuffer.callback), fieldBuffer.inputs, fieldBuffer.label));

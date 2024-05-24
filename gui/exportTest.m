@@ -1,9 +1,6 @@
 clf; % gui/exportTest.m
-A = Point('A',[0.30989 0.42219],[0 0 1],8);
-B = Point('B',[0.327272727272727 0.636898395721925],[0 0 1],8);
-C = Point('C',[0.53369 0.34278],[0 0 1],8);
-D = Point('D',[0.658823529411765 0.575935828877005],[0 0 1],8);
-FFF = Midpoint('FFF',B,D);
-circ1 = Circle('circ1',FFF,C,'-',1);
-circ2 = Circle('circ2',B,D,'-',1);
-[circ3,center1] = Circle('circ3',A,B,FFF,'-',1);
+A = Point('A',[0.11016 0.67968],[0 0 1],8);
+B = Point('B',[0.33155 0.67968],[0 0 1],8);
+C = Point('C',[0.58716577540107 0.448663101604278],[0 0 1],8);
+circ1 = Circle('circ1',A,B,'k-',1);
+perpln1 = PerpendicularLine('perpln1',C,circ1,'k-',1);

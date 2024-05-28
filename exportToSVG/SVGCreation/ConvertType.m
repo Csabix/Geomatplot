@@ -72,7 +72,7 @@ function svgLine = ConvertType(plotData, scale, shiftX, shiftY, dashedEnabled, d
                 j=1;
                 for i=1:(size(xData, 2) - 1)
                     
-                    if ~isnan(xData(i)) && ~isnan(xData(i+1))
+                    if (~isnan(xData(i)) && ~isnan(xData(i+1))) && (~isinf(xData(i)) && ~isinf(xData(i+1)))
                         svgLine = strcat(svgLine, '<line id="',string(j),'" x1="', string(xData(i)), '" y1="', string(yData(i)), '" x2="', string(xData(i+1)), '" y2="', string(yData(i+1)), '"');
                         svgLine = strcat(svgLine, ' stroke="rgb(', string(r), ', ', string(g), ', ', string(b), ')" stroke-width="', string(width),'" ',style,' />');
                         j = j + 1;

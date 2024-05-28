@@ -31,7 +31,6 @@ for i=1:size(data, 2)
     elseif isequal(fieldBuffer.type, 'mpolygon')
         fprintf(file, GetDefinedCallback("mpolygon", {}, fieldBuffer.label));
     else
-        disp(fieldBuffer.type);
         fprintf(file, GetDefinedCallback(func2str(fieldBuffer.callback), fieldBuffer.inputs, fieldBuffer.label));
     end
 

@@ -1,17 +1,11 @@
 function exportsvg(g, location, dashedEnabled, dottedEnabled, interactive, scale, shiftX, shiftY)
-
+    
     userData = get(g, 'UserData');
-    
-    if isempty(get(g, 'UserData'))
-        fig = get(g,'parent');
-        close(fig);
-        error("Error! There are no plots to export! | Hiba! Nincs exportálható adat");
-    end
-    
-    if ~isequal(class(userData), 'Geomatplot')
-        fig = get(g,'parent');
-        close(fig);
-        error("Error! This plot cannot be exported (not made with Geomatplot) | Hiba! Ez a koordinátarendszer nem Geomatplottal lett létrehozva");
+
+    if isempty(userData)
+        error("There are no plots to export! | Nincs exportálható adat");
+    elseif ~isequal(class(userData), 'Geomatplot')
+        error("Data is not type of Geomatplot! | Az adatok nem Geomatplot típusúak");
     end
 
     locationDefault = './export.svg';

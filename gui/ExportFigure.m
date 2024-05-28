@@ -103,9 +103,35 @@ classdef ExportFigure < handle
             if ExportFigure.isCallbackNamed(point,'midpoint_')
                 o.exportMidpoint(point);
             elseif ExportFigure.isCallbackNamed(point,'equidistpoint') %skip
-            elseif ExportFigure.isCallbackNamed(point,'closest') %skip for now!
+            elseif ExportFigure.isCallbackNamed(point,'closest')
+                o.exportClosestPoint(point);
             else
                 throw(MException('ExportFigure:exportdpoint','Unknown type!'));
+            end
+        end
+
+        function exportClosestPoint(o,point)
+            depFields = fieldnames(o.go.deps);
+            isPerpClosestPoint = false;
+            for i = 1:length(depFields)
+                dep = o.go.deps.(depFields{i});
+                if isa(dep,'dlines') && ...
+                   ExportFigure.isCallbackNamed(dep,'@(a,b)a.value+(b.value-a.value).*[-1e8;-1e4;0;1;1e4;1e8]') && ...
+                   isequal(dep.inputs{2},point)
+                   isPerpClosestPoint = true;
+                   break;
+                end
+            end
+            if ~isPerpClosestPoint
+                A = point.inputs{1};
+                B = point.inputs{2};
+                o.checkLabel(A);
+                o.checkLabel(B);
+                fprintf(o.fileID,"%s = ClosestPoint('%s',%s,%s,%s,%s);\n", ...
+                    point.label, point.label, A.label, B.label, ...
+                    mat2str(point.fig.Color), ...
+                    string(point.fig.MarkerSize));
+                o.addLabel(string(point.label));
             end
         end
         
@@ -114,8 +140,10 @@ classdef ExportFigure < handle
             B = mp.inputs{2};
             o.checkLabel(A);
             o.checkLabel(B);
-            fprintf(o.fileID,"%s = Midpoint('%s',%s,%s);\n", ...
-                mp.label, mp.label, A.label, B.label);
+            fprintf(o.fileID,"%s = Midpoint('%s',%s,%s,%s,%s);\n", ...
+                mp.label, mp.label, A.label, B.label, ...
+                mat2str(mp.fig.Color), ...
+                string(mp.fig.MarkerSize));
             o.addLabel(string(mp.label));
         end
     
@@ -142,35 +170,27 @@ classdef ExportFigure < handle
                 o.exportLineWithType(line,"Ray"); 
             elseif ExportFigure.isCallbackNamed(line,'perpendicular_bisector')
                 o.exportLineWithType(line,"PerpendicularBisector"); 
-            elseif ExportFigure.isCallbackNamed(line,'perpline2point')
+            elseif ExportFigure.isCallbackNamed(line,'perpline2point') || ...
+                   ExportFigure.isCallbackNamed(line,'perpline2segment')
                 o.exportLineWithType(line,"PerpendicularLine");
-            elseif ExportFigure.isCallbackNamed(line,'perpline2segment')
-                o.exportPerpLineSegment(line);
+            elseif ExportFigure.isCallbackNamed(line,'angle_bisector3') || ...
+                   ExportFigure.isCallbackNamed(line,'angle_bisector4')
+                o.exportLineWithType(line,"AngleBisector");
             end
         end
 
         function exportLineWithType(o,line,type)
-            A = line.inputs{1};
-            B = line.inputs{2};
-            o.checkLabel(A);
-            o.checkLabel(B);
-            out = "%s = " + type + "('%s',%s,%s,'%s',%s);\n";
+            size = length(line.inputs);
+            labels = strings([1 size]);
+            for i = 1:size
+                input = line.inputs{i};
+                o.checkLabel(input);
+                labels(i) = string(input.label);
+            end
+           
+            out = "%s = " + type + "('%s'," + strjoin(repmat("%s",1,size),',') + ",'%s',%s);\n";
             fprintf(o.fileID,out, ...
-                line.label, line.label, A.label, B.label, ...
-                o.colors({line.fig.Color}) + line.fig.LineStyle, ...
-                string(line.fig.LineWidth));
-            o.addLabel(string(line.label));
-        end
-
-        function exportPerpLineSegment(o,line)
-            A = line.inputs{1};
-            B = line.inputs{2};
-            C = line.inputs{3};
-            o.checkLabel(A);
-            o.checkLabel(B);
-            o.checkLabel(C);
-            fprintf(o.fileID,"%s = PerpendicularLine('%s',%s,%s,%s,'%s',%s);\n", ...
-                line.label, line.label, A.label, B.label, C.label, ...
+                line.label, line.label, labels, ...
                 o.colors({line.fig.Color}) + line.fig.LineStyle, ...
                 string(line.fig.LineWidth));
             o.addLabel(string(line.label));

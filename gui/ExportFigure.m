@@ -48,15 +48,28 @@ classdef ExportFigure < handle
             end
         end
 
+        function [size,labels] = checkInputs(o,object)
+            size = length(object.inputs);
+            labels = strings([1 size]);
+            for i = 1:size
+                input = object.inputs{i};
+                o.checkLabel(input);
+                labels(i) = string(input.label);
+            end
+        end
+
         function addLabel(o,label)
             o.finishedLabels = [o.finishedLabels, label];
         end
 
         function exportDependent(o,dep)
             if isa(dep,'dcircle'); o.exportCircle(dep);
+            elseif isa(dep,'dcurve'); o.exportdcurve(dep);
             elseif isa(dep,'dvector'); o.exportVector(dep);
             elseif isa(dep,'dlines'); o.exportdlines(dep);
             elseif isa(dep,'dpoint'); o.exportdpoint(dep);
+            elseif isa(dep,'dpointseq'); o.exportdpointseq(dep);
+            elseif isa(dep,'dpolygon'); o.exportdpolygon(dep);
             elseif isa(dep,'dscalar') %ignore for now, wait for mscalars
             else
                 throw(MException('ExportFigure:exportDependent','Unknown type!'));
@@ -82,32 +95,59 @@ classdef ExportFigure < handle
                 o.addLabel(string(circle.label));
             else
                 % 3p input
-                circleInputs = center.inputs;
-                for i = 1:3
-                    o.checkLabel(circleInputs{i});
-                end
+                [~,labels] = o.checkInputs(center);
                 fprintf(o.fileID,"[%s,%s] = Circle('%s',%s,%s,%s,'%s',%s);\n", ...
                     circle.label, ...
                     center.label, ...
                     circle.label, ...
-                    circleInputs{1}.label, ...
-                    circleInputs{2}.label, ...
-                    circleInputs{3}.label, ...
+                    labels, ...
                     o.colors({circle.fig.Color}) + circle.fig.LineStyle, ...
                     string(circle.fig.LineWidth));
                 o.addLabel([string(circle.label),string(center.label)]);
             end
         end
         
+        function exportdpointseq(o,pointseq)
+            if ExportFigure.isCallbackNamed(pointseq,'intersect')
+                [size,labels] = o.checkInputs(pointseq);
+                fprintf(o.fileID,"%s = Intersect(" + ExportFigure.genouts(size) + ");\n", ...
+                    pointseq.label, labels);
+                o.addLabel(string(pointseq.label));
+            end
+        end
+
         function exportdpoint(o,point)
             if ExportFigure.isCallbackNamed(point,'midpoint_')
                 o.exportMidpoint(point);
             elseif ExportFigure.isCallbackNamed(point,'equidistpoint') %skip
+            elseif ExportFigure.isCallbackNamed(point,'@(x)x.value(i)') % skip
             elseif ExportFigure.isCallbackNamed(point,'closest')
                 o.exportClosestPoint(point);
             else
                 throw(MException('ExportFigure:exportdpoint','Unknown type!'));
             end
+        end
+
+        function exportdcurve(o,curve)
+            if ExportFigure.isCallbackNamed(curve,'circ_arc') %TODO
+            else
+                [size,labels] = o.checkInputs(curve);
+                callback = functions(functions(curve.callback).workspace{1}.usercallback).function;
+                fprintf(o.fileID,"%s = Curve('%s'," + ExportFigure.genouts(size) + ",%s,'%s',%s);\n", ...
+                    curve.label, curve.label, labels, callback, ...
+                    o.colors({curve.fig.Color}) + curve.fig.LineStyle, ...
+                    string(curve.fig.LineWidth));
+                o.addLabel(string(curve.label));
+            end
+        end
+
+        function exportdpolygon(o,poly)
+            [size,labels] = o.checkInputs(poly);
+            fprintf(o.fileID,"%s = Polygon('%s'," + ExportFigure.genouts(size) + ",'%s',%s);\n", ...
+                poly.label, poly.label, labels, ...
+                o.colors({poly.fig.FaceColor}) + poly.fig.LineStyle, ...
+                string(poly.fig.LineWidth));
+            o.addLabel(string(poly.label));
         end
 
         function exportClosestPoint(o,point)
@@ -123,12 +163,9 @@ classdef ExportFigure < handle
                 end
             end
             if ~isPerpClosestPoint
-                A = point.inputs{1};
-                B = point.inputs{2};
-                o.checkLabel(A);
-                o.checkLabel(B);
-                fprintf(o.fileID,"%s = ClosestPoint('%s',%s,%s,%s,%s);\n", ...
-                    point.label, point.label, A.label, B.label, ...
+                [size,labels] = o.checkInputs(point);
+                fprintf(o.fileID,"%s = ClosestPoint('%s',"+ ExportFigure.genouts(size) + ",%s,%s);\n", ...
+                    point.label, point.label, labels, ...
                     mat2str(point.fig.Color), ...
                     string(point.fig.MarkerSize));
                 o.addLabel(string(point.label));
@@ -136,24 +173,18 @@ classdef ExportFigure < handle
         end
         
         function exportMidpoint(o,mp)
-            A = mp.inputs{1};
-            B = mp.inputs{2};
-            o.checkLabel(A);
-            o.checkLabel(B);
-            fprintf(o.fileID,"%s = Midpoint('%s',%s,%s,%s,%s);\n", ...
-                mp.label, mp.label, A.label, B.label, ...
+            [size,labels] = o.checkInputs(mp);
+            fprintf(o.fileID,"%s = Midpoint('%s'," + ExportFigure.genouts(size) +",%s,%s);\n", ...
+                mp.label, mp.label, labels, ...
                 mat2str(mp.fig.Color), ...
                 string(mp.fig.MarkerSize));
             o.addLabel(string(mp.label));
         end
     
         function exportVector(o,vector)
-            A = vector.inputs{1};
-            B = vector.inputs{2};
-            o.checkLabel(A);
-            o.checkLabel(B);
-            fprintf(o.fileID,"%s = Vector('%s',%s,%s);\n", ...
-                vector.label, vector.label, A.label, B.label);
+            [size,labels] = o.checkInputs(vector);
+            fprintf(o.fileID,"%s = Vector('%s'," + ExportFigure.genouts(size) + ");\n", ...
+                vector.label, vector.label, labels);
             o.addLabel(string(vector.label));
         end
 
@@ -176,24 +207,34 @@ classdef ExportFigure < handle
             elseif ExportFigure.isCallbackNamed(line,'angle_bisector3') || ...
                    ExportFigure.isCallbackNamed(line,'angle_bisector4')
                 o.exportLineWithType(line,"AngleBisector");
+            elseif ExportFigure.isCallbackNamed(line,'segmentseq_concat')
+                o.exportSegmentSequence(line);
             end
         end
 
         function exportLineWithType(o,line,type)
-            size = length(line.inputs);
-            labels = strings([1 size]);
-            for i = 1:size
-                input = line.inputs{i};
-                o.checkLabel(input);
-                labels(i) = string(input.label);
-            end
-           
-            out = "%s = " + type + "('%s'," + strjoin(repmat("%s",1,size),',') + ",'%s',%s);\n";
+            [size,labels] = o.checkInputs(line);
+            out = "%s = " + type + "('%s'," + ExportFigure.genouts(size) + ",'%s',%s);\n";
             fprintf(o.fileID,out, ...
                 line.label, line.label, labels, ...
                 o.colors({line.fig.Color}) + line.fig.LineStyle, ...
                 string(line.fig.LineWidth));
             o.addLabel(string(line.label));
+        end
+
+        function exportSegmentSequence(o,seq)
+            [size,labels] = o.checkInputs(seq);
+            breakEvery = 0;
+            if size > 2 && isnan(seq.fig.XData(3))
+                breakEvery = 2;
+            elseif size > 3 && isnan(seq.fig.XData(4))
+                breakEvery = 3;
+            end
+            fprintf(o.fileID,"%s = SegmentSequence('%s'," + ExportFigure.genouts(size) + ",%s,'%s',%s);\n", ...
+                seq.label, seq.label, labels, ...
+                string(breakEvery), o.colors({seq.fig.Color}) + seq.fig.LineStyle, ...
+                string(seq.fig.LineWidth));
+            o.addLabel(string(seq.label));
         end
 
         function exportPerpLinePD(o,line)
@@ -216,6 +257,10 @@ classdef ExportFigure < handle
 
         function ret = checkPossiblePerpLine(line)
             ret = isa(line.inputs{2},'dpoint') && ExportFigure.isCallbackNamed(line.inputs{2},'closest');
+        end
+
+        function expStr = genouts(size)
+            expStr = strjoin(repmat("%s",1,size),',');
         end
     end % static private
 end

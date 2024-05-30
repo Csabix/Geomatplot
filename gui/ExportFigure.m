@@ -82,17 +82,31 @@ classdef ExportFigure < handle
             if isa(center,'mpoint') || ...
                (isa(center,'dpoint') && center.inputs{1}~=radius.inputs{2})
                 %2p input
-                radPoint = radius.inputs{2};
-                o.checkLabel(center);
-                o.checkLabel(radPoint);
-                fprintf(o.fileID,"%s = Circle('%s',%s,%s,'%s',%s);\n", ...
-                    circle.label, ...
-                    circle.label, ...
-                    center.label, ...
-                    radPoint.label, ...
-                    o.colors({circle.fig.Color}) + circle.fig.LineStyle, ...
-                    string(circle.fig.LineWidth));
-                o.addLabel(string(circle.label));
+                origCircle = [];
+                if isa(center,'dpoint')
+                    depFields = fieldnames(o.go.deps);
+                    for i = 1:length(depFields)
+                        dep = o.go.deps.(depFields{i});
+                        if isa(dep,'dcircle') && isequal(dep.center,center.inputs{1})
+                           origCircle = dep;
+                           break;
+                        end
+                    end
+                end
+                if isempty(origCircle)
+                    radPoint = radius.inputs{2};
+                    o.checkLabel(center);
+                    o.checkLabel(radPoint);
+                    fprintf(o.fileID,"%s = Circle('%s',%s,%s,'%s',%s);\n", ...
+                        circle.label, ...
+                        circle.label, ...
+                        center.label, ...
+                        radPoint.label, ...
+                        o.colors({circle.fig.Color}) + circle.fig.LineStyle, ...
+                        string(circle.fig.LineWidth));
+                    o.addLabel(string(circle.label));
+                else; o.exportMirrorCircle(circle,origCircle);
+                end
             else
                 % 3p input
                 [~,labels] = o.checkInputs(center);
@@ -121,6 +135,8 @@ classdef ExportFigure < handle
                 o.exportMidpoint(point);
             elseif ExportFigure.isCallbackNamed(point,'equidistpoint') %skip
             elseif ExportFigure.isCallbackNamed(point,'@(x)x.value(i)') % skip
+            elseif ExportFigure.isCallbackNamed(point,'mirror_point2')
+                o.exportMirrorPoint(point);
             elseif ExportFigure.isCallbackNamed(point,'closest')
                 o.exportClosestPoint(point);
             else
@@ -128,8 +144,65 @@ classdef ExportFigure < handle
             end
         end
 
+        function exportMirrorPoint(o,point)
+            depFields = fieldnames(o.go.deps);
+            foundCircle = false;
+            for i = 1:length(depFields)
+                dep = o.go.deps.(depFields{i});
+                if isa(dep,'dcircle') && isequal(dep.center,point.inputs{1})
+                   foundCircle = true;
+                   break;
+                end
+            end
+            if ~foundCircle
+                [size,labels] = o.checkInputs(point);
+                fprintf(o.fileID,"%s = Mirror('%s'," + ExportFigure.genouts(size) + ",%s,%s);\n", ...
+                    point.label, point.label, labels, ...
+                    mat2str(point.fig.Color), ...
+                    string(point.fig.MarkerSize));
+                o.addLabel(string(point.label));
+            end
+        end
+
+        function exportMirrorCircle(o,circle,original)
+            center = circle.center;
+            o.checkLabel(original);
+            size = length(center.inputs(2:end));
+            labels = strings([1 size]);
+            for i = 1:length(center.inputs)-1
+                input = center.inputs{i+1};
+                o.checkLabel(input);
+                labels(i) = string(input.label);
+            end
+            fprintf(o.fileID,"%s = Mirror('%s',%s," + ExportFigure.genouts(size) + ",'%s',%s);\n", ...
+                circle.label, circle.label, original.label, labels, ...
+                o.colors({circle.fig.Color}) + circle.fig.LineStyle, ...
+                string(circle.fig.LineWidth));
+            o.addLabel(string(circle.label));
+        end
+
+        function exportMirrorLines(o,line)
+            [size,labels] = o.checkInputs(line);
+            fprintf(o.fileID,"%s = Mirror('%s'," + ExportFigure.genouts(size) + ",'%s',%s);\n", ...
+                line.label, line.label, labels, ...
+                o.colors({line.fig.Color}) + line.fig.LineStyle, ...
+                string(line.fig.LineWidth));
+            o.addLabel(string(line.label));
+        end
+
         function exportdcurve(o,curve)
-            if ExportFigure.isCallbackNamed(curve,'circ_arc') %TODO
+            if ExportFigure.isCallbackNamed(curve,'circ_arc')
+                A = curve.inputs{1};
+                B = curve.inputs{2}.inputs{2};
+                if ExportFigure.isCallbackNamed(curve.inputs{4},'angle_between')
+                    C = curve.inputs{4}.inputs{3};
+                else; C = curve.inputs{4}; 
+                end
+                fprintf(o.fileID,"%s = CircularArc('%s',%s,%s,%s,'%s',%s);\n", ...
+                    curve.label, curve.label, A.label, B.label, C.label, ...
+                    o.colors({curve.fig.Color}) + curve.fig.LineStyle, ...
+                    string(curve.fig.LineWidth));
+                o.addLabel(string(curve.label));
             else
                 [size,labels] = o.checkInputs(curve);
                 callback = functions(functions(curve.callback).workspace{1}.usercallback).function;
@@ -209,6 +282,8 @@ classdef ExportFigure < handle
                 o.exportLineWithType(line,"AngleBisector");
             elseif ExportFigure.isCallbackNamed(line,'segmentseq_concat')
                 o.exportSegmentSequence(line);
+            elseif ExportFigure.isCallbackNamed(line,'mirror_point')
+                o.exportMirrorLines(line);
             end
         end
 

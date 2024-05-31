@@ -9,7 +9,6 @@ methods
         args = namedargs2cell(args);
         fig = drawPoint("Movable",false,"Position",[0,0],args{:});
         o = o@dependent(parent,label,fig,inputs,callback,hidden);
-        o.labelfig.Visible = false;
     end
     function v = value(o)
         v = o.fig.Position;
@@ -23,7 +22,7 @@ methods
     end
     function update(o,~)
         update@dependent(o);
-        o.labelfig.Position = o.fig.Position;
+        %o.labelfig.Position = o.fig.Position;
     end
 end
 methods (Static)

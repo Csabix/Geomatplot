@@ -10,6 +10,7 @@ classdef Plot < handle
     properties (Access=private)
         FrameH
         CanvasH
+        figs
     end
     
     methods
@@ -18,28 +19,48 @@ classdef Plot < handle
             obj.JClickInput = obj.JPlot.clickInputQuery;
             obj.FrameH = handle(obj.JPlot.frame,'CallbackProperties');
             obj.CanvasH = handle(obj.JPlot.canvas,'CallbackProperties');
+            obj.figs = {};
         end
 
         function setFrameCallback(obj,name,fcn)
-            set(obj.FrameH, name,fcn);
+            set(obj.FrameH, name, fcn);
         end
 
         function setCanvasCallback(obj,name,fcn)
-            set(obj.CanvasH, name,fcn);
+            set(obj.CanvasH, name, fcn);
         end
 
         function addDrawable(obj,drawable)
-            obj.JPlot.addDrawable(drawable);
+            if ~isempty(drawable)
+                addDrawable(obj.JPlot,drawable);
+            end
+        end
+
+        function addDrawables(obj,drawable)
+            if ~isempty(drawable)
+                addDrawables(obj.JPlot,drawable);
+            end
         end
 
         function updateDrawable(obj,drawable)
-            
-            obj.JPlot.updateDrawable(drawable);
+            updateDrawable(obj.JPlot,drawable);
+        end
+
+        function updateDrawables(obj,drawable)
+            if ~isempty(drawable)
+                updateDrawables(obj.JPlot,drawable);
+            end
         end
 
         function removeDrawable(obj,drawables)
             for i = 1:numel(drawables)
-                obj.JPlot.removeDrawable(drawables(i));
+                removeDrawable(obj.JPlot,drawables(i));
+            end
+        end
+
+        function removeDrawables(obj,drawables)
+            if ~isempty(drawables)
+                removeDrawables(obj.JPlot,drawables);
             end
         end
 
@@ -61,6 +82,16 @@ classdef Plot < handle
 
             p = obj.JClickInput.xy;
             p = p';
+        end
+
+        function addFig(obj,fig)
+            obj.figs{end+1} = fig;
+        end
+
+        function delete(obj)
+            for x = obj.figs
+                delete(x{1});
+            end
         end
     end
 end

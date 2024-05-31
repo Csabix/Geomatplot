@@ -5,7 +5,8 @@ function plt = cplt(createIfEmpty)
     global globalPlt;
     if isempty(globalPlt) && createIfEmpty
         globalPlt = Plot;
-        globalPlt.setFrameCallback('WindowClosedCallback',@(~,~)clearcplt(globalPlt));
+        setFrameCallback(globalPlt,'WindowClosedCallback',@(~,~)clearcplt(globalPlt));
+        %globalPlt.setFrameCallback('WindowClosedCallback',@(~,~)clearcplt(globalPlt));
     end
     plt = globalPlt;
 end

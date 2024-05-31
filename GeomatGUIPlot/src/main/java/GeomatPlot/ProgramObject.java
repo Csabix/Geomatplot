@@ -1,0 +1,103 @@
+package GeomatPlot;
+
+import com.jogamp.opengl.GL4;
+import com.jogamp.opengl.util.GLBuffers;
+
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.jogamp.opengl.GL.GL_FALSE;
+import static com.jogamp.opengl.GL2ES2.*;
+
+public class ProgramObject {
+    public int ID;
+    protected Map<String,Integer> uniformLocations;
+
+    public void use(GL4 gl){
+        gl.glUseProgram(ID);
+    }
+    public void unuse(GL4 gl){
+        gl.glUseProgram(0);
+    }
+    public void delete(GL4 gl){
+        gl.glDeleteProgram(ID);
+        ID = 0;
+    }
+    public Integer getUniformLocation(GL4 gl, String uniform){
+        Integer location = uniformLocations.get(uniform);
+        if(location == null){
+            location = gl.glGetUniformLocation(ID,uniform);
+            uniformLocations.put(uniform,location);
+        }
+        return location;
+    }
+    protected static class ShaderStage {
+        final int stage;
+        final String path;
+        final boolean inner;
+
+        public ShaderStage(int stage, String path, boolean inner){
+            this.stage = stage;
+            this.path = path;
+            this.inner = inner;
+        }
+
+        public ShaderStage(int stage, String path){
+            this(stage, path, true);
+        }
+    }
+    protected ProgramObject(GL4 gl, List<ShaderStage> stageInfos) {
+        ID = gl.glCreateProgram();
+        uniformLocations = new HashMap<>();
+        // Load each shader stage
+        int[] stages = new int[stageInfos.size()];
+        for (int i = 0; i < stageInfos.size(); i++) {
+            stages[i] = gl.glCreateShader(stageInfos.get(i).stage);
+            if (stageInfos.get(i).inner) {
+                try (InputStream in = getClass().getResourceAsStream(stageInfos.get(i).path)){
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    String[] lines = {reader.lines().collect(Collectors.joining("\n"))};
+                    IntBuffer length = GLBuffers.newDirectIntBuffer(new int[]{lines[0].length()});
+                    gl.glShaderSource(stages[i],1, lines,length);
+                } catch (Exception e) {
+                    System.out.println("Failed to read file");
+                }
+            } else {
+                try (InputStream in = Files.newInputStream(new File(stageInfos.get(i).path).toPath())){
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    String[] lines = {reader.lines().collect(Collectors.joining("\n"))};
+                    IntBuffer length = GLBuffers.newDirectIntBuffer(new int[]{lines[0].length()});
+                    gl.glShaderSource(stages[i],1, lines,length);
+                } catch (Exception e) {
+                    System.out.println("Failed to read file");
+                }
+            }
+
+            gl.glCompileShader(stages[i]);
+            gl.glAttachShader(ID,stages[i]);
+        }
+        // Link program
+        gl.glLinkProgram(ID);
+        // Check for errors
+        int[] result = new int[1];
+        int[] logLen = new int[1];
+        gl.glGetProgramiv(ID,GL_LINK_STATUS,result,0);
+        gl.glGetProgramiv(ID,GL_INFO_LOG_LENGTH,logLen,0);
+        if(result[0] == GL_FALSE && logLen[0] != 0) {
+            ByteBuffer byteBuffer = ByteBuffer.allocate(logLen[0]);
+            gl.glGetProgramInfoLog(ID,logLen[0],null,byteBuffer);
+            byteBuffer.rewind();
+            for (int i = 0; i < logLen[0]-1; i++) {
+                System.out.print((char)byteBuffer.get());
+            }
+        }
+        // We can delete them
+        for (int stage : stages) gl.glDeleteShader(stage);
+    }
+}

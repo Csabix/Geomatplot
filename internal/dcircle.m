@@ -10,15 +10,15 @@ methods
         o.radius = radius;
         o.center = center;
         radius.labelfig.Visible = false;
-        o.labelfig.Position = o.center.value;
+        %o.labelfig.Position = o.center.value;
         o.labelfig.Offset = [0,40];
     end
 
     function update(o,~)
         update@dcurve(o);
-        if ~isempty(o.center)
-            o.labelfig.Position = o.center.value;
-        end
+        %if ~isempty(o.center)
+        %    o.labelfig.Position = o.center.value;
+        %end
     end
 
     function s = string(o)

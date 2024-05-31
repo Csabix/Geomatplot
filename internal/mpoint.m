@@ -5,6 +5,7 @@ methods
         h = drawPoint(args{:});
         o = o@moveable(parent,label,h,@mpoint.update);
         o.labelfig.Position = o.fig.Position;
+        o.labelfig.Visible = true;
     end
     function v = value(o)
         v = o.fig.Position;

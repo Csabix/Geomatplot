@@ -1,5 +1,5 @@
 function h = Text(varargin)
-
+    throw(MException('Text:support','Text is not supported'));
 %% usage
 % pos = Point([0,1]);  or   pos = [0 1]; or pos = {'A'};
 %

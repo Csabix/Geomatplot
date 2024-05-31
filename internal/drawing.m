@@ -14,7 +14,7 @@ methods
         o.parent = parent;
         o.label = label;
         o.fig = fig;
-        o.labelfig = labelH(parent.ax, label);
+        o.labelfig = drawLabel(label, parent.ax, "Visible", false);
         o.fig.UserData = o;
     end
     function s = string(o,r)

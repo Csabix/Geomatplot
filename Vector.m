@@ -1,4 +1,5 @@
 function h = Vector(varargin)
+    throw(MException('Vector:support','Vector is not supported'));
     [parent,varargin] = Geomatplot.extractGeomatplot(varargin);
     [label, varargin] = parent.extractLabel(varargin,'vec');
     [inputs,varargin] = parent.extractInputs(varargin,2,2);

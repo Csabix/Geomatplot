@@ -1,0 +1,86 @@
+package GeomatPlot.Draw;
+
+public class gLine extends Drawable {
+    public static final int VERTEX_SIZE = 8;
+    public static final int VERTEX_BYTE = VERTEX_SIZE * Float.BYTES;
+    public float[] x;
+    public float[] y;
+    public float[][] primaryColor; // rgb
+    public float[] width;
+    public boolean dashed;
+    public gLine(float[] x, float[] y, float[][] primaryColor, float[] width, boolean dashed) {
+        super(false);
+        this.x = x;
+        this.y = y;
+        this.primaryColor = primaryColor;
+        this.width = width;
+        this.dashed = dashed;
+    }
+
+    public gLine(float[][] primaryColor, float[] width, boolean movable) {
+        super(movable);
+        this.primaryColor = primaryColor;
+        this.width = width;
+        this.dashed = false;
+    }
+
+    @Override
+    public float[] pack() {
+        lastSize = bytes();
+        float[] data = new float[elementCount()];
+
+        data[4] = x[0] + x[0] - x[1];
+        data[5] = y[0] + y[0] - y[1];
+        data[data.length - 4] = x[x.length - 1] + x[x.length - 1] - x[x.length - 2];
+        data[data.length - 3] = y[y.length - 1] + y[y.length - 1] - y[y.length - 2];
+
+        int colorDiv = primaryColor.length;
+        int widthDiv = width.length;
+        float distTotal = 0;
+        for (int i = 1; i < x.length + 1; i++) {
+            int ind = i - 1;
+            data[i * VERTEX_SIZE    ] = primaryColor[ind % colorDiv][0];
+            data[i * VERTEX_SIZE + 1] = primaryColor[ind % colorDiv][1];
+            data[i * VERTEX_SIZE + 2] = primaryColor[ind % colorDiv][2];
+            data[i * VERTEX_SIZE + 3] = width[i % widthDiv];
+
+            data[i * VERTEX_SIZE + 4] = x[ind];
+            data[i * VERTEX_SIZE + 5] = y[ind];
+
+            data[i * VERTEX_SIZE + 6] = dashed?distTotal:Float.NaN;
+            //data[i * VERTEX_SIZE + 7] = ... ;
+
+            /*long l = dashed?Double.doubleToRawLongBits(distTotal):Double.doubleToRawLongBits(Double.NaN);
+            int a = (int) l;
+            int b = (int) (l >> 32);
+
+            float f1 = Float.intBitsToFloat(a);
+            float f2 = Float.intBitsToFloat(b);
+
+            data[i * VERTEX_SIZE + 6] = f1;
+            data[i * VERTEX_SIZE + 7] = f2;*/
+
+            if(ind < x.length - 1) {
+                double dX = (double)x[ind] - (double)x[ind + 1];
+                double dY = (double)y[ind] - (double)y[ind + 1];
+                distTotal += (float)Math.sqrt(dX * dX + dY * dY);
+            }
+        }
+        return data;
+    }
+
+    @Override
+    public int elementCount() {
+        return VERTEX_SIZE * (x.length + 2);
+    }
+
+    @Override
+    public int bytes() {
+        return VERTEX_BYTE * (x.length + 2);
+    }
+
+    @Override
+    public DrawableType getType() {
+        return DrawableType.Line;
+    }
+}

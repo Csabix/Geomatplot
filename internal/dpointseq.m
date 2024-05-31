@@ -6,7 +6,7 @@ methods
         %args = namedargs2cell(rmfield(s,{'MarkerSize','MarkerColor','MarkerSymbol'}));
         %fig = scatter(parent.ax,0,0,sz,c,mkr,args{:});
         args = namedargs2cell(s);
-        fig = Scatter(args{:});
+        fig = drawScatter(args{:});
         o = o@dpointlineseq(parent,label,fig,labels,callback,hidden);
     end
     function v = value(o,i)

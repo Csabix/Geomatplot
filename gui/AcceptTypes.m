@@ -16,7 +16,7 @@ classdef AcceptTypes
             end
         end
         
-        function accepted = acceptSelect(data)
+        function accepted = acceptMove(data)
             accepted = (numel(data) == 1);          
         end
         

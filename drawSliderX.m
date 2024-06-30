@@ -1,10 +1,11 @@
-function [val,Pt,txt] = drawSliderX(label, range, startPos, slideLen)
+function [val,Pt,txt] = drawSliderX(label, range, startPos, slideLen,startval)
 
 arguments
     label    (1,:) char
-    range    (1,2) double = [0,1];
-    startPos (1,2) double = [0 0];
-    slideLen (1,1) double = 1;
+    range    (1,2) double = [0,1]
+    startPos (1,2) double = [0 0]
+    slideLen (1,1) double = 1
+    startval (1,1) double = range(1)
 end
 
 Segment(...
@@ -12,7 +13,7 @@ Segment(...
     Point("Bend"+label,@() startPos+[slideLen,0],'LabelV','off')...
     );
 
-Pt = Point(label,startPos,'LabelV','off');
+Pt = Point(label,startPos + [startval/diff(range) + range(1), 0],'LabelV','off');
 function v = slidercallb(dp)
     v = min(startPos(1)+slideLen,max(startPos(1),dp(1)));
     Pt.fig.Position = [v startPos(2)];

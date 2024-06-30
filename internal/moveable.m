@@ -14,8 +14,9 @@ methods
         o.parent.movs.(label) = o;
         o.fig.UserData = o;
         o.deps = struct;
-        addlistener(o.fig,'ROIMoved' ,@moveable.update); % todo @update ?
-        addlistener(o.fig,'MovingROI',@moveable.update);
+        addlistener(o.fig,'ROIMoved'  ,@moveable.update); % todo @update ?
+        addlistener(o.fig,'MovingROI' ,@moveable.update);
+        addlistener(o.fig,'ROIClicked',@moveable.hit);
     end
     function addCallback(o,dep)
         o.deps.(dep.label) = dep;
@@ -23,6 +24,10 @@ methods
     end
 end
 methods (Static)
+    function hit(fig,~)
+        o = fig.UserData;
+        o.parent.pushData(o);
+    end
     function update(fig,evt)
         t_total_stamp = tic;
         o = fig.UserData;

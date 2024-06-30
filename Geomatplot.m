@@ -3,6 +3,10 @@ properties
 	ax (1,1) %matlab.ui.Axes;
 	movs % struct mapping label -> movable class handles
 	deps % struct mapping label -> dependent class handles 
+    clickData % contains the clicked objects
+    acceptFcn % accept function callback
+    drawFcn % draw function callback
+    errorFcn % error function callback
 end
 properties (Hidden)
     nextCapitalLabel (1,1) int32  = 0;      % 65 = 'A' = 'Z'-25
@@ -24,14 +28,20 @@ methods (Access = public)
             else
                 o.ax = ax.Children(1);
             end
-        elseif isa(ax,'matlab.ui.Axes')
+        elseif isa(ax,'matlab.graphics.axis.Axes')
             o.ax = ax;
         end
         if isempty(o.ax.UserData)
-            axis(o.ax,'equal'); axis(o.ax,'manual');
+            if isa(o.ax, 'matlab.ui.control.UIAxes')
+                pbaspect(o.ax, [1 1 1]);
+                o.ax.XLimMode = 'manual';
+                o.ax.YLimMode = 'manual';
+            else; axis(o.ax,'equal'); axis(o.ax,'manual'); 
+            end
             o.ax.Interactions = [panInteraction zoomInteraction]; % disableDefaultInteractivity(o.ax);
             o.movs = struct; o.deps = struct;
             o.ax.UserData = o;
+            addlistener(o.ax,'Hit',@o.emptySpace);
         else % workaround hack for matlab wtf
             assert(isa(o.ax.UserData,'Geomatplot'));
             o = o.ax.UserData;
@@ -57,6 +67,29 @@ methods (Access = public)
         b = isfield(o.movs,l) || isfield(o.deps,l);
     end
 
+    function addHandlerFcns(o,acceptFcn,drawFcn,errorFcn)
+        o.acceptFcn = acceptFcn;
+        o.drawFcn = drawFcn;
+        o.errorFcn = errorFcn;
+        o.clickData = [];
+    end
+
+    function pushData(o,value)
+        if isempty(o.acceptFcn); return; end
+        o.clickData = [o.clickData, {value}];
+        o.checkData();
+    end
+
+    function checkData(o)
+        switch o.acceptFcn(o.clickData)
+            case 1 %Accept state
+                o.drawFcn(o,o.clickData);
+                o.clickData = [];
+            case -1 %Error state
+                o.errorFcn(o,o.clickData);
+                o.clickData = [];
+        end
+    end
 end % public
 
 methods(Access = public, Static)
@@ -262,6 +295,11 @@ methods (Access = public, Hidden)
 end % public hidden
 
 methods (Access = protected)
+    function emptySpace(o,~,evt)
+            raw.x = evt.IntersectionPoint(1);
+            raw.y = evt.IntersectionPoint(2);
+            o.pushData(raw);
+    end
     function head = getHeader(o,mnum,dnum)
         if nargin == 1
             mnum = length(fieldnames(o.movs));
@@ -313,7 +351,7 @@ methods (Static, Access = public, Hidden)
             if isempty(parent.Children)
                 parent = axes(parent);
             else
-                parent = parent.Chilren(1);
+                parent = parent.Children(1);
             end
         end
         if isa(parent,'matlab.graphics.axis.Axes')
@@ -328,8 +366,13 @@ methods (Static, Access = public, Hidden)
         else
             parent = [];
         end
-        parent = Geomatplot.findCurrentGeomatplot(parent);
-        if isempty(parent); parent = Geomatplot; end
+        current = Geomatplot.findCurrentGeomatplot(parent);
+        if isempty(current)
+            if isempty(parent); parent = Geomatplot;
+            else; parent = Geomatplot(parent); end
+        else
+            parent = current;
+        end
         if ~isa(parent,'Geomatplot')
             eidType = 'extractGeomatplot:noGeomatplot';
             msgType = 'Geomatplot not found, probably wrong argument.';

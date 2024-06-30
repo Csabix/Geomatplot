@@ -10,8 +10,10 @@ methods
             o.pt = pt;
             parent.ax.NextPlot ='add';
             args = namedargs2cell(args);
-            o.fig = quiver(0,0,0,0,1.,args{:});
+            o.fig = quiver(parent.ax,0,0,0,0,1.,args{:});
             o.update;
+            o.fig.UserData = o;
+            addlistener(o.fig,'Hit',@dvector.hit);
             if ~isempty(o.exception); rethrow(o.exception); end
         end
     end
@@ -65,6 +67,12 @@ methods
         if isa(a,'dvector'); a = evector.fromDrawing(a);
         elseif isa(b,'dvector'); b = evector.fromDrawing(b); end
         c = a / b;
+    end
+end
+methods(Static,Hidden)
+    function hit(fig,~)
+        o = fig.UserData;
+        o.parent.pushData(o);
     end
 end
 end

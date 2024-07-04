@@ -1,6 +1,6 @@
 # Geomatplot
 
-Geomatplot is a Matlab interactive plot library similar to Geogebra.
+Geomatplot is a Matlab interactive plot library similar to Geogebra. We showcased the library at the CAD'24 conference, see in [Citation](#citation).
 
 ## Main features
 
@@ -166,6 +166,24 @@ The `examples/bez.m` produces the following:
 1. Common geometry should be easy to define
 2. Responsive interaction, fast callbacks
 3. User callbacks for advanced programmable applets
+
+## Citation
+
+We showcased the library at CAD'24, see the paper at the [proceedings website](http://cad-conference.net/files/CAD24/CAD24_222-226.pdf). If you use Geomatplot for research, please cite this paper. See the BibTeX entry below. 
+
+```
+@inproceedings{balint_geomatplot_2024,
+   author =     {Bálint, Csaba and Bán, Róbert},
+   title =      {Geomatplot: Interactive Geometric Plotting Library},
+   date =       {2024-05-09}
+   url =        {http://cad-conference.net/files/CAD24/CAD24-eger.html},
+   doi =        {10.14733/cadconfP.2024.222-226},
+   shorttitle = {Geomatplot},
+   eventtitle = {{CAD}'24},
+   booktitle =  {{CAD}'24},
+   publisher =  {U-turn Press {LLC}},
+}
+```
 
 ## Credits
 

@@ -25,7 +25,7 @@ methods
     function c = mtimes(a,b)
         arguments
             a   (1,1) {mustBeA(a,["evector","dvector","escalar","dscalar","numeric"])}
-            b   (1,1) {mustBeA(b,["evector","dvector","escalar","dscalar","numeric"])}
+            b   (:,:) {mustBeA(b,["evector","dvector","escalar","dscalar","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
         a_is_vector = isa(a,'dvector')||isa(a,'evector');

@@ -24,6 +24,16 @@ D = Intersect(parln1,parln2);
 line5 = Line(D,G,'m');
 E = Intersect(line5,line2);
 Circle(E,line1,'r')
+%%
+clf;
+A = Point('A',[0.23741 0.44244],[0 0 1],8);
+B = Point('B',[0.75425 0.35971],[0 0 1],8);
+d = Eval(Distance(A,B)*0.5);
+h = drawSliderX('h',[0,1],0,1,.5);
+r = Eval((d*d+h*h)/h*0.5);
+n = Eval((B-A)/d*.5*[0 1;-1 0]);
+O = Eval(Midpoint(A,B)-n*(r-h));
+Circle(O,r)
 
 %%
 clf;
@@ -36,31 +46,41 @@ Cp = Point('Cp',[0.48279 0.70187],[0 0 1],8);
 [circ1,~,r1] = Circle('circ1',A,Ap,'g-',2);
 [circ2,~,r2] = Circle('circ2',B,Bp,'g-',2);
 [circ3,~,r3] = Circle('circ3',C,Cp,'g-',2);
-P = Point('p',A,r1,B,r2,C,r3,@apollonius);
+
+CD = CustomValue(A,r1,B,r2,C,r3,@apolloniuses);
+for i = 1:8
+    O = Point("O"+string(i),CD,@(cd) cd.center(i,:));
+    r = Scalar("r"+string(i),CD,@(cd) cd.radius(i));
+    Circle("acirc"+string(i),O,r,'m--',1);
+end
+
+function o = apolloniuses(o1,r1,o2,r2,o3,r3)
+    signs = [+1 +1 +1; +1 +1 -1; +1 -1 +1; -1 +1 +1; +1 -1 -1; -1 +1 -1; -1 -1 +1; -1 -1 -1];
+    o = struct('center',[],'radius',[]);
+    for i = 1:8
+        p = apollonius(o1,r1*signs(i,1),o2,r2*signs(i,2),o3,r3*signs(i,3));
+        o.center = [o.center; p.center];
+        o.radius = [o.radius; p.radius];
+    end
+end
 
 function o = apollonius(o1,r1,o2,r2,o3,r3)
-    x1 = o1(1); y1 = o1(2);
-    x2 = o2(1); y2 = o2(2);
-    x3 = o3(1); y3 = o3(2);
-    a2 = 2*(x1-x2);
-    b2 = 2*(y1-y2);
-    c2 = 2*(r1+r2);
-    d2 = (x1*x1+y1*y1-r1*r1)-(x2*x2+y2*y2-r2*r2);
-    a3 = 2*(x1-x3);
-    b3 = 2*(y1-y3);
-    c3 = 2*(r1+r3);
-    d3 = (x1*x1+y1*y1-r1*r1)-(x3*x3+y3*y3-r3*r3);
-    mul = 1/(a2*b3-b2*a3);
-    xc = (b3*d2-b2*d3)*mul;
-    yc = (a3*d2-a2*d3)*mul;
-    xr = (b2*c3-b3*c2)*mul;
-    yr = (a3*c2-a2*c3)*mul;
-    A = xr*xr + yr*yr - 1;  %r^2
-    B = 2*(xr*xc + yr*yc - r1 - x1*xr - y1*yr); %r
-    C = xc*xc+yc*yc + 2*x1*xc + 2*y1*yc + x1*x1+y1*y1-r1*r1;%const
-    sols = roots([A B C]);
-    r = sols(2);
-    x = xc + xr*r;
-    y = yc + yr*r;
-    o=[x y];
+    x1 = o1(1);     y1 = o1(2);
+    x2 = o2(1);     y2 = o2(2);
+    x3 = o3(1);     y3 = o3(2);
+    a2 = 2*(x2-x1); b2 = 2*(y2-y1); c2 = 2*(r2-r1);
+    d2 = (x2*x2+y2*y2-r2*r2)-(x1*x1+y1*y1-r1*r1);
+    a3 = 2*(x3-x1); b3 = 2*(y3-y1); c3 = 2*(r3-r1);
+    d3 = (x3*x3+y3*y3-r3*r3)-(x1*x1+y1*y1-r1*r1);
+    mul = 1/(a2*b3-a3*b2);
+    xc = ( +b3*d2-b2*d3)*mul;    xr = (-b3*c2+b2*c3)*mul;
+    yc = ( -a3*d2+a2*d3)*mul;    yr = (+a3*c2-a2*c3)*mul;
+    A = xr*xr + yr*yr - 1;                                         % r^2
+    B = 2*(xc*xr + yc*yr - xr*x1 - yr*y1 - r1);                    % r^1
+    C = xc*xc + yc*yc - 2*xc*x1 - 2*yc*y1 + x1*x1 + y1*y1 - r1*r1; % r^0
+    r = roots([A B C]); %quadratic
+    o = struct('center',[],'radius',[]);
+    r = r(isreal(r) & r>0);
+    o.center = [o.center; xc + xr*r, yc + yr*r];
+    o.radius = [o.radius; r];
 end

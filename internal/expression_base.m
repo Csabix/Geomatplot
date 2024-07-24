@@ -87,7 +87,7 @@ methods (Access = protected, Static, Hidden)
                 assert(isscalar(a),'invalid operand');
                 a = expression_base(a.parent, {a}, {}, a.label);
             elseif isa(b,'drawing') || isa(b,'expression_base')
-                assert(all(size(a) == sz),'invalied constant');
+                assert(all(size(a) == sz) || all(size(a)==[2 2]),'invalied constant');
                 a = expression_base(b.parent, {}, {a}, expression_base.constLabel(1));
             else
                 throw('invalid operation');
@@ -103,8 +103,10 @@ methods (Access = protected, Static, Hidden)
         function w = writeConst(c)
             if isscalar(c)
                 w = num2str(c);
-            elseif length(c) == 2
-                w = num2str(c,'[%.10f %.10f]');
+            elseif numel(c) == 2
+                w = num2str(c(:)','[%.10f %.10f]');
+            elseif all(size(c)==[2 2])
+                w = num2str(c(:)','[%.10f %.10f;%.10f %.10f]');
             else
                 throw('wrong constant');
             end

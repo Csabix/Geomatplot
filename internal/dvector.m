@@ -51,7 +51,7 @@ methods
     function c = mtimes(a,b)
         arguments
             a   (1,1) {mustBeA(a,["evector","dvector","escalar","dscalar","numeric"])}
-            b   (1,1) {mustBeA(b,["evector","dvector","escalar","dscalar","numeric"])}
+            b   (:,:) {mustBeA(b,["evector","dvector","escalar","dscalar","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
         if isa(a,'dvector'); a = evector.fromDrawing(a);

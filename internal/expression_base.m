@@ -114,15 +114,6 @@ methods (Access = protected, Static, Hidden)
         vals = cellfun(@writeConst,constants,'UniformOutput',false);
         exp = replace(exp, names, vals);
     end
-    function p = operatorPrecedence(op)
-        switch op
-            case '+'; p = 1;
-            case '-'; p = 1;
-            case '*'; p = 2;
-            case '/'; p = 2;
-            case '^'; p = 3;
-        end
-    end
     function [parent,inputs,constants,expression,operator] = assembleExpression(a,b,operator,sz)
         a = expression_base.wrapIfNotExpression(a,b,sz);
         b = expression_base.wrapIfNotExpression(b,a,sz);
@@ -146,11 +137,10 @@ methods (Access = protected, Static, Hidden)
         if ca ~= 0 && cb ~= 0
             bexp = expression_base.renameConstants(bexp, 1:cb, (ca+1):(ca+cb));
         end
-        prec = expression_base.operatorPrecedence(operator);
-        if expression_base.operatorPrecedence(a.operator) < prec
+        if length(a.constants) + length(fieldnames(a.inputs)) > 1
             aexp = ['(' aexp ')'];
         end
-        if expression_base.operatorPrecedence(b.operator) < prec
+        if length(b.constants) + length(fieldnames(b.inputs)) > 1
             bexp = ['(' bexp ')'];
         end
         expression = [aexp ' ' operator ' ' bexp];

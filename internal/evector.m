@@ -46,6 +46,15 @@ methods
         [parent,inputs,constants,expression] = expression_base.assembleExpression(a,b,'/',[1 1]);
         c = evector(parent,inputs,constants,expression);
     end
+    function c = dot(a,b)
+        arguments
+            a   (1,:) {mustBeA(a,["evector","dvector","numeric"])}
+            b   (1,:) {mustBeA(b,["evector","dvector","numeric"])}
+        end
+        expression_base.warning_if_unused(nargout);
+        [parent,inputs,constants,expression] = expression_base.assembleExpression(a,b,'dot',[1 2]);
+        c = escalar(parent,inputs,constants,expression);
+    end
     function d = evalimpl(o,label)
         [inputs,callback] = o.createCallback();
         d = dvector(o.parent,label,inputs,callback);

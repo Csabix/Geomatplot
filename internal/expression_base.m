@@ -132,13 +132,12 @@ methods (Access = protected, Static, Hidden)
         if ca ~= 0 && cb ~= 0
             bexp = expression_base.renameConstants(bexp, 1:cb, (ca+1):(ca+cb));
         end
-        if length(a.constants) + length(fieldnames(a.inputs)) > 1
-            aexp = ['(' aexp ')'];
+        switch operator
+            case 'dot'
+                expression = ['dot(' aexp ', ' bexp ')'];
+            otherwise
+                expression = ['(' aexp ' ' operator ' ' bexp ')'];
         end
-        if length(b.constants) + length(fieldnames(b.inputs)) > 1
-            bexp = ['(' bexp ')'];
-        end
-        expression = [aexp ' ' operator ' ' bexp];
     end
 end
 end

@@ -14,19 +14,15 @@ properties
     %   need to be renamed in the expression string
     expression (1,:) char
     % the string of the built expression
-    operator   (1,1) char
-    % top level operator in the expression
-    % helps minimizing the amount of parentheses
 end
 
 methods
-    function o = expression_base(parent, inputs, constants, expression, operator)
+    function o = expression_base(parent, inputs, constants, expression)
         arguments
             parent     (1,1) Geomatplot
             inputs     (1,:) cell
             constants  (1,:) cell
             expression (1,:) char
-            operator   (1,1) char = '^'
         end
         
         o.parent = parent;
@@ -38,7 +34,6 @@ methods
         end
         o.constants = constants;
         o.expression = expression;
-        o.operator = operator;
     end  
     function val = eval(o,label)
         if nargin < 2
@@ -86,7 +81,7 @@ methods (Access = protected, Static, Hidden)
             if isa(a,'drawing')
                 assert(isscalar(a),'invalid operand');
                 a = expression_base(a.parent, {a}, {}, a.label);
-            elseif isa(b,'drawing') || isa(b,'expression_base')
+            elseif isnumeric(a) && (isa(b,'drawing') || isa(b,'expression_base'))
                 assert(all(size(a) == sz) || all(size(a)==[2 2]),'invalied constant');
                 a = expression_base(b.parent, {}, {a}, expression_base.constLabel(1));
             else
@@ -114,7 +109,7 @@ methods (Access = protected, Static, Hidden)
         vals = cellfun(@writeConst,constants,'UniformOutput',false);
         exp = replace(exp, names, vals);
     end
-    function [parent,inputs,constants,expression,operator] = assembleExpression(a,b,operator,sz)
+    function [parent,inputs,constants,expression] = assembleExpression(a,b,operator,sz)
         a = expression_base.wrapIfNotExpression(a,b,sz);
         b = expression_base.wrapIfNotExpression(b,a,sz);
         % parent

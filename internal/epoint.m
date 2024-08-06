@@ -10,8 +10,8 @@ methods
         a_is_point = isa(a,'point_base')||isa(a,'epoint');
         b_is_point = isa(b,'point_base')||isa(b,'epoint');
         assert(~a_is_point || ~b_is_point, 'invalid input');
-        [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'+',[1 2]);
-        c = epoint(parent,inputs,constants,expression,operator);
+        [parent,inputs,constants,expression] = expression_base.assembleExpression(a,b,'+',[1 2]);
+        c = epoint(parent,inputs,constants,expression);
     end
     function c = minus(a,b)
         arguments
@@ -19,14 +19,14 @@ methods
             b   (1,:) {mustBeA(b,["point_base","epoint","dvector","evector","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
-        a_is_point = isa(a,'point_base')||isa(a,'epoint');
+        a_is_point = isa(a,'point_base')||isa(a,'epoint')||isnumeric(a);
         b_is_point = isa(b,'point_base')||isa(b,'epoint');
-        [parent,inputs,constants,expression,operator] = expression_base.assembleExpression(a,b,'-',[1 2]);
+        [parent,inputs,constants,expression] = expression_base.assembleExpression(a,b,'-',[1 2]);
         if a_is_point && b_is_point
-            c = evector(parent,inputs,constants,expression,operator);
+            c = evector(parent,inputs,constants,expression);
         else
             assert(~b_is_point,'invalid operation');
-            c = epoint(parent,inputs,constants,expression,operator);
+            c = epoint(parent,inputs,constants,expression);
         end
     end
     function d = evalimpl(o,label)

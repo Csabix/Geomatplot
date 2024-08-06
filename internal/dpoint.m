@@ -11,10 +11,7 @@ methods
         o = o@dependent(parent,label,fig,inputs,callback,hidden);
         addlistener(o.fig,'ROIMoved'  ,@dpoint.move);
         addlistener(o.fig,'MovingROI' ,@dpoint.move);
-        addlistener(o.fig,'ROIClicked',@dpoint.hit);
-    end
-    function v = value(o)
-        v = o.fig.Position;
+        addlistener(o.fig,'ROIClicked',@dependent.hit);
     end
     function updatePlot(o,pos)
         if ~any(isnan(pos))
@@ -25,10 +22,6 @@ methods
     end
 end
 methods (Static)
-    function hit(fig,~)
-        o = fig.UserData;
-        o.parent.pushData(o);
-    end
     
     function move(fig,evt)
         fig.Position = evt.PreviousPosition;

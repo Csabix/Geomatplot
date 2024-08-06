@@ -5,16 +5,12 @@ methods
         args = namedargs2cell(args);
         fig = line(parent.ax,0,0,args{:});
         o = o@dpointlineseq(parent,label,fig,inputs,callback,hidden);
-        addlistener(o.fig,'Hit',@dlines.hit);
+        addlistener(o.fig,'Hit',@dependent.hit);
     end
 end
 
 methods (Static,Hidden)
-    function hit(fig,~)
-        o = fig.UserData;
-        o.parent.pushData(o);
-    end
-    
+  
     function [parent,label,inputs,params] = parse_inputs(args,flag,mina,maxa)
         arguments
             args (1,:) cell;       flag (1,:) char   = 'lines';

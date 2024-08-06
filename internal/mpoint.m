@@ -5,8 +5,5 @@ methods
         h = drawpoint(parent.ax,'Deletable',0,args{:});
         o = o@moveable(parent,label,h);
     end
-    function v = value(o)
-        v = o.fig.Position;
-    end
 end
 end

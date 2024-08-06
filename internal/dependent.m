@@ -149,6 +149,13 @@ methods (Access = protected)
     
 end
 
+methods(Static,Hidden)
+    function hit(fig,~)
+        o = fig.UserData;
+        o.parent.pushData(o);
+    end
+end
+
 methods (Abstract)
     updatePlot(o,varargin)
 end

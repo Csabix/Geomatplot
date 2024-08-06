@@ -53,6 +53,15 @@ methods (Static, Hidden)
             warning('Unused expression - if you meant to create a dependent object, call eval() or ()'' on the expression');
         end
     end
+    function mustBeSizeIfNumeric(a, sizeList)
+        if isnumeric(a)
+            if ~any(all(sizeList == size(a),2),1)
+                throwAsCaller(MException('mustBeSizeIfNumeric','Invalid size for numeric type'));
+            end
+        elseif ~isscalar(a)
+            throwAsCaller(MException('mustBeSizeIfNumeric','Non-numeric type should be scalar'));
+        end
+    end
 end
 methods (Hidden)
     function [inputs,callback] = createCallback(o)
@@ -76,13 +85,13 @@ methods (Access = protected, Static, Hidden)
             label = "c@" + index + "@";
         end
     end
-    function a = wrapIfNotExpression(a,b,sz)
+    function a = wrapIfNotExpression(a,b,sizeList)
         if ~isa(a,'expression_base')
             if isa(a,'drawing')
                 assert(isscalar(a),'invalid operand');
                 a = expression_base(a.parent, {a}, {}, a.label);
             elseif isnumeric(a) && (isa(b,'drawing') || isa(b,'expression_base'))
-                assert(all(size(a) == sz) || all(size(a)==[2 2]),'invalied constant');
+                assert(any(all(sizeList == size(a),2),1),'invalied constant');
                 a = expression_base(b.parent, {}, {a}, expression_base.constLabel(1));
             else
                 throw('invalid operation');
@@ -101,7 +110,7 @@ methods (Access = protected, Static, Hidden)
             elseif numel(c) == 2
                 w = num2str(c(:)','[%.10f %.10f]');
             elseif all(size(c)==[2 2])
-                w = num2str(c(:)','[%.10f %.10f;%.10f %.10f]');
+                w = num2str(reshape(c.',1,[]),'[%.10f %.10f;%.10f %.10f]');
             else
                 throw('wrong constant');
             end

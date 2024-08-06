@@ -50,8 +50,8 @@ methods
     end
     function c = mtimes(a,b)
         arguments
-            a   (1,1) {mustBeA(a,["evector","dvector","escalar","dscalar","numeric"])}
-            b   (:,:) {mustBeA(b,["evector","dvector","escalar","dscalar","numeric"])}
+            a   (:,:) {mustBeA(a,["evector","dvector","escalar","dscalar","numeric"]),expression_base.mustBeSizeIfNumeric(a,[1 1;2 2])}
+            b   (:,:) {mustBeA(b,["evector","dvector","escalar","dscalar","numeric"]),expression_base.mustBeSizeIfNumeric(b,[1 1;2 2])}
         end
         expression_base.warning_if_unused(nargout);
         if isa(a,'dvector'); a = evector.fromDrawing(a);

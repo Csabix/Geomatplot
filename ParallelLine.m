@@ -1,7 +1,8 @@
 function [h,p] = ParallelLine(varargin)
 % ParallelLine  draws a parallel line.
-%   ParallelLine(A,B,C) draws a prependicular line from A to BC
-%   ParallelLine(A,B,C) draws a prependicular line from A to BC
+%   ParallelLine(A,B,C) draws a parallel line through A to BC
+%
+%   ParallelLine(B,C,d) draws a translated parallel line to BC at signed distance d
 %
 %   ParallelLine(label,___)  provides a label for the line. The label is not drawn.
 %

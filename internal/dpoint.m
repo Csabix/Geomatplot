@@ -7,11 +7,11 @@ methods
         end
         hidden = strcmp(args.Visible,'off');
         args = namedargs2cell(args);
-        fig = drawpoint(parent.ax,args{:},'Position',[0 0]);
+        fig = drawpoint(parent.ax,args{:},'Position',[0 0],'Deletable',0);
         o = o@dependent(parent,label,fig,inputs,callback,hidden);
         addlistener(o.fig,'ROIMoved'  ,@dpoint.move);
         addlistener(o.fig,'MovingROI' ,@dpoint.move);
-        addlistener(o.fig,'ROIClicked',@dependent.hit);
+        addlistener(o.fig,'ROIClicked',@drawing.hit);
     end
     function updatePlot(o,pos)
         if ~any(isnan(pos))

@@ -13,7 +13,7 @@ methods
             o.fig = quiver(parent.ax,0,0,0,0,1.,args{:});
             o.update;
             o.fig.UserData = o;
-            addlistener(o.fig,'Hit',@dependent.hit);
+            addlistener(o.fig,'Hit',@drawing.hit);
             if ~isempty(o.exception); rethrow(o.exception); end
         end
     end

@@ -5,7 +5,7 @@ methods
         args = namedargs2cell(args);
         fig = line(parent.ax,0,0,args{:});
         o = o@dpointlineseq(parent,label,fig,inputs,callback,hidden);
-        addlistener(o.fig,'Hit',@dependent.hit);
+        addlistener(o.fig,'Hit',@drawing.hit);
     end
 end
 

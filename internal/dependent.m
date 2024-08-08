@@ -44,7 +44,13 @@ end
 
 methods
     function o = dependent(parent,label,fig,inputs,callback,hidden)
-        o = o@drawing(parent,label,fig);
+        if nargin == 0
+            params = {};
+        else
+            params = {parent,label,fig};
+        end
+        o = o@drawing(params{:});
+        if nargin ==0; return; end
         o.inputs = inputs;
         o.parent.deps.(label)=o;
         o.hidden = hidden;
@@ -147,13 +153,6 @@ methods (Access = protected)
         end
     end
     
-end
-
-methods(Static,Hidden)
-    function hit(fig,~)
-        o = fig.UserData;
-        o.parent.pushData(o);
-    end
 end
 
 methods (Abstract)

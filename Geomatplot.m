@@ -104,7 +104,7 @@ methods(Access = public, Static)
         values = struct2cell(o.movs); labels = fieldnames(o.movs);
         M = NaN(length(values),2);
         for i=1:length(values)
-            M(i,:) = [values{i}.move_total_time,values{i}.stop_total_time];
+            M(i,:) = [values{i}.move_total_time_m,values{i}.stop_total_time_m];
         end
         M = num2cell(M*1000,1);
         vnames = ["move_total","stop_total"];     
@@ -318,7 +318,7 @@ methods (Access = protected)
         for i=1:mnum
             v = values{i};
             meanstr = string(v);
-            timestr = num2str([v.move_total_time,v.stop_total_time]*1000,'%.2fms/%.2fms');
+            timestr = num2str([v.move_total_time_m,v.stop_total_time_m]*1000,'%.2fms/%.2fms');
             str(i+1,1:4) = [''''+string(labels{i})+'''', string(class(v)), timestr, meanstr];
         end
         labels = fieldnames(o.deps); values = struct2cell(o.deps);

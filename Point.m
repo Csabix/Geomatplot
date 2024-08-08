@@ -7,6 +7,11 @@ function h = Point(varargin)
 %   Point([x y]) specifies starting position of the point, thus no user input is needed after the
 %       call.
 %
+%   Point(C)  restricts the point to C (where C is a curve or a polygon) and awaits for input
+%
+%   Point([x y], C)  restricts the point to C (where C is a curve or a polygon) and specifies the 
+%       starting position of the point (it will be snapped to C immediately)
+%
 %   Point(A,B...,callback) creates a dependent point with a given callback of the form
 %           callback(A,B,...) -> [x y]
 %       where A,B,... are n>=1 number of any Geomaplot handles, and their values will be passed to
@@ -37,6 +42,7 @@ function h = Point(varargin)
     [label,   varargin] = parent.extractLabel(varargin,'capital');
     [position,varargin] = drawing.extractPosition(varargin);
 
+    isrestricted = false;
     if isempty(position) && ~isempty(varargin)
         isdependent = true;  % because cannot define function inside an if statement
         [inputs,  varargin] = parent.extractInputs(varargin,0,inf,false);
@@ -53,13 +59,24 @@ function h = Point(varargin)
             args = parse_dpoint(varargin{:});
             n = abs(nargout(usercallback));
             callback = [];
+        elseif length(inputs) == 1 && (isa(inputs{1},'dpointlineseq')||isa(inputs{1},'polygon_base'))
+            isrestricted = true;
+            args = parse_dpoint(varargin{:});
         else
             throw(MException('Point:invalidInputPattern','Unknown overload.'))
         end
     else
         isdependent = false;
-        if ~isempty(position)
+        [inputs,  varargin] = parent.extractInputs(varargin,0,inf,false);
+        if isempty(inputs) && (isempty(varargin) || ~isa(varargin{1},'function_handle'))
+            if ~isempty(position)
+                args = parse_mpoint(position,varargin{:});
+            end % TODO allow args if no position is set?
+        elseif length(inputs) == 1 && (isempty(varargin) || ~isa(varargin{1},'function_handle'))
+            isrestricted = true;
             args = parse_mpoint(position,varargin{:});
+        else
+            throw(MException('Point:invalidInputPattern','Unknown overload.'))
         end
     end
     args.Label = label;
@@ -72,7 +89,11 @@ function h = Point(varargin)
         [varargout{1:n}] = usercallback(params{:});
     end
 
-    if isdependent
+    if isrestricted
+        h_ = rpoint(parent,label,args);
+        callback = ClosestPoint('internal',h_,inputs{1});
+        h_.setCallback(callback, {h_,inputs{1}});
+    elseif isdependent
         if isempty(callback)
             callback = @internalcallback;
         end

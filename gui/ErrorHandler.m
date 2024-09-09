@@ -135,6 +135,11 @@ classdef ErrorHandler
             expected = "{''point_base'',''point_base'',''point_base'',''point_base''}";
             ErrorHandler.decideError(o,data,expected);
         end
+
+        function parallelLineError(o,data)
+            expected = "{''point_base'',''point_base'',''point_base''}";
+            ErrorHandler.decideError(o,data,expected);
+        end
     end
 
     methods(Access=private,Static)

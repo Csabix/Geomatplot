@@ -154,6 +154,10 @@ classdef AcceptTypes
         function accepted = acceptBezier3(data)
             accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base','point_base'});
         end
+
+        function accepted = acceptParallelLine(data)
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base'});
+        end
     end % static public
 
     methods(Access = private,Static)

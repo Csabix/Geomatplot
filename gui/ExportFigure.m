@@ -4,10 +4,11 @@ classdef ExportFigure < handle
         fileID
         go
         colors
+        precDigits
     end
 
     methods(Access=public)
-        function o = ExportFigure(go,outputFile)
+        function o = ExportFigure(go,outputFile,precDigits)
             keys = {[1 0 0], [0 1 0], [0 0 1], [0 0 0]};
             vals = ["r","g","b","k"];
             o.colors = dictionary(keys,vals);
@@ -17,13 +18,14 @@ classdef ExportFigure < handle
             o.fileID = fileID;
             movFields = fieldnames(go.movs);
             o.finishedLabels = [];
+            o.precDigits = precDigits;
             for i = 1:length(movFields)
                 moveable = go.movs.(movFields{i});
                 if isa(moveable,'mpoint')
                     fprintf(fileID,"%s = Point('%s',%s,%s,%s);\n", ...
                         moveable.label, ...
                         moveable.label, ...
-                        mat2str(moveable.value), ...
+                        ExportFigure.formatValue(moveable.value,o.precDigits), ...
                         mat2str(moveable.fig.Color), ...
                         string(moveable.fig.MarkerSize));
                    o.addLabel(string(moveable.label));
@@ -336,6 +338,11 @@ classdef ExportFigure < handle
 
         function expStr = genouts(size)
             expStr = strjoin(repmat("%s",1,size),',');
+        end
+
+        function str = formatValue(value,precision)
+            format = '%.' + string(precision) +'f';
+            str = "[" + strjoin(compose(format, value),' ') + "]";
         end
     end % static private
 end

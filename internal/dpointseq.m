@@ -6,7 +6,6 @@ methods
         args = namedargs2cell(rmfield(s,{'MarkerSize','MarkerColor','MarkerSymbol'}));
         fig = scatter(parent.ax,0,0,sz,c,mkr,args{:});
         o = o@dpointlineseq(parent,label,fig,labels,callback,hidden);
-        % todo addlistener hit?
     end
     function v = value(o,i)
         if nargin == 2

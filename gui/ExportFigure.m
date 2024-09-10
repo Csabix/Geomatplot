@@ -9,8 +9,9 @@ classdef ExportFigure < handle
 
     methods(Access=public)
         function o = ExportFigure(go,outputFile,precDigits)
-            keys = {[1 0 0], [0 1 0], [0 0 1], [0 0 0]};
-            vals = ["r","g","b","k"];
+            keys = {[1 0 0], [0 1 0], [0 0 1], [0 1 1], [1 0 1], ...
+                [1 1 0], [0 0 0], [1 1 1]};
+            vals = ["r","g","b","c","m","y","k","w"];
             o.colors = dictionary(keys,vals);
             o.go = go;
             fileID = fopen(outputFile,'w');
@@ -126,8 +127,20 @@ classdef ExportFigure < handle
         function exportdpointseq(o,pointseq)
             if ExportFigure.isCallbackNamed(pointseq,'intersect')
                 [size,labels] = o.checkInputs(pointseq);
+                firstPoint = [];
+                depFields = fieldnames(o.go.deps);
+                for i = 1:length(depFields)
+                    dep = o.go.deps.(depFields{i});
+                    if isa(dep,'dpoint') && isequal(length(dep.inputs), 1) ...
+                        && isequal(dep.inputs{1},pointseq)
+                        firstPoint = dep;
+                        break;
+                    end
+                end
+                if isempty(firstPoint); name = pointseq.label;
+                else; name = firstPoint.label; end
                 fprintf(o.fileID,"%s = Intersect(" + ExportFigure.genouts(size) + ");\n", ...
-                    pointseq.label, labels);
+                    name, labels);
                 o.addLabel(string(pointseq.label));
             end
         end
@@ -286,6 +299,9 @@ classdef ExportFigure < handle
                 o.exportSegmentSequence(line);
             elseif ExportFigure.isCallbackNamed(line,'mirror_point')
                 o.exportMirrorLines(line);
+            elseif ExportFigure.isCallbackNamed(line,'paraline2segment') || ...
+                   ExportFigure.isCallbackNamed(line,'paralinewithdist')
+                o.exportLineWithType(line,"ParallelLine");
             end
         end
 

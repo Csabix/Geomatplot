@@ -89,7 +89,8 @@ classdef PropertiesPanel < handle
         end
     
         function colorDropdown = createColorDropdown(o,grid,layout,valueChangedFcn,tooltip)
-            colors = {[1 0 0], [0 1 0], [0 0 1], [0 0 0]};
+            colors = {[1 0 0], [0 1 0], [0 0 1], [0 1 1], [1 0 1], ...
+                [1 1 0], [0 0 0], [1 1 1]};
             colorDropdown = uidropdown(grid);
             colorDropdown.ValueChangedFcn = valueChangedFcn;
             colorDropdown.Layout.Row = layout(1);

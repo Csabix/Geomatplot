@@ -5,15 +5,17 @@ classdef ExportFigure < handle
         go
         colors
         precDigits
+        uDistances
     end
 
     methods(Access=public)
-        function o = ExportFigure(go,outputFile,precDigits)
+        function o = ExportFigure(go,outputFile,precDigits,uDistances)
             keys = {[1 0 0], [0 1 0], [0 0 1], [0 1 1], [1 0 1], ...
                 [1 1 0], [0 0 0], [1 1 1]};
             vals = ["r","g","b","c","m","y","k","w"];
             o.colors = dictionary(keys,vals);
             o.go = go;
+            o.uDistances = uDistances;
             fileID = fopen(outputFile,'w');
             fprintf(fileID,"clf; %% %s\n",outputFile);
             o.fileID = fileID;
@@ -73,7 +75,7 @@ classdef ExportFigure < handle
             elseif isa(dep,'dpoint'); o.exportdpoint(dep);
             elseif isa(dep,'dpointseq'); o.exportdpointseq(dep);
             elseif isa(dep,'dpolygon'); o.exportdpolygon(dep);
-            elseif isa(dep,'dscalar') %ignore for now, wait for mscalars
+            elseif isa(dep,'dscalar'); o.exportdscalar(dep);
             else
                 throw(MException('ExportFigure:exportDependent','Unknown type!'));
             end
@@ -97,9 +99,14 @@ classdef ExportFigure < handle
                     end
                 end
                 if isempty(origCircle)
-                    radPoint = radius.inputs{2};
+                    if ~isequal(center,radius.inputs{1}) 
+                        o.checkLabel(radius);
+                        radPoint = radius;
+                    else
+                        radPoint = radius.inputs{2};
+                        o.checkLabel(radPoint);
+                    end
                     o.checkLabel(center);
-                    o.checkLabel(radPoint);
                     fprintf(o.fileID,"%s = Circle('%s',%s,%s,'%s',%s);\n", ...
                         circle.label, ...
                         circle.label, ...
@@ -340,6 +347,23 @@ classdef ExportFigure < handle
                 o.colors({line.fig.Color}) + line.fig.LineStyle, ...
                 string(line.fig.LineWidth));
             o.addLabel(string(line.label));
+        end
+
+        function exportDistance(o,distance)
+            if ~any(ismember(o.uDistances,distance)); return; end
+            [size,labels] = o.checkInputs(distance);
+            fprintf(o.fileID,"%s = Distance('%s'," + ExportFigure.genouts(size) + ");\n", ...
+            distance.label, distance.label, labels);
+            o.addLabel(string(distance.label));
+        end
+
+        function exportdscalar(o,scalar)
+            if ExportFigure.isCallbackNamed(scalar,'dist_point2pointseq') || ...
+               ExportFigure.isCallbackNamed(scalar,'dist_point2circle') || ...
+               ExportFigure.isCallbackNamed(scalar,'dist_point2polyline')
+                o.exportDistance(scalar);
+            end
+            %skip other
         end
     end % private
 

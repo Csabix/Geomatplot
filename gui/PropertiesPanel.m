@@ -1,8 +1,15 @@
 classdef PropertiesPanel < handle
     %PANELS Create panels for the app
+    properties (Access = public)
+        geometry
+    end
+
     properties (Access = private)
         propPanel
-        geometry
+    end
+
+    events
+        RenamedLabel
     end
 
     methods (Access = public)
@@ -237,6 +244,8 @@ classdef PropertiesPanel < handle
         function setLabel(o,src,evt)
             if ~Utils.renameLabel(o.geometry,evt.Value)
                 src.Value = o.geometry.label;
+            else
+                notify(o, 'RenamedLabel'); 
             end
         end
 

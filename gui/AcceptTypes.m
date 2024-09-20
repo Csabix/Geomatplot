@@ -156,7 +156,12 @@ classdef AcceptTypes
         end
 
         function accepted = acceptParallelLine(data)
-            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base'});
+            accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base',{'point_base','dscalar'}});
+        end
+
+        function accepted = acceptDistance(data)
+            pattern = {'point_base',{'point_base','dpointseq','dcircle','dlines','polygon_base'}};
+            accepted = AcceptTypes.acceptGeometryByPattern(data,pattern);
         end
     end % static public
 

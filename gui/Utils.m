@@ -15,6 +15,12 @@ classdef Utils
         function renamed = renameLabel(geometry,newLabel)
             oldLabel = geometry.label;
             go = geometry.parent;
+            if ~all(isstrprop(newLabel, 'alphanum'))
+                uialert(go.ax.Parent,'The new label is not alphanumeric!','Label Rename Error');
+                renamed = false;
+                return;
+            end
+
             renamed = ~go.isLabel(newLabel);
             if renamed
                 Utils.changeGeomatplotLabel(go,oldLabel,newLabel);

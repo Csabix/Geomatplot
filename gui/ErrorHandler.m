@@ -137,7 +137,12 @@ classdef ErrorHandler
         end
 
         function parallelLineError(o,data)
-            expected = "{''point_base'',''point_base'',''point_base''}";
+            expected = "{''point_base'',''point_base'',{''point_base'',''dscalar''}}";
+            ErrorHandler.decideError(o,data,expected);
+        end
+
+        function distanceError(o,data)
+            expected = "{''point_base'',{''point_base'',''dpointseq'',''dcircle'',''dlines'',''polygon_base''}}";
             ErrorHandler.decideError(o,data,expected);
         end
     end

@@ -31,19 +31,22 @@ function [h,O,r] = Circle(varargin)
 
     [parent,label,inputs,args] = dlines.parse_inputs(varargin,'circ',2,3);
 
+    gen_dist = [];
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
         c_ = dpoint(parent,parent.getNextLabel('center'),inputs,@equidistpoint);
         r_ = Distance(parent,{c_,inputs{1}});
+        gen_dist = r_;
     elseif drawing.isInputPatternMatching(inputs,{'point_base','dscalar'})
         c_ = inputs{1}; r_ = inputs{2};
     elseif drawing.isInputPatternMatching(inputs,{'point_base',{'point_base','dpointlineseq','polygon_base'}})
         c_ = inputs{1};
         r_ = Distance(parent,{c_,inputs{2}});
+        gen_dist = r_;
     else
         throw(MException('CircularArc:invalidInputPattern','Unsupported input label types or unknown overload.'));
     end
 
-    h_ = dcircle(parent,label,c_,r_,args);
+    h_ = dcircle(parent,label,c_,r_,gen_dist,args);
 
     if nargout >= 1; h = h_; end
     if nargout >= 2; O = c_; end

@@ -35,7 +35,7 @@ function h = Mirror(varargin)
         end
         args = dlines.parse_inputs_(varargin{:});
         c_ = Mirror(parent,[{inputs{1}.center},inputs(2:end)],'LabelVisible','off','MarkerSize',5);
-        h_ = dcircle(parent,label,c_,inputs{1}.radius,args);
+        h_ = dcircle(parent,label,c_,inputs{1}.radius,[],args);
     elseif isa(inputs{1},'dlines') || isa(inputs{1},'polygon_base')  % includes dcurves
         if drawing.isInputPatternMatching(inputs,{'drawing','point_base'})
             callback = @mirror_point2point;

@@ -18,7 +18,7 @@ classdef PropertiesPanel < handle
                 o = createPointPanel(o,fig,pos,geometry);
             elseif isa(geometry,'dlines')
                 o = createLinePanel(o,fig,pos,geometry);
-            elseif isa(geometry,'polygon_base')
+            elseif isa(geometry,'dpolygon')
                 o = createPolygonPanel(o,fig,pos,geometry);
             end
         end

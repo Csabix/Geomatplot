@@ -10,12 +10,24 @@ classdef ImportScript < handle
                            'Distance', ... %Non-UI editable Geomatplot Types:
                            'Text', 'Eval', 'CustomValue', 'Scalar', ...
                            'PointSequence'};
+        UnsupportedTypes = {'drawSliderX',"Image"};
     end
 
     methods(Access=public)
         function o = ImportScript(app,inputFile,go,folderName) %#ok<INUSD>
             inputData = strjoin(importdata(inputFile),'\n');
             inputData = regexprep(inputData, 'clf;', '');
+
+            for i = 1:length(o.UnsupportedTypes)
+                match = regexp(inputData,[o.UnsupportedTypes{i} '\('],'match');
+                if ~isempty(match)
+                    uialert(go.ax.Parent ...
+                        ,"Import failed." + newline + ...
+                         "The file contains unsupported type: '" + o.UnsupportedTypes{i} + "'!", ...
+                        "Unsupported Type");
+                    return;
+                end
+            end
 
             for i = 1:length(o.GeomatplotTypes)
                 inputData = regexprep(inputData, ...

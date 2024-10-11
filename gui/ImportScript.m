@@ -10,7 +10,7 @@ classdef ImportScript < handle
                            'Distance', ... %Non-UI editable Geomatplot Types:
                            'Text', 'Eval', 'CustomValue', 'Scalar', ...
                            'PointSequence'};
-        UnsupportedTypes = {'drawSliderX',"Image"};
+        UnsupportedTypes = {'drawSliderX','Image'};
     end
 
     methods(Access=public)
@@ -28,6 +28,9 @@ classdef ImportScript < handle
                     return;
                 end
             end
+
+            inputData = regexprep(inputData,'xlim\(([^)]*)\);','go.ax.XLim = $1;');
+            inputData = regexprep(inputData,'ylim\(([^)]*)\);','go.ax.YLim = $1;');
 
             for i = 1:length(o.GeomatplotTypes)
                 inputData = regexprep(inputData, ...

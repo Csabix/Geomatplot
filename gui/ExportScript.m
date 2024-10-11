@@ -3,25 +3,28 @@ classdef ExportScript < handle
         finishedLabels = []
         fileID
         go
-        precDigits
+        decimals
     end
 
     methods(Access=public)
-        function o = ExportScript(go,outputFile,precDigits,tempfolder)
+        function o = ExportScript(go,outputFile,inputs,tempfolder)
             o.go = go;
-            fileID = fopen(outputFile,'w');
-            fprintf(fileID,"clf; %% %s\n",outputFile);
-            o.fileID = fileID;
-            movFields = fieldnames(go.movs);
             o.finishedLabels = [];
-            o.precDigits = precDigits;
+            o.decimals = inputs{1};
+            fileID = fopen(outputFile,'w');
+            o.fileID = fileID;
+            if inputs{2} ~= 0; fprintf(fileID,"clf; "); end
+            if inputs{3} ~= 0; fprintf(fileID,"%% %s",outputFile); end
+
+            fprintf(fileID,"\n");
+            movFields = fieldnames(go.movs);
             for i = 1:length(movFields)
                 moveable = go.movs.(movFields{i});
                 if isa(moveable,'mpoint')
                     fprintf(fileID,"%s = Point('%s',%s,%s,%s);\n", ...
                         moveable.label, ...
                         moveable.label, ...
-                        ExportScript.formatValue(moveable.value,o.precDigits), ...
+                        ExportScript.formatValue(moveable.value,o.decimals), ...
                         mat2str(moveable.fig.Color), ...
                         string(moveable.fig.MarkerSize));
                    o.addLabel(string(moveable.label));
@@ -29,7 +32,7 @@ classdef ExportScript < handle
                     fprintf(fileID,"%s = Polygon('%s',%s);\n", ...
                         moveable.label, ...
                         moveable.label, ...
-                        ExportScript.formatmpoly(moveable.fig.Position,o.precDigits));
+                        ExportScript.formatmpoly(moveable.fig.Position,o.decimals));
                 end
             end
             depFields = fieldnames(go.deps);
@@ -37,6 +40,15 @@ classdef ExportScript < handle
                 dep = go.deps.(depFields{i});
                 o.exportDependent(dep);
             end
+            
+            %Lims
+            if inputs{4} ~= 0
+                fprintf(fileID,"\nxlim(%s); ylim(%s);\n", ...
+                    ExportScript.formatValue(go.ax.XLim,o.decimals), ...
+                    ExportScript.formatValue(go.ax.YLim,o.decimals));
+            end
+
+            %Functions
             if exist(tempfolder, 'dir')
                 fileList = {dir(fullfile(tempfolder, '*.m')).name};
                 for i = 1:length(fileList)
@@ -341,19 +353,19 @@ classdef ExportScript < handle
                 case "Text/text_constPos_constStr"
                     fprintf(o.fileID,"%s = Text(%s,'%s');\n", ...
                         text.label, ...
-                        ExportScript.formatValue(text.fig.Position(1:2),o.precDigits), ...
+                        ExportScript.formatValue(text.fig.Position(1:2),o.decimals), ...
                         replace(text.fig.String,' ',''));
                 case "Text/text_constPos_varStr"
                     callbackname = ExportScript.getusercallback(text);
                     [size,labels] = o.checkInputs(text);
                     fprintf(o.fileID,"%s = Text(%s," + ExportScript.genouts(size) + ",%s);\n", ...
                         text.label, ...
-                        ExportScript.formatValue(text.fig.Position(1:2),o.precDigits), ...
+                        ExportScript.formatValue(text.fig.Position(1:2),o.decimals), ...
                         labels, callbackname);
                 case "Text/text_constPos_printDrawing"
                     fprintf(o.fileID,"%s = Text(%s,%s);\n", ...
                         text.label, ...
-                        ExportScript.formatValue(text.fig.Position(1:2),o.precDigits), ...
+                        ExportScript.formatValue(text.fig.Position(1:2),o.decimals), ...
                         text.inputs{1}.label);
                 case "Text/text_varPos_constStr"
                     fprintf(o.fileID,"%s = Text(%s,'%s');\n", ...

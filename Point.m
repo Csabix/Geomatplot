@@ -91,7 +91,7 @@ function h = Point(varargin)
 
     if isrestricted
         h_ = rpoint(parent,label,args);
-        callback = ClosestPoint('internal',h_,inputs{1});
+        callback = ClosestPoint('internal',parent,h_,inputs{1});
         h_.setCallback(callback, {h_,inputs{1}});
     elseif isdependent
         if isempty(callback)

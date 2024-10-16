@@ -4,6 +4,7 @@ classdef ExportScript < handle
         fileID
         go
         decimals
+        finishedVars = []
     end
 
     methods(Access=public)
@@ -20,7 +21,8 @@ classdef ExportScript < handle
             movFields = fieldnames(go.movs);
             for i = 1:length(movFields)
                 moveable = go.movs.(movFields{i});
-                if isa(moveable,'mpoint')
+                if isa(moveable,'rpoint') %skip (processed in dependents)
+                elseif isa(moveable,'mpoint')
                     fprintf(fileID,"%s = Point('%s',%s,%s,%s);\n", ...
                         moveable.label, ...
                         moveable.label, ...
@@ -97,6 +99,7 @@ classdef ExportScript < handle
             elseif isa(dep,'dscalar'); o.exportdscalar(dep);
             elseif isa(dep,'dtext'); o.exportdtext(dep);
             elseif isa(dep,'dcustomvalue'); o.exportdcustomvalue(dep);
+            elseif isa(dep,'rpoint'); o.exportrpoint(dep);
             else
                 throw(MException('ExportFigure:exportDependent','Unknown type!'));
             end
@@ -183,7 +186,8 @@ classdef ExportScript < handle
                         mat2str(pts.fig.MarkerFaceColor), ...
                         num2str(pts.fig.SizeData/16));
                 else
-                    callbackname = ExportScript.getusercallback(pts);
+                    callbackname = ExportScript.getUserCallbackName(pts);
+                    o.exportWorkspace(pts);
                     fprintf(o.fileID,"%s = PointSequence(" + ExportScript.genouts(size) + ",%s,%s,%s);\n", ...
                         pts.label, labels, callbackname,...
                         mat2str(pts.fig.MarkerFaceColor), ...
@@ -204,6 +208,7 @@ classdef ExportScript < handle
                 o.exportClosestPoint(point);
             elseif ExportScript.isCallbackNamed(point,'Point/internalcallback')
                 o.exportCallbackPoint(point);
+            elseif ExportScript.isCallbackNamed(point,'[-0.1600000000,-0.0400000000]') %skip Slider generated
             else
                 o.exportEval(point);
             end
@@ -275,7 +280,8 @@ classdef ExportScript < handle
                 o.addLabel(string(curve.label));
             else
                 [size,labels] = o.checkInputs(curve);
-                callback = ExportScript.getusercallback(curve);
+                callback = ExportScript.getUserCallbackName(curve);
+                o.exportWorkspace(curve);
                 fprintf(o.fileID,"%s = Curve('%s'," + ExportScript.genouts(size) + "," + ...
                     "%s,'%s',%s,'Color',%s);\n", ...
                     curve.label, curve.label, labels, callback, ...
@@ -295,6 +301,32 @@ classdef ExportScript < handle
                 string(poly.fig.LineWidth), ...
                 mat2str(poly.fig.FaceColor));
             o.addLabel(string(poly.label));
+        end
+
+        function exportrpoint(o,rpoint)
+            depFields = fieldnames(o.go.deps);
+            for i = 1:length(depFields)
+                dep = o.go.deps.(depFields{i});
+                if isa(dep,'dscalar') && isequal(dep.inputs{1},rpoint) && ...
+                    contains(ExportScript.getUserCallbackName(dep),'@(dp)(dp(1)')
+                    return;
+                end
+            end
+            size = length(rpoint.inputs) - 1;
+            labels = strings([1 size]);
+            for i = 2:length(rpoint.inputs)
+                input = rpoint.inputs{i};
+                o.checkLabel(input);
+                labels(i-1) = string(input.label);
+            end
+
+            fprintf(o.fileID,"%s = Point('%s',%s," + ExportScript.genouts(size) +",%s,%s);\n", ...
+                rpoint.label, rpoint.label, ...
+                ExportScript.formatValue(rpoint.fig.Position,o.decimals),...
+                labels, ...
+                mat2str(rpoint.fig.Color), ...
+                string(rpoint.fig.MarkerSize));
+            o.addLabel(string(rpoint.label));
         end
 
         function exportClosestPoint(o,point)
@@ -329,7 +361,11 @@ classdef ExportScript < handle
         end
 
         function exportCallbackPoint(o,point)
-            callbackname = ExportScript.getusercallback(point);
+            if ExportScript.isUserCallbackNamed(point,'@()args.startPos')
+                return; %Slider generated point
+            end
+            callbackname = ExportScript.getUserCallbackName(point);
+            o.exportWorkspace(point);
             [size,labels] = o.checkInputs(point);
             fprintf(o.fileID,"%s = Point('%s'," + ExportScript.genouts(size) +",%s);\n", ...
                 point.label, point.label, labels, callbackname);
@@ -348,6 +384,10 @@ classdef ExportScript < handle
         end
 
         function exportdtext(o,text)
+            if ~isempty(text.inputs) && isa(text.inputs{1},'dpoint') && ...
+               ExportScript.isCallbackNamed(text.inputs{1},'[-0.1600000000,-0.0400000000]') 
+                return; %skip Slider generated text
+            end
             func = functions(text.callback).function;
             switch func
                 case "Text/text_constPos_constStr"
@@ -356,7 +396,8 @@ classdef ExportScript < handle
                         ExportScript.formatValue(text.fig.Position(1:2),o.decimals), ...
                         replace(text.fig.String,' ',''));
                 case "Text/text_constPos_varStr"
-                    callbackname = ExportScript.getusercallback(text);
+                    callbackname = ExportScript.getUserCallbackName(text);
+                    o.exportWorkspace(text);
                     [size,labels] = o.checkInputs(text);
                     fprintf(o.fileID,"%s = Text(%s," + ExportScript.genouts(size) + ",%s);\n", ...
                         text.label, ...
@@ -373,7 +414,8 @@ classdef ExportScript < handle
                         text.inputs{1}.label, ...
                         replace(text.fig.String,' ',''));
                 case "Text/text_varPos_varStr"
-                    callbackname = ExportScript.getusercallback(text);
+                    callbackname = ExportScript.getUserCallbackName(text);
+                    o.exportWorkspace(text);
                     [size,labels] = o.checkInputs(text);
                         fprintf(o.fileID,"%s = Text(" + ExportScript.genouts(size) + ",%s);\n", ...
                     text.label, labels,callbackname);
@@ -386,7 +428,8 @@ classdef ExportScript < handle
         end
 
         function exportdcustomvalue(o,val)
-            callbackname = ExportScript.getusercallback(val);
+            callbackname = ExportScript.getUserCallbackName(val);
+            o.exportWorkspace(val);
             [size,labels] = o.checkInputs(val);
             fprintf(o.fileID,"%s = CustomValue('%s'," + ExportScript.genouts(size) + ",%s);\n", ...
                 val.label, val.label, labels,callbackname);
@@ -404,6 +447,11 @@ classdef ExportScript < handle
         function exportdlines(o,line)
             if ExportScript.isCallbackNamed(line,'@(a,b)a.value+(b.value-a.value).*[0;1]') || ...
                ExportScript.isCallbackNamed(line,'@(a,b)a.value+b.value.*[0;1]')
+                if isa(line.inputs{1},'dpoint') && ...
+                   ExportScript.isCallbackNamed(line.inputs{1},'Point/internalcallback') && ...
+                   ExportScript.isUserCallbackNamed(line.inputs{1},'@()args.startPos')
+                    return;%Slider generated segment
+                end
                 o.exportLineWithType(line,"Segment");
             elseif ExportScript.isCallbackNamed(line,'@(a,b)a.value+(b.value-a.value).*[-1e8;-1e4;0;1;1e4;1e8]') || ...
                    ExportScript.isCallbackNamed(line,'@(a,b)a.value+b.value.*[-1e8;-1e4;0;1;1e4;1e8]')
@@ -462,7 +510,8 @@ classdef ExportScript < handle
                     string(seq.fig.LineWidth), ...
                     mat2str(seq.fig.Color));
             else
-                callbackname = ExportScript.getusercallback(seq);
+                callbackname = ExportScript.getUserCallbackName(seq);
+                o.exportWorkspace(seq);
                 fprintf(o.fileID,"%s = SegmentSequence('%s'," + ExportScript.genouts(size) + "," + ...
                     "%s,%s,'%s',%s,'Color',%s);\n", ...
                     seq.label, seq.label, labels, ...
@@ -510,11 +559,16 @@ classdef ExportScript < handle
                ExportScript.isCallbackNamed(scalar,'dist_point2polyline')
                 o.exportDistance(scalar);
             elseif ExportScript.isCallbackNamed(scalar,'Scalar/internalcallback')
-                callbackname = ExportScript.getusercallback(scalar);
-                [size,labels] = o.checkInputs(scalar);
-                fprintf(o.fileID,"%s = Scalar('%s'," + ExportScript.genouts(size) +",%s);\n", ...
-                    scalar.label, scalar.label, labels, callbackname);
-                o.addLabel(string(scalar.label));
+                if ExportScript.isUserCallbackNamed(scalar,'@(dp)(dp(1)')
+                    o.exportSlider(scalar);
+                else
+                    callbackname = ExportScript.getUserCallbackName(scalar);
+                    o.exportWorkspace(scalar);
+                    [size,labels] = o.checkInputs(scalar);
+                    fprintf(o.fileID,"%s = Scalar('%s'," + ExportScript.genouts(size) +",%s);\n", ...
+                        scalar.label, scalar.label, labels, callbackname);
+                    o.addLabel(string(scalar.label));
+                end
             elseif ExportScript.isCallbackNamed(scalar,'base_angle') || ...
                    ExportScript.isCallbackNamed(scalar,'angle_between')
                 %skip circarc generated scalars
@@ -522,11 +576,104 @@ classdef ExportScript < handle
                 o.exportEval(scalar);
             end
         end
+
+        function exportSlider(o,slider)
+            Pt = slider.inputs{1};
+            depFields = fieldnames(Pt.deps);
+            for i = 1:length(depFields)
+                dep = Pt.deps.(depFields{i});
+                if isa(dep,'dtext')
+                    txt = dep;
+                    break;
+                end
+            end
+            usercallback = functions(functions(slider.callback).workspace{1}.usercallback);
+            range = usercallback.workspace{1}.args.range;
+            startPos = Pt.inputs{2}.inputs{1}.fig.Position;
+            slideLen = Pt.inputs{2}.inputs{2}.fig.Position - startPos;
+            fprintf(o.fileID,"[%s,%s,%s] = drawSliderX('%s',%s,%s,%s,%s);\n", ...
+                slider.label,Pt.label,txt.label, Pt.label, ...
+                ExportScript.formatValue(range,o.decimals), ...
+                ExportScript.formatValue(startPos,o.decimals), ...
+                ExportScript.formatSingleValue(slideLen,o.decimals), ...
+                ExportScript.formatSingleValue(slider.val,o.decimals));
+            o.addLabel(string(slider.label));
+        end
+
+        function exportWorkspace(o,object)
+            o.finishedVars = [];
+            callback = functions(functions(object.callback).workspace{1}.usercallback);
+            o.exportWorkspaceVars(callback);
+        end
+
+        function exportWorkspaceVars(o,callback)
+            str = o.getWorkspaceVars(callback);
+            if isempty(str); return; end
+            fprintf(o.fileID,"%s",str);
+        end
+
+        function str = getWorkspaceVars(o,callback)
+            str = '';
+            if ~strcmp(callback.type,'anonymous'); return; end
+            workspace = callback.workspace{1};
+            labels = fieldnames(workspace);
+            values = struct2cell(workspace);
+                
+            for i = 1:length(labels)
+                label = labels{i};
+                if ismember(label,o.finishedVars); continue; end
+                valstr = o.val2str(values{i});
+                str = sprintf('%s%s = %s;\n', str, label, valstr);
+                o.finishedVars = [o.finishedVars, string(label)];
+            end
+        end
+        
+        function str = struct2str(o,s)
+            labels = fieldnames(s);
+            values = struct2cell(s);
+            str = 'struct(';
+            for i = 1:numel(labels)
+                label = labels{i};
+                if ismember(label,o.finishedVars); continue; end
+                valstr = o.val2str(values{i});
+                str = sprintf('%s''%s'', %s, ', str, label, valstr);
+                o.finishedVars = [o.finishedVars, string(label)];
+            end
+            str = [str(1:end-2) ')'];
+        end
+
+        function str = val2str(o,val)
+            if isnumeric(val) || iscell(val)
+                str = mat2str(val);
+            elseif isa(val, 'function_handle')
+                o.exportWorkspaceVars(functions(val));
+                str = functions(val).function;
+            elseif ischar(val) || isstring(val)
+                str = sprintf('"%s"', char(val));
+            elseif isstruct(val)
+                str = ExportScript.struct2str(val);
+            else
+                throw(MException('ExportFigure:val2str','Unsupported type!'));
+            end
+        end
     end % private
 
     methods(Access=private,Static)
         function is = isCallbackNamed(object,name)
             is = contains(functions(object.callback).function,name);
+        end
+
+        function is = isUserCallbackNamed(object,name)
+            usercallback = functions(functions(object.callback).workspace{1}.usercallback).function;
+            is = contains(usercallback,name);
+        end
+
+        function name = getUserCallbackName(object)
+            callback = functions(functions(object.callback).workspace{1}.usercallback);
+            name = callback.function;
+            if ~strcmp(callback.type,'anonymous')
+                name = ['@' name];              
+            end
         end
 
         function ret = checkPossiblePerpLine(line)
@@ -537,8 +684,14 @@ classdef ExportScript < handle
             expStr = strjoin(repmat("%s",1,size),',');
         end
 
+        function str = formatSingleValue(value,precision)
+            format = ['%.' num2str(precision) 'f'];
+            comp = compose(format,value);
+            str = comp{1};
+        end
+        
         function str = formatValue(value,precision)
-            format = '%.' + string(precision) +'f';
+            format = ['%.' num2str(precision) 'f'];
             str = "[" + strjoin(compose(format, value),' ') + "]";
         end
 
@@ -549,22 +702,6 @@ classdef ExportScript < handle
                 1:size(value, 1), 'UniformOutput', false);
             
             str = ['[', strjoin(strtrim(rows), '; '), ']'];
-        end
-
-        function callbackname = getusercallback(object)
-            callback = functions(functions(object.callback).workspace{1}.usercallback);
-            callbackname = callback.function;
-            if ~strcmp(callback.type,'anonymous')
-                callbackname = ['@' callbackname];
-            else
-                %replace workspace variables with actual values
-                values = struct2cell(callback.workspace{1});
-                labels = fieldnames(callback.workspace{1});
-                for i = 1:length(labels)
-                    callbackname = regexprep(callbackname, ...
-                        [labels{i} '(?=[,|\)])'],num2str(values{i}));
-                end
-            end
         end
 
         function str = circleRadiusName(circle)

@@ -9,8 +9,8 @@ classdef ImportScript < handle
                            'AngleBisector', 'SegmentSequence', ...
                            'Distance', ... %Non-UI editable Geomatplot Types:
                            'Text', 'Eval', 'CustomValue', 'Scalar', ...
-                           'PointSequence'};
-        UnsupportedTypes = {'drawSliderX','Image'};
+                           'PointSequence','drawSliderX'};
+        UnsupportedTypes = {'Image'};
     end
 
     methods(Access=public)
@@ -40,6 +40,10 @@ classdef ImportScript < handle
             inputData = regexprep(inputData, ...
                                 '([A-Za-z0-9]+)\s*=\s*(Distance\([^)]*\));', ...
                                 '$1 = $2; app.createDistanceUI($1);');
+
+            inputData = regexprep(inputData, ...
+                                'drawSliderX\((.*?)(?<!(''|")Visible("|''))\);', ...
+                                'drawSliderX($1,''Visible'',''off'');');
             
             funcPattern = '\nfunction[^\n]*\n(?:[^\n]*\n)*?end';
             functions = regexp(inputData,funcPattern,'match');
@@ -54,6 +58,8 @@ classdef ImportScript < handle
 
     methods(Access=private,Static)
         function createTempFunctions(dirName,functions)
+            if isempty(functions); return; end
+
             if ~exist(dirName, 'dir')
                 mkdir(dirName);
             end

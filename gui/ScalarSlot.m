@@ -1,21 +1,28 @@
 classdef ScalarSlot < handle
     properties
-        minText
-        maxText
         slider
         currentValueText
         labelText
-        value
-        scalarHandle
-        limits
+        Pt
+        val
+        txt
     end
     
     methods(Access=public)
-        function o = ScalarSlot(Geomatplot,parentList)
+        function o = ScalarSlot(parentList,val)
             panel = uipanel(parentList);
-            o.limits = [-5 5];
-            o.value = sum(o.limits)/2;
-            o.scalarHandle = Scalar(Geomatplot,@() ScalarSlot.slidercallb(o));
+            o.Pt = val.inputs{1};
+            depFields = fieldnames(o.Pt.deps);
+            for i = 1:length(depFields)
+                dep = o.Pt.deps.(depFields{i});
+                if isa(dep,'dtext')
+                    o.txt = dep;
+                    break;
+                end
+            end
+            o.val = val;
+            usercallback = functions(functions(val.callback).workspace{1}.usercallback);
+            limits = usercallback.workspace{1}.args.range;
 
             layout = uigridlayout(panel);
             layout.RowHeight = {'1x' '1x'};
@@ -32,7 +39,7 @@ classdef ScalarSlot < handle
 
             o.labelText = uieditfield(topLayout,'text');
             o.labelText.Layout.Column = 1;
-            o.labelText.Value = o.scalarHandle.label;
+            o.labelText.Value = o.Pt.label;
             o.labelText.ValueChangedFcn = @(src,evt) o.editLabelChanged(src,evt);
 
             eqLabel = uibutton(topLayout);
@@ -44,8 +51,8 @@ classdef ScalarSlot < handle
 
             o.currentValueText = uieditfield(topLayout,'numeric');
             o.currentValueText.Layout.Column = 3;
-            o.currentValueText.Limits = o.limits;
-            o.currentValueText.Value = o.value;
+            o.currentValueText.Limits = limits;
+            o.currentValueText.Value = o.val.val;
             o.currentValueText.ValueChangedFcn = @(src,evt) o.editValueChanged(evt);
 
             botLayout = uigridlayout(layout);
@@ -55,25 +62,18 @@ classdef ScalarSlot < handle
             botLayout.Padding = [0 0 0 0];
             botLayout.ColumnSpacing = 1;
 
-            o.minText = uieditfield(botLayout,'numeric');
-            o.minText.Layout.Column = 1;
-            o.minText.Value = o.limits(1);
-            o.minText.Limits = [-Inf o.limits(2)];
-            o.minText.ValueChangedFcn = @(src,evt) o.minValueChanged(evt);
+            minText = uilabel(botLayout);
+            minText.Text = num2str(limits(1));
 
             o.slider = uislider(botLayout);
-            o.slider.Layout.Column = 2;
-            o.slider.Limits = o.limits;
+            o.slider.Limits = limits;
             o.slider.MajorTicks = [];
             o.slider.MinorTicks = [];
-            o.slider.Value = o.value;
+            o.slider.Value = o.val.val;
             o.slider.ValueChangingFcn = @(src,evt) o.sliderValueChanged(evt);
 
-            o.maxText = uieditfield(botLayout,'numeric');
-            o.maxText.Layout.Column = 3;
-            o.maxText.Value = o.limits(2);
-            o.maxText.Limits = [o.limits(1) Inf];
-            o.maxText.ValueChangedFcn = @(src,evt) o.maxValueChanged(evt);
+            maxText = uilabel(botLayout);
+            maxText.Text = num2str(limits(2));
         end
         
     end % public
@@ -81,48 +81,34 @@ classdef ScalarSlot < handle
     methods(Access=private)
         function editValueChanged(o,evt)
             o.updateValue(evt.Value);
-            o.slider.Value = o.value;
+            o.slider.Value = evt.Value;
         end
         
-        function minValueChanged(o,evt)
-            o.limits(1) = evt.Value;
-            o.maxText.Limits = [o.limits(1) Inf];
-            o.intervalChanged();
-        end
-
-        function maxValueChanged(o,evt)
-            o.limits(2) = evt.Value;
-            o.minText.Limits = [-Inf o.limits(2)];
-            o.intervalChanged();
-        end
-
         function sliderValueChanged(o,evt)
             o.updateValue(evt.Value);
-            o.currentValueText.Value = o.value;
+            o.currentValueText.Value = evt.Value;
         end
 
         function editLabelChanged(o,src,evt)
-            if ~Utils.renameLabel(o.scalarHandle,evt.Value)
-                src.Value = o.scalarHandle.label;
+            if ~Utils.renameLabel(o.Pt,evt.Value)
+                src.Value = o.Pt.label;
+            else
+                o.Pt.static_update(o.Pt.fig,struct('EventName', 'ROIMoved'));
             end
         end
 
-        function intervalChanged(o)
-            o.updateValue(sum(o.limits) / 2);
-            o.slider.Limits = o.limits;
-            o.slider.Value = o.value;
-            o.currentValueText.Limits = o.limits;
-            o.currentValueText.Value = o.value;
-        end
-
         function updateValue(o,value)
-            o.value = value;
-            o.scalarHandle.update();
+            startPos = o.Pt.inputs{2}.inputs{1}.fig.Position;
+            slideLen = o.Pt.inputs{2}.inputs{2}.fig.Position - startPos;
+            range = o.currentValueText.Limits;
+            pos = startPos + [slideLen(1) * ((value - range(1))/diff(range)),0];
+            o.Pt.updatePlot(pos);
+            o.Pt.static_update(o.Pt.fig,struct('EventName', 'ROIMoved'));
         end
 
         function selectScalar(o,~,~)
-            go = o.scalarHandle.parent;
-            go.pushData(o.scalarHandle);
+            go = o.val.parent;
+            go.pushData(o.val);
         end
     end % private
 

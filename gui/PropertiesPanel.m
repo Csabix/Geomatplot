@@ -19,7 +19,9 @@ classdef PropertiesPanel < handle
             elseif isa(geometry,'dlines')
                 o = createLinePanel(o,fig,pos,geometry);
             elseif isa(geometry,'dpolygon')
-                o = createPolygonPanel(o,fig,pos,geometry);
+                o = createDPolygonPanel(o,fig,pos,geometry);
+            elseif isa(geometry,'mpolygon')
+                o = createMPolygonPanel(o,fig,pos,geometry);
             end
         end
 
@@ -79,7 +81,7 @@ classdef PropertiesPanel < handle
             markerButton.ButtonPushedFcn = @(~,~) o.switchMarkerPanel(size,[1 5]);
         end
 
-        function o = createPolygonPanel(o,fig,pos,geometry)
+        function o = createDPolygonPanel(o,fig,pos,geometry)
             o.geometry = geometry;
             o.propPanel = uipanel(fig);
             o.propPanel.Position = [pos + [10 -50], 105, 35];
@@ -93,6 +95,17 @@ classdef PropertiesPanel < handle
 
             lineColorDropdown = o.createColorDropdown(grid,[1 3],@(src,evt) o.setEdgeColor(evt),"Line color");
             lineColorDropdown.Value = o.geometry.fig.EdgeColor;
+        end
+
+        function o = createMPolygonPanel(o,fig,pos,geometry)
+            o.geometry = geometry;
+            o.propPanel = uipanel(fig);
+            o.propPanel.Position = [pos + [10 -50], 35, 35];
+
+            grid = PropertiesPanel.createContainerGrid(o.propPanel,{{25}, {25}},[5 5 5 5]);
+            addlistener (grid, 'ButtonDown', @(~,~) o.closeSubPanels);
+            colorDropdown = o.createColorDropdown(grid,[1 1],@(src,evt) o.setColor(evt),"Color");
+            colorDropdown.Value = o.geometry.fig.Color;
         end
     
         function colorDropdown = createColorDropdown(o,grid,layout,valueChangedFcn,tooltip)

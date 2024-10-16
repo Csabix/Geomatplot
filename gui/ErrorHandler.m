@@ -35,7 +35,7 @@ classdef ErrorHandler
             ErrorHandler.decideError(o,data,expected);
         end
 
-        function polygonError(o,data)
+        function dpolygonError(o,data)
             expected = "{''point_base'',''dpointseq'',''polygon_base''}";
             ErrorHandler.decideError(o,data,expected);
         end
@@ -82,7 +82,7 @@ classdef ErrorHandler
             expected = "{''point_base''," + ...
                 "{''point_base'',''dpointseq'',''dcircle'',''dlines'',''polygon_base''}}," + newline + ...
                 "{''dcircle'',''point_base''}," + newline + ...
-                "{''dlines'',''point_base''}";
+                "{{''dlines'',''polygon_base''},''point_base''}";
             ErrorHandler.decideError(o,data,expected);
         end
 
@@ -144,6 +144,12 @@ classdef ErrorHandler
         function distanceError(o,data)
             expected = "{''point_base'',{''point_base'',''dpointseq'',''dcircle'',''dlines'',''polygon_base''}}";
             ErrorHandler.decideError(o,data,expected);
+        end
+
+        function mpolygonError(o,data)
+            expected = "{''struct''}";
+            check = length(data) < 3;
+            ErrorHandler.decideSequenceError(o,data,expected,check,"Not enough input!");
         end
     end
 

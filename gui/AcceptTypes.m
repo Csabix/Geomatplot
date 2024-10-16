@@ -51,7 +51,7 @@ classdef AcceptTypes
             accepted = AcceptTypes.acceptGeometryByPattern(data,{'point_base','point_base','point_base'});
         end
 
-        function accepted = acceptPolygon(data)
+        function accepted = acceptDPolygon(data)
             types = {'point_base','dpointseq','polygon_base'};
             AcceptTypes.setSelected(data{end},true);
             check_type = @(x) any(cellfun(@(type) isa(x,type), types));
@@ -104,7 +104,7 @@ classdef AcceptTypes
             patterns = {
                 {'point_base',{'point_base','dpointseq','dcircle','dlines','polygon_base'}}
                 {'dcircle','point_base'}
-                {'dlines','point_base'}
+                {{'dlines','polygon_base'},'point_base'}
                 };
             accepted = AcceptTypes.acceptGeometryByPatterns(data,patterns);
         end
@@ -162,6 +162,12 @@ classdef AcceptTypes
         function accepted = acceptDistance(data)
             pattern = {'point_base',{'point_base','dpointseq','dcircle','dlines','polygon_base'}};
             accepted = AcceptTypes.acceptGeometryByPattern(data,pattern);
+        end
+
+        function accepted = acceptMPolygon(data,shouldAccept)
+            types = {'struct'};
+            checks = length(data) < 3;
+            accepted = AcceptTypes.acceptSequencedInputGeometry(data,shouldAccept,types,checks);  
         end
     end % static public
 
@@ -227,15 +233,15 @@ classdef AcceptTypes
             if isa(elem,'point_base')
                 fig = elem.fig;
                 if selected; fig.MarkerSize = fig.MarkerSize + 2;
-                else; fig.MarkerSize = fig.MarkerSize - 2; end
+                else; fig.MarkerSize = max(fig.MarkerSize - 2,1); end
             elseif isa(elem,'dlines')
                 fig = elem.fig;
                 if selected; fig.LineWidth = fig.LineWidth + 1;
-                else; fig.LineWidth = fig.LineWidth - 1; end
+                else; fig.LineWidth = max(fig.LineWidth - 1,1); end
             elseif isa(elem,'polygon_base')
                 fig = elem.fig;
                 if selected; fig.FaceAlpha = fig.FaceAlpha + 0.4;
-                else; fig.FaceAlpha = fig.FaceAlpha - 0.4; end
+                else; fig.FaceAlpha = max(fig.FaceAlpha - 0.4,0.15); end
             end
         end
     end % static private

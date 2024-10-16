@@ -33,7 +33,7 @@ classdef DrawGeometry
             AngleBisector(o,data{1},data{2},data{3},':');
         end
     
-        function drawPolygon(o,data)
+        function drawDPolygon(o,data)
             Polygon(o,data);
         end
 
@@ -98,6 +98,15 @@ classdef DrawGeometry
 
         function drawParallelLine(o,data)
             ParallelLine(o,data{1},data{2},data{3});
+        end
+
+        function drawMPolygon(o,data)
+            N = numel(data);
+            rawData = zeros(N, 2);
+            for i = 1:N
+                rawData(i,:) = [data{i}.x data{i}.y];
+            end
+            Polygon(o,rawData);
         end
     end % static public
 end

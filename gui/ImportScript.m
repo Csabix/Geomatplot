@@ -65,9 +65,9 @@ classdef ImportScript < handle
             end
             
             for i = 1:length(functions)
-                fileName = regexp(functions{i},'function\s\w+\s=\s(\w+)', ...
-                    'tokens','once');
-                fid = fopen([dirName '\\' fileName{1} '.m'], 'w');
+                fileName = regexp(functions{i},'\nfunction(\s.*?=\s|\s)(\w+)\(', ...
+                    'tokens');
+                fid = fopen([dirName '\\' fileName{1}{2} '.m'], 'w');
                 fprintf(fid, '%s\n\n', functions{i});
                 fclose(fid);
             end

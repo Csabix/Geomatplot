@@ -31,10 +31,11 @@ classdef ExportScript < handle
                         string(moveable.fig.MarkerSize));
                    o.addLabel(string(moveable.label));
                 elseif isa(moveable,'mpolygon')
-                    fprintf(fileID,"%s = Polygon('%s',%s);\n", ...
+                    fprintf(fileID,"%s = Polygon('%s',%s,%s);\n", ...
                         moveable.label, ...
                         moveable.label, ...
-                        ExportScript.formatmpoly(moveable.fig.Position,o.decimals));
+                        ExportScript.formatmpoly(moveable.fig.Position,o.decimals), ...
+                        mat2str(moveable.fig.Color));
                 end
             end
             depFields = fieldnames(go.deps);
@@ -131,7 +132,8 @@ classdef ExportScript < handle
                         dep = o.go.deps.(depFields{i});
                         if ~isequal(dep,circle) && isa(dep,'dcircle') && ...
                             isequal(dep.center,center.inputs{1}) && ...
-                            ExportScript.isCallbackNamed(center,'mirror_point2')
+                            (ExportScript.isCallbackNamed(center,'mirror_point2point') || ...
+                            ExportScript.isCallbackNamed(center,'mirror_point2segment'))
                            origCircle = dep;
                            break;
                         end
@@ -219,7 +221,9 @@ classdef ExportScript < handle
             foundCircle = false;
             for i = 1:length(depFields)
                 dep = o.go.deps.(depFields{i});
-                if isa(dep,'dcircle') && isequal(dep.center,point.inputs{1})
+                if isa(dep,'dcircle') && isequal(dep.center,point.inputs{1}) && ...
+                   (ExportScript.isCallbackNamed(point,'mirror_point2point') || ...
+                    ExportScript.isCallbackNamed(point,'mirror_point2segment'))
                    foundCircle = true;
                    break;
                 end
@@ -651,7 +655,7 @@ classdef ExportScript < handle
             elseif ischar(val) || isstring(val)
                 str = sprintf('"%s"', char(val));
             elseif isstruct(val)
-                str = ExportScript.struct2str(val);
+                str = o.struct2str(val);
             else
                 throw(MException('ExportFigure:val2str','Unsupported type!'));
             end

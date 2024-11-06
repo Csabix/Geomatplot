@@ -8,7 +8,7 @@ classdef ExportScript < handle
     end
 
     methods(Access=public)
-        function o = ExportScript(go,outputFile,inputs,tempfolder)
+        function o = ExportScript(go,outputFile,inputs,dirName)
             o.go = go;
             o.finishedLabels = [];
             o.decimals = inputs{1};
@@ -52,8 +52,8 @@ classdef ExportScript < handle
             end
 
             %Functions
-            if exist(tempfolder, 'dir')
-                fileList = {dir(fullfile(tempfolder, '*.m')).name};
+            if exist(dirName, 'dir')
+                fileList = {dir(fullfile(dirName, '*.m')).name};
                 for i = 1:length(fileList)
                     rawdata = importdata(fileList{i});
                     if isempty(rawdata); continue; end

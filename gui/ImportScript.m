@@ -14,7 +14,7 @@ classdef ImportScript < handle
     end
 
     methods(Access=public)
-        function o = ImportScript(app,inputFile,go,folderName) %#ok<INUSD>
+        function o = ImportScript(app,inputFile,go,dirName) %#ok<INUSD>
             inputData = strjoin(importdata(inputFile),'\n');
             inputData = regexprep(inputData, 'clf;', '');
 
@@ -50,7 +50,7 @@ classdef ImportScript < handle
 
             code = regexprep(inputData,funcPattern,'');
 
-            ImportScript.createTempFunctions(folderName,functions);
+            ImportScript.createTempFunctions(dirName,functions);
 
             eval(code);
         end
@@ -59,10 +59,12 @@ classdef ImportScript < handle
     methods(Access=private,Static)
         function createTempFunctions(dirName,functions)
             if isempty(functions); return; end
-
-            if ~exist(dirName, 'dir')
-                mkdir(dirName);
+            if isdeployed
+                throw(MException('ImportScript:functions',['External functions are' ...
+                    ' not supported in deployed application!']));
             end
+
+            if ~exist(dirName, 'dir'); mkdir(dirName); end
             
             for i = 1:length(functions)
                 fileName = regexp(functions{i},'\nfunction(\s.*?=\s|\s)(\w+)\(', ...
@@ -72,11 +74,7 @@ classdef ImportScript < handle
                 fclose(fid);
             end
 
-            if ~isdeployed
-                addpath([pwd '\\' dirName]);
-            else
-                throw(MException('ImportScript:functions','Functions aren''t supported in deployed application!'));
-            end
+            addpath(dirName);
         end
     end
 end

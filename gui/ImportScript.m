@@ -71,8 +71,12 @@ classdef ImportScript < handle
                 fprintf(fid, '%s\n\n', functions{i});
                 fclose(fid);
             end
-            
-            addpath([pwd '\\' dirName]);
+
+            if ~isdeployed
+                addpath([pwd '\\' dirName]);
+            else
+                throw(MException('ImportScript:functions','Functions aren''t supported in deployed application!'));
+            end
         end
     end
 end

@@ -102,7 +102,7 @@ classdef ExportScript < handle
             elseif isa(dep,'dcustomvalue'); o.exportdcustomvalue(dep);
             elseif isa(dep,'rpoint'); o.exportrpoint(dep);
             else
-                throw(MException('ExportFigure:exportDependent','Unknown type!'));
+                throw(MException('ExportScript:exportDependent','Unknown type!'));
             end
         end
 
@@ -482,7 +482,7 @@ classdef ExportScript < handle
                    ExportScript.isCallbackNamed(line,'paralinewithdist')
                 o.exportLineWithType(line,"ParallelLine");
             else
-                throw(MException('ExportFigure:exportdlines','Unknown type!'));
+                throw(MException('ExportScript:exportdlines','Unknown type!'));
             end
         end
 
@@ -657,7 +657,7 @@ classdef ExportScript < handle
             elseif isstruct(val)
                 str = o.struct2str(val);
             else
-                throw(MException('ExportFigure:val2str','Unsupported type!'));
+                throw(MException('ExportScript:val2str','Unsupported type!'));
             end
         end
     end % private

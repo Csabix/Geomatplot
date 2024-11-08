@@ -1,4 +1,4 @@
-classdef ScalarSlot < handle
+classdef SliderSlot < handle
     properties
         slider
         currentValueText
@@ -9,7 +9,7 @@ classdef ScalarSlot < handle
     end
     
     methods(Access=public)
-        function o = ScalarSlot(parentList,val)
+        function o = SliderSlot(parentList,val)
             panel = uipanel(parentList);
             o.Pt = val.inputs{1};
             depFields = fieldnames(o.Pt.deps);
@@ -47,7 +47,7 @@ classdef ScalarSlot < handle
             eqLabel.HorizontalAlignment = 'center';
             eqLabel.Text = '=';
             eqLabel.Tooltip = 'Click to select scalar for geometries.';
-            eqLabel.ButtonPushedFcn = @(src,evt) o.selectScalar(src,evt);
+            eqLabel.ButtonPushedFcn = @(src,evt) o.selectSlider(src,evt);
 
             o.currentValueText = uieditfield(topLayout,'numeric');
             o.currentValueText.Layout.Column = 3;
@@ -106,7 +106,7 @@ classdef ScalarSlot < handle
             o.Pt.static_update(o.Pt.fig,struct('EventName', 'ROIMoved'));
         end
 
-        function selectScalar(o,~,~)
+        function selectSlider(o,~,~)
             go = o.val.parent;
             go.pushData(o.val);
         end

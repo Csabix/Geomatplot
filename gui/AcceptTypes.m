@@ -166,8 +166,8 @@ classdef AcceptTypes
 
         function accepted = acceptMPolygon(data,shouldAccept)
             types = {'struct'};
-            checks = length(data) < 3;
-            accepted = AcceptTypes.acceptSequencedInputGeometry(data,shouldAccept,types,checks);  
+            check = length(data) < 3;
+            accepted = AcceptTypes.acceptSequencedInputGeometry(data,shouldAccept,types,check);
         end
     end % static public
 

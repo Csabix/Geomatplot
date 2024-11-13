@@ -7,7 +7,7 @@ end
 methods
     function o = dimage(parent,label,inputs,callback,c0,c1,args,options)
         args = namedargs2cell(args);
-        fig = imagesc('XData',[0 1],'YData',[0 1],'CData',0,args{:});
+        fig = imagesc(parent.ax,'XData',[0 1],'YData',[0 1],'CData',0,args{:});
         uistack(fig,'bottom');
         o = o@dependent(parent,label,fig,inputs,[],false);
         if nargin >= 8; o.Resolution = options.Resolution; end

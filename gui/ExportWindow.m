@@ -21,7 +21,7 @@ function result = ExportWindow(mainFigure)
     precisionField.Value = 2;
 
     clfLabel = uilabel(grid);
-    clfLabel.Text = "Include CLF:";
+    clfLabel.Text = "Include clf:";
     clfLabel.Tooltip = "Include a clf; at the beginning.";
     clfCheckbox = uicheckbox(grid);
     clfCheckbox.Value = 1;

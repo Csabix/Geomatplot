@@ -101,6 +101,7 @@ classdef ExportScript < handle
             elseif isa(dep,'dtext'); o.exportdtext(dep);
             elseif isa(dep,'dcustomvalue'); o.exportdcustomvalue(dep);
             elseif isa(dep,'rpoint'); o.exportrpoint(dep);
+            elseif isa(dep,'dimage'); o.exportdimage(dep);
             else
                 throw(MException('ExportScript:exportDependent','Unknown type!'));
             end
@@ -331,6 +332,31 @@ classdef ExportScript < handle
                 mat2str(rpoint.fig.Color), ...
                 string(rpoint.fig.MarkerSize));
             o.addLabel(string(rpoint.label));
+        end
+
+        function exportdimage(o,image)
+            callbackname = ExportScript.getUserCallbackName(image);
+            o.exportWorkspace(image);
+            [size,labels] = o.checkInputs(image);
+            if isa(image.corner0,'double'); corner0 = ExportScript.formatValue(image.corner0,o.decimals);
+            else; corner0 = image.corner0.label; end
+            if isa(image.corner1,'double'); corner1 = ExportScript.formatValue(image.corner1,o.decimals);
+            else; corner1 = image.corner1.label; end
+            if ExportScript.isCallbackNamed(image,'cpu'); device = "CPU";
+            else; device = "GPU"; end
+            if ExportScript.isCallbackNamed(image,'cplx'); repres = "complex";
+            else; repres = "real"; end
+            if ExportScript.isCallbackNamed(image,'arrayfun'); callback = "vectorize";
+            else; callback = "matrix"; end
+            fprintf(o.fileID,"%s = Image('%s'," + ExportScript.genouts(size) +",%s,%s,%s," + ...
+                "Resolution=%s,CallbackType='%s'," + ...
+                "Device='%s',Representation='%s');\n", ...
+                image.label, image.label, ...
+                labels, callbackname, ...
+                corner0, corner1, ...
+                string(length(image.fig.CData)),callback, ...
+                device, repres);
+            o.addLabel(string(image.label));
         end
 
         function exportClosestPoint(o,point)

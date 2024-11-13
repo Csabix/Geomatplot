@@ -9,7 +9,7 @@ classdef ImportScript < handle
                            'AngleBisector', 'SegmentSequence', ...
                            'Distance', ... %Non-UI editable Geomatplot Types:
                            'Text', 'Eval', 'CustomValue', 'Scalar', ...
-                           'PointSequence','drawSliderX'};
+                           'PointSequence','drawSliderX', 'Image'};
         UnsupportedTypes = {'Image'};
     end
 
@@ -17,17 +17,6 @@ classdef ImportScript < handle
         function o = ImportScript(app,inputFile,go,dirName) %#ok<INUSD>
             inputData = strjoin(importdata(inputFile),'\n');
             inputData = regexprep(inputData, 'clf;', '');
-
-            for i = 1:length(o.UnsupportedTypes)
-                match = regexp(inputData,[o.UnsupportedTypes{i} '\('],'match');
-                if ~isempty(match)
-                    uialert(go.ax.Parent ...
-                        ,"Import failed." + newline + ...
-                         "The file contains unsupported type: '" + o.UnsupportedTypes{i} + "'!", ...
-                        "Unsupported Type");
-                    return;
-                end
-            end
 
             inputData = regexprep(inputData,'xlim\(([^)]*)\);','go.ax.XLim = $1;');
             inputData = regexprep(inputData,'ylim\(([^)]*)\);','go.ax.YLim = $1;');

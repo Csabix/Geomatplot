@@ -18,26 +18,13 @@ classdef ExportScript < handle
             if inputs{3} ~= 0; fprintf(fileID,"%% %s",outputFile); end
 
             fprintf(fileID,"\n");
+
             movFields = fieldnames(go.movs);
             for i = 1:length(movFields)
-                moveable = go.movs.(movFields{i});
-                if isa(moveable,'rpoint') %skip (processed in dependents)
-                elseif isa(moveable,'mpoint')
-                    fprintf(fileID,"%s = Point('%s',%s,%s,%s);\n", ...
-                        moveable.label, ...
-                        moveable.label, ...
-                        ExportScript.formatValue(moveable.value,o.decimals), ...
-                        mat2str(moveable.fig.Color), ...
-                        string(moveable.fig.MarkerSize));
-                   o.addLabel(string(moveable.label));
-                elseif isa(moveable,'mpolygon')
-                    fprintf(fileID,"%s = Polygon('%s',%s,%s);\n", ...
-                        moveable.label, ...
-                        moveable.label, ...
-                        ExportScript.formatmpoly(moveable.fig.Position,o.decimals), ...
-                        mat2str(moveable.fig.Color));
-                end
+                mov = go.movs.(movFields{i});
+                o.exportMoveable(mov);
             end
+
             depFields = fieldnames(go.deps);
             for i = 1:length(depFields)
                 dep = go.deps.(depFields{i});
@@ -67,12 +54,8 @@ classdef ExportScript < handle
 
     methods(Access=private)
         function checkLabel(o,object)
-            missing = ~ismember(object.label,o.finishedLabels);
-            if missing
-                if isa(object,'dependent')
-                    o.exportDependent(object);
-                end
-            end
+            if ismember(object.label,o.finishedLabels); return; end
+            if isa(object,'dependent'); o.exportDependent(object); end
         end
 
         function [size,labels] = checkInputs(o,object)
@@ -105,6 +88,32 @@ classdef ExportScript < handle
             else
                 throw(MException('ExportScript:exportDependent','Unknown type!'));
             end
+        end
+
+        function exportMoveable(o,mov)
+            if isa(mov,'rpoint') %skip (processed in dependents)
+            elseif isa(mov,'mpoint'); o.exportmpoint(mov);
+            elseif isa(mov,'mpolygon'); o.exportmpolygon(mov);
+            else
+                throw(MException('ExportScript:exportMoveable','Unknown type!'));
+            end
+        end
+
+        function exportmpoint(o,point)
+            fprintf(o.fileID,"%s = Point('%s',%s,%s,%s);\n", ...
+                point.label, ...
+                point.label, ...
+                ExportScript.formatValue(point.value,o.decimals), ...
+                mat2str(point.fig.Color), ...
+                string(point.fig.MarkerSize));
+        end
+
+        function exportmpolygon(o,polygon)
+            fprintf(o.fileID,"%s = Polygon('%s',%s,%s);\n", ...
+                polygon.label, ...
+                polygon.label, ...
+                ExportScript.formatmpoly(polygon.fig.Position,o.decimals), ...
+                mat2str(polygon.fig.Color));
         end
 
         function exportCircle(o,circle)

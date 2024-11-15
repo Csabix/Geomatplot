@@ -10,7 +10,6 @@ classdef ImportScript < handle
                            'Distance', ... %Non-UI editable Geomatplot Types:
                            'Text', 'Eval', 'CustomValue', 'Scalar', ...
                            'PointSequence','drawSliderX', 'Image'};
-        UnsupportedTypes = {'Image'};
     end
 
     methods(Access=public)

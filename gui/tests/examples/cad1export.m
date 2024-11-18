@@ -1,0 +1,23 @@
+clf; 
+[scal1,a1,txt1] = drawSliderX('a1',[0.00000 1.00000],[-3.14159 1.40000],1.41372,0.41702);
+[scal2,p1,txt2] = drawSliderX('p1',[0.00000 6.28319],[-3.14159 1.20000],1.41372,0.92209);
+[scal3,a2,txt3] = drawSliderX('a2',[0.00000 1.00000],[-1.57080 1.40000],1.41372,0.36016);
+[scal4,p2,txt4] = drawSliderX('p2',[0.00000 6.28319],[-1.57080 1.20000],1.41372,0.58018);
+[scal5,a3,txt5] = drawSliderX('a3',[0.00000 1.00000],[0.00000 1.40000],1.41372,0.00004);
+[scal6,p3,txt6] = drawSliderX('p3',[0.00000 6.28319],[0.00000 1.20000],1.41372,1.17031);
+[scal7,a4,txt7] = drawSliderX('a4',[0.00000 1.00000],[1.57080 1.40000],1.41372,0.07558);
+[scal8,p4,txt8] = drawSliderX('p4',[0.00000 6.28319],[1.57080 1.20000],1.41372,2.17122);
+custom1 = CustomValue('custom1',scal1,scal3,scal5,scal7,@horzcat);
+custom2 = CustomValue('custom2',scal2,scal4,scal6,scal8,@horzcat);
+n = 4;
+graph = @(f,t,a,p)[t,f(t,a,p)];
+f = @(t,a,p)sum(a.*sin(p+t.*2.^(1:n)),2);
+curve1 = Curve('curve1',custom1,custom2,@(t,a,p)graph(f,t*2*pi-pi,a,p),'-',2,'Color',[0 0 1]);
+n = 4;
+f = @(t,a,p)sum(a.*sin(p+t.*2.^(1:n)),2);
+df = @(t,a,p)(f(t+0.0001,a,p)-f(t-0.0001,a,p))/0.0001;
+graph = @(f,t,a,p)[t,f(t,a,p)];
+g = @(t,a,p)f(t,a,p)./(df(t,a,p)<0);
+curve2 = Curve('curve2',custom1,custom2,@(t,a,p)graph(g,t*2*pi-pi,a,p),'-',3,'Color',[1 0 0]);
+
+xlim([-3.14159 3.14159]); ylim([-1.00000 1.80000]);

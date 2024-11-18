@@ -171,7 +171,7 @@ classdef AcceptTypes
         end
     end % static public
 
-    methods(Access = private,Static)
+    methods(Access = ?AcceptTypesTests,Static)
         function accepted = acceptGeometryByPattern(data,pattern)
             accepted = 1;
             AcceptTypes.setSelected(data{end},true);

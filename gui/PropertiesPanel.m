@@ -6,6 +6,7 @@ classdef PropertiesPanel < handle
 
     properties (Access = private)
         propPanel
+        path
     end
 
     events
@@ -33,6 +34,7 @@ classdef PropertiesPanel < handle
 
     methods(Access = private)
         function o = createPointPanel(o,fig,pos,geometry)
+            o.path = fileparts(mfilename('fullpath'));
             o.geometry = geometry;
             o.propPanel = uipanel(fig);
             o.propPanel.Position = [pos + [10 -50], 105, 35];
@@ -47,7 +49,7 @@ classdef PropertiesPanel < handle
             labelButton.Layout.Column = 2;
             labelButton.Tooltip = "Label";
             labelButton.Text = "";
-            labelButton.Icon = imread("gui\resources\Label.png");
+            labelButton.Icon = fullfile(o.path, 'resources', 'Label.png');
             labelButton.ButtonPushedFcn = @(~,~) o.switchLabelPanel;
 
             size = geometry.fig.MarkerSize - 2;
@@ -56,11 +58,12 @@ classdef PropertiesPanel < handle
             markerButton.Layout.Column = 3;
             markerButton.Tooltip = "Marker";
             markerButton.Text = "";
-            markerButton.Icon = imread("gui\resources\Marker.png");
+            markerButton.Icon = fullfile(o.path, 'resources', 'Marker.png');
             markerButton.ButtonPushedFcn = @(~,~) o.switchMarkerPanel(size,[1 10]);
         end
 
         function o = createLinePanel(o,fig,pos,geometry)
+            o.path = fileparts(mfilename('fullpath'));
             o.geometry = geometry;
             o.propPanel = uipanel(fig);
             o.propPanel.Position = [pos + [10 -50], 105, 35];
@@ -82,6 +85,7 @@ classdef PropertiesPanel < handle
         end
 
         function o = createDPolygonPanel(o,fig,pos,geometry)
+            o.path = fileparts(mfilename('fullpath'));
             o.geometry = geometry;
             o.propPanel = uipanel(fig);
             o.propPanel.Position = [pos + [10 -50], 105, 35];
@@ -98,6 +102,7 @@ classdef PropertiesPanel < handle
         end
 
         function o = createMPolygonPanel(o,fig,pos,geometry)
+            o.path = fileparts(mfilename('fullpath'));
             o.geometry = geometry;
             o.propPanel = uipanel(fig);
             o.propPanel.Position = [pos + [10 -50], 35, 35];
@@ -127,10 +132,10 @@ classdef PropertiesPanel < handle
 
         function createLinestyleDropdown(o,grid,layout)
             styles = {'-','--',':','-.'};
-            icons = {'gui/resources/LinestyleSolid.png'
-                     'gui/resources/LinestyleDashed.png'
-                     'gui/resources/LinestyleDotted.png'
-                     'gui/resources/LinestyleDashdotted.png'
+            icons = {fullfile(o.path, 'resources', 'LinestyleSolid.png')
+                     fullfile(o.path, 'resources', 'LinestyleDashed.png')
+                     fullfile(o.path, 'resources', 'LinestyleDotted.png')
+                     fullfile(o.path, 'resources', 'LinestyleDashdotted.png')
                     };
             styleDropdown = uidropdown(grid);
             styleDropdown.ValueChangedFcn = @(src,evt) o.setLinestyle(evt);

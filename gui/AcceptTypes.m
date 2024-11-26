@@ -240,7 +240,7 @@ classdef AcceptTypes
                 else; fig.LineWidth = max(fig.LineWidth - 1,1); end
             elseif isa(elem,'polygon_base')
                 fig = elem.fig;
-                if selected; fig.FaceAlpha = fig.FaceAlpha + 0.4;
+                if selected; fig.FaceAlpha = min(fig.FaceAlpha + 0.4,1.0);
                 else; fig.FaceAlpha = max(fig.FaceAlpha - 0.4,0.15); end
             end
         end

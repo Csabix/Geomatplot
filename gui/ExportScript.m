@@ -136,31 +136,32 @@ classdef ExportScript < handle
             else
                 %2p input
                 origCircle = [];
-                if isa(center,'dpoint')
+                if isa(center,'dpoint') && circle.mirrored
                     depFields = fieldnames(o.go.deps);
                     for i = 1:length(depFields)
                         dep = o.go.deps.(depFields{i});
                         if ~isequal(dep,circle) && isa(dep,'dcircle') && ...
                             isequal(dep.center,center.inputs{1}) && ...
-                            (ExportScript.isCallbackNamed(center,'mirror_point2point') || ...
-                            ExportScript.isCallbackNamed(center,'mirror_point2segment'))
-                           origCircle = dep;
-                           break;
+                            isequal(dep.radius,circle.radius)
+                            origCircle = dep;
+                            break;
                         end
                     end
                 end
                 if isempty(origCircle)
                     if isempty(circle.gen_dist) 
+                        radLabel = "~";
                         o.checkLabel(radius);
                         radPoint = radius;
                     else
+                        radLabel = circle.radius.label;
                         radPoint = radius.inputs{2};
                         o.checkLabel(radPoint);
                     end
                     o.checkLabel(center);
                     fprintf(o.fileID,"[%s,~,%s] = Circle('%s',%s,%s,'%s',%s,'Color',%s);\n", ...
                         circle.label, ...
-                        ExportScript.circleRadiusName(circle), ...
+                        radLabel, ...
                         circle.label, ...
                         center.label, ...
                         radPoint.label, ...
@@ -228,24 +229,16 @@ classdef ExportScript < handle
 
         function exportMirrorPoint(o,point)
             depFields = fieldnames(o.go.deps);
-            foundCircle = false;
             for i = 1:length(depFields)
                 dep = o.go.deps.(depFields{i});
-                if isa(dep,'dcircle') && isequal(dep.center,point.inputs{1}) && ...
-                   (ExportScript.isCallbackNamed(point,'mirror_point2point') || ...
-                    ExportScript.isCallbackNamed(point,'mirror_point2segment'))
-                   foundCircle = true;
-                   break;
-                end
+                if isa(dep,'dcircle') && isequal(dep.center,point) && dep.mirrored; return; end
             end
-            if ~foundCircle
-                [size,labels] = o.checkInputs(point);
-                fprintf(o.fileID,"%s = Mirror('%s'," + ExportScript.genouts(size) + ",%s,%s);\n", ...
-                    point.label, point.label, labels, ...
-                    mat2str(point.fig.Color), ...
-                    string(point.fig.MarkerSize));
-                o.addLabel(string(point.label));
-            end
+            [size,labels] = o.checkInputs(point);
+            fprintf(o.fileID,"%s = Mirror('%s'," + ExportScript.genouts(size) + ",%s,%s);\n", ...
+                point.label, point.label, labels, ...
+                mat2str(point.fig.Color), ...
+                string(point.fig.MarkerSize));
+            o.addLabel(string(point.label));
         end
 
         function exportMirrorCircle(o,circle,original)
@@ -580,8 +573,7 @@ classdef ExportScript < handle
             depFields = fieldnames(o.go.deps);
             for i = 1:length(depFields)
                 dep = o.go.deps.(depFields{i});
-                if (isa(dep,'dcircle') && ~isempty(dep.gen_dist) && ...
-                   isequal(dep.gen_dist,distance)) || ...
+                if (isa(dep,'dcircle') && isequal(dep.gen_dist,distance)) || ...
                    (isa(dep,'dcurve') && ...
                    ExportScript.isCallbackNamed(dep,'circ_arc') && ...
                    isequal(dep.inputs{2},distance))
@@ -743,11 +735,6 @@ classdef ExportScript < handle
                 1:size(value, 1), 'UniformOutput', false);
             
             str = ['[', strjoin(strtrim(rows), '; '), ']'];
-        end
-
-        function str = circleRadiusName(circle)
-            if isempty(circle.gen_dist); str = "~";
-            else; str = circle.radius.label; end
         end
     end % static private
 end

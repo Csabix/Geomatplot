@@ -46,7 +46,7 @@ function [h,O,r] = Circle(varargin)
         throw(MException('CircularArc:invalidInputPattern','Unsupported input label types or unknown overload.'));
     end
 
-    h_ = dcircle(parent,label,c_,r_,gen_dist,args);
+    h_ = dcircle(parent,label,c_,r_,gen_dist,false,args);
 
     if nargout >= 1; h = h_; end
     if nargout >= 2; O = c_; end

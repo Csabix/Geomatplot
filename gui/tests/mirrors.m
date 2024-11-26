@@ -1,4 +1,4 @@
-clf; % C:\Users\leven\Desktop\Geomatplot\gui\exportTest.m
+clf;
 A = Point('A',[0.22326 0.49893],[0 0 1],8);
 B = Point('B',[0.33877 0.60989],[0 0 1],8);
 C = Point('C',[0.39144 0.31604],[0 0 1],8);

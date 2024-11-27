@@ -1,0 +1,22 @@
+clf; 
+A = Point('A',[0.24000 0.34000],[0 0 1],8);
+B = Point('B',[0.57000 0.71000],[0 0 1],8);
+C = Point('C',[0.86000 0.11000],[0 0 1],8);
+D = Point('D',[0.61818 0.54064],[1 0 0],8);
+line1 = Line('line1',A,B,'-',1,'Color',[0 0 0]);
+line2 = Line('line2',B,C,'-',1,'Color',[0 0 0]);
+line3 = Line('line3',C,A,'-',1,'Color',[0 0 0]);
+perpln1 = PerpendicularLine('perpln1',D,B,A,':',1,'Color',[0 1 0]);
+E = Intersect(line1,perpln1);
+perpln2 = PerpendicularLine('perpln2',D,B,C,':',1,'Color',[0 1 0]);
+F = Intersect(line2,perpln2);
+perpln3 = PerpendicularLine('perpln3',D,A,C,':',1,'Color',[0 1 0]);
+G = Intersect(perpln3,line3);
+seg1 = Segment('seg1',G,E,'-',2,'Color',[1 0 0]);
+seg2 = Segment('seg2',E,F,'-',2,'Color',[1 0 0]);
+seg3 = Segment('seg3',F,G,'-',2,'Color',[1 0 0]);
+seg4 = Segment('seg4',A,B,'-',1,'Color',[0 0 1]);
+seg5 = Segment('seg5',B,C,'-',1,'Color',[0 0 1]);
+seg6 = Segment('seg6',C,A,'-',1,'Color',[0 0 1]);
+
+xlim([0.00000 1.00000]); ylim([0.00000 1.00000]);

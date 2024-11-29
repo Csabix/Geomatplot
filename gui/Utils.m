@@ -30,7 +30,7 @@ classdef Utils
                 uialert(go.ax.Parent,'This label already exists!','Label Rename Error');
             end
         end
-    end
+    end % static public
 
     methods(Access=private,Static)
         function struct = renameField(struct,oldLabel,newLabel)
@@ -39,6 +39,7 @@ classdef Utils
         end
 
         function changeGeomatplotLabel(Geomatplot,oldLabel,newLabel)
+            %Check every occurence of the label
             if isfield(Geomatplot.movs,oldLabel)
                 Geomatplot.movs = Utils.renameField(Geomatplot.movs,oldLabel,newLabel);
                 depFields = fieldnames(Geomatplot.deps);
@@ -59,6 +60,6 @@ classdef Utils
                 end
             end
         end
-    end
+    end % static private
 end
 

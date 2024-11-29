@@ -15,24 +15,31 @@ classdef ImportScript < handle
     methods(Access=public)
         function o = ImportScript(app,inputFile,go,dirName) %#ok<INUSD>
             inputData = strjoin(importdata(inputFile),'\n');
+            %Remove clf-s
             inputData = regexprep(inputData, 'clf;', '');
 
+            %Modify lims for gui
             inputData = regexprep(inputData,'xlim\(([^)]*)\);','go.ax.XLim = $1;');
             inputData = regexprep(inputData,'ylim\(([^)]*)\);','go.ax.YLim = $1;');
 
+            %Add Geomatplot object to types
             for i = 1:length(o.GeomatplotTypes)
                 inputData = regexprep(inputData, ...
                                 [o.GeomatplotTypes{i} '\('], ...
                                 [o.GeomatplotTypes{i} '(go,']);
             end
+
+            %Add UI function for distances
             inputData = regexprep(inputData, ...
                                 '([A-Za-z0-9]+)\s*=\s*(Distance\([^)]*\));', ...
                                 '$1 = $2; app.createDistanceUI($1);');
 
+            %Hide sliders
             inputData = regexprep(inputData, ...
                                 'drawSliderX\((.*?)(?<!(''|")Visible("|''))\);', ...
                                 'drawSliderX($1,''Visible'',''off'');');
             
+            %Select functions
             funcPattern = '\nfunction[^\n]*\n(?:[^\n]*\n)*?end';
             functions = regexp(inputData,funcPattern,'match');
 

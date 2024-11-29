@@ -151,7 +151,7 @@ classdef ErrorHandler
             check = length(data) < 3;
             ErrorHandler.decideSequenceError(o,data,expected,check,"Not enough input!");
         end
-    end
+    end % static public
 
     methods(Access=private,Static)
         function decideSequenceError(o,data,expected,seqCheck,seqMsg)
@@ -176,6 +176,7 @@ classdef ErrorHandler
         end
 
         function ret = stringizeActualData(data)
+            %Stringize data types for output
             ret = "{";
             for i = 1:length(data)
                     ret = ret + "''" + class(data{i}) + "'',";
@@ -186,6 +187,6 @@ classdef ErrorHandler
         function createErrorMsg(o,expected,actual)
             uialert(o.ax.Parent,"Expected: " + expected + ","+ newline +"but got: " + actual + "!","Parsing Error");
         end
-    end
+    end % static private
 end
 

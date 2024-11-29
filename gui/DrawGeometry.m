@@ -101,6 +101,7 @@ classdef DrawGeometry
         end
 
         function drawMPolygon(o,data)
+            %convert input data for constructor
             N = numel(data);
             rawData = zeros(N, 2);
             for i = 1:N

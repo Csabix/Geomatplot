@@ -98,6 +98,7 @@ classdef SliderSlot < handle
         end
 
         function updateValue(o,value)
+            %Convert value to current slider implementation
             startPos = o.Pt.inputs{2}.inputs{1}.fig.Position;
             slideLen = o.Pt.inputs{2}.inputs{2}.fig.Position - startPos;
             range = o.currentValueText.Limits;

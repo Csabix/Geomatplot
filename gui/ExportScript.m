@@ -19,12 +19,14 @@ classdef ExportScript < handle
 
             fprintf(fileID,"\n");
 
+            %Export moveables
             movFields = fieldnames(go.movs);
             for i = 1:length(movFields)
                 mov = go.movs.(movFields{i});
                 o.exportMoveable(mov);
             end
 
+            %Export dependents
             depFields = fieldnames(go.deps);
             for i = 1:length(depFields)
                 dep = go.deps.(depFields{i});
@@ -59,6 +61,7 @@ classdef ExportScript < handle
         end
 
         function [size,labels] = checkInputs(o,object)
+            %check if inputs are exported yet
             size = length(object.inputs);
             labels = strings([1 size]);
             for i = 1:size
@@ -121,7 +124,7 @@ classdef ExportScript < handle
             radius = circle.radius;
             if isa(center,'dpoint') && ...
                 ExportScript.isCallbackNamed(center,'equidistpoint')
-                % 3p input
+                % 3 point input
                 [~,labels] = o.checkInputs(center);
                 fprintf(o.fileID,"[%s,%s,%s] = Circle('%s',%s,%s,%s,'%s',%s,'Color',%s);\n", ...
                     circle.label, ...
@@ -134,7 +137,8 @@ classdef ExportScript < handle
                     mat2str(circle.fig.Color));
                 o.addLabel([string(circle.label),string(center.label)]);
             else
-                %2p input
+                %2 point input
+                %check for mirrored circle
                 origCircle = [];
                 if isa(center,'dpoint') && circle.mirrored
                     depFields = fieldnames(o.go.deps);
@@ -316,7 +320,7 @@ classdef ExportScript < handle
                 dep = o.go.deps.(depFields{i});
                 if isa(dep,'dscalar') && isequal(dep.inputs{1},rpoint) && ...
                     contains(ExportScript.getUserCallbackName(dep),'@(dp)(dp(1)')
-                    return;
+                    return; %Slider generated rpoint
                 end
             end
             size = length(rpoint.inputs) - 1;
@@ -634,6 +638,7 @@ classdef ExportScript < handle
         end
 
         function exportWorkspace(o,object)
+            %export the workspace of a function
             o.finishedVars = [];
             callback = functions(functions(object.callback).workspace{1}.usercallback);
             o.exportWorkspaceVars(callback);

@@ -206,13 +206,15 @@ classdef AcceptTypes
             if  Utils.checkForDuplicates(data) || (~isempty(data) && ~all(cellfun(check_type, data)))
                 accepted = -1; 
             elseif shouldAccept
-                accepted = 2 * (~additionalDataChecks) - 1;
+                accepted = 2 * (~additionalDataChecks) - 1; % only accept if additionals are correct
             end
 
             if accepted ~= 0; AcceptTypes.resetDataSelection(data); end
         end
 
         function match = checkInputPattern(data,pattern)
+            %similar to drawing.isInputPatternMatching() without checking
+            %input length
             match = true;
             for i = 1:length(data)
                 pat = pattern{i};

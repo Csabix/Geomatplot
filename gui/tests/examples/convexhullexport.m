@@ -33,9 +33,9 @@ seq1 = PointSequence(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,A1,B1,C
 [scal1,sliderx1,txt1] = drawSliderX('sliderx1',[0.00000 1.00000],[1.00000 1.00000],1.00000,0.00000);
 custom1 = CustomValue('custom1',seq1,scal1,@alphaShape);
 segseq1 = SegmentSequence('segseq1',custom1,@(as)as.Points(boundaryFacets(as)',:),0,'-',1,'Color',[0 1 1]);
-GeomMed = Point('GeomMed',seq1,@weiszfeld_algorithm);
+GeomMed = Point('GeomMed',seq1,@weiszfeld_algorithm,[1 0 0],6);
 
-xlim([-0.19770 1.26640]); ylim([-0.24024 1.22386]);
+xlim([0.00000 1.00000]); ylim([0.00000 1.00000]);
 
 function gm = weiszfeld_algorithm(points)
     tol = 1e-6;

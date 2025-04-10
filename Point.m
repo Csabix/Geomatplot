@@ -61,13 +61,21 @@ function h = Point(varargin)
             callback = [];
         elseif length(inputs) == 1 && (isa(inputs{1},'dpointlineseq')||isa(inputs{1},'polygon_base'))
             isrestricted = true;
-            args = parse_dpoint(varargin{:});
+            if isfield(parent.inivalues, label)
+                position = parent.inivalues.(label);
+                args = parse_mpoint(position,varargin{:});
+            else
+                args = parse_dpoint(varargin{:});
+            end
         else
             throw(MException('Point:invalidInputPattern','Unknown overload.'))
         end
     else
         isdependent = false;
         [inputs,  varargin] = parent.extractInputs(varargin,0,inf,false);
+        if isfield(parent.inivalues, label)
+            position = parent.inivalues.(label);
+        end
         if isempty(inputs) && (isempty(varargin) || ~isa(varargin{1},'function_handle'))
             if ~isempty(position)
                 args = parse_mpoint(position,varargin{:});

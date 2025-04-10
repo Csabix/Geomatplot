@@ -36,6 +36,9 @@ function h = Polygon(varargin)
         args = parse_dpolygon(varargin{:}); % todo check inputs
         h_ = dpolygon(parent,label,inputs,@dpoly_callback,args);
     else
+        if isfield(parent.inivalues, label)
+            position = parent.inivalues.(label);
+        end
         args = parse_mpolygon(position,varargin{:});
         h_ = mpolygon(parent,label,args);
     end

@@ -66,6 +66,7 @@ methods (Static)
             o.move_total_time_m = o.move_total_time_m*(1-rate) + t_total_time*rate;
         case 'ROIMoved'
             o.stop_total_time_m = o.stop_total_time_m*(1-rate) + t_total_time*rate;
+            o.parent.saveCurrentMovablesToIniFile();
         end
     end
 end

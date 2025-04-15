@@ -7,6 +7,8 @@ properties
     acceptFcn % accept function callback
     drawFcn % draw function callback
     errorFcn % error function callback
+    inifile % path to ini file
+    inivalues % struct mapping label -> default value for movables
 end
 properties (Hidden)
     nextCapitalLabel (1,1) int32  = 0;      % 65 = 'A' = 'Z'-25
@@ -16,7 +18,7 @@ end
     
 methods (Access = public)
     
-    function o = Geomatplot(ax)
+    function o = Geomatplot(ax, inifilepath)
         folder = mfilename('fullpath');
         folder = folder(1:end-length(mfilename));
         addpath([folder '/internal/'], [folder '/examples/']);
@@ -42,10 +44,33 @@ methods (Access = public)
             o.movs = struct; o.deps = struct;
             o.ax.UserData = o;
             addlistener(o.ax,'Hit',@o.emptySpace);
+            if nargin == 2
+                o.inifile = inifilepath;
+                try
+                    o.inivalues = load(o.inifile,'-mat').s;
+                catch
+                    o.inivalues = struct;
+                end
+            else
+                o.inifile = [];
+                o.inivalues = struct;
+            end
         else % workaround hack for matlab wtf
             assert(isa(o.ax.UserData,'Geomatplot'));
             o = o.ax.UserData;
         end
+    end
+
+    function saveCurrentMovablesToIniFile(o)
+        if isempty(o.inifile); return; end
+
+        movnames = fieldnames(o.movs);
+        s = struct;
+        for idx = 1:length(movnames)
+            name = movnames{idx};
+            s.(name) = o.getElement(name);
+        end
+        save(o.inifile, "s","-mat") % save values
     end
 
     function h = getHandle(o,label)

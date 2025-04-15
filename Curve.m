@@ -24,7 +24,8 @@ function h = Curve(varargin)
 %   Curve(___,Name,Value)  specifies additional properties using one or more Name,
 %       Value pairs arguments.
 %
-%   h = Curve(___)  returns the created handle.
+%   h = Curve(___)  returns the created handle. The h.fun yields a CustomValue
+%       with the parametric curve @(t)->[x,y] as its .value for easy evaluation.
 %
 %   Name-Value Arguments
 %

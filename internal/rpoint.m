@@ -24,8 +24,12 @@ methods
 end
 methods (Static)
     function outs = parseOutputs(args)
-        if length(args)==1
-            outs{1} = args{1}(:)';
+        if isscalar(args)
+            if isreal(args{1})
+                outs{1} = args{1}(:)';
+            else
+                outs{1} = [real(args{1}(:)) imag(args{1}(:))];
+            end
         elseif length(args)==2
             outs{1} = [args{1}(:) args{2}(:)];
         else

@@ -71,7 +71,11 @@ function h = SegmentSequence(varargin)
             params{i} = varargin{i}.value;
         end
         xy = usercallback(params{:});
-        x = xy(:,1); y = xy(:,2);
+        if isreal(xy)
+            x = xy(:,1); y = xy(:,2);
+        else
+            x = real(xy); y = imag(xy);
+        end
         if breakEvery ~= 0
             len = length(x)/breakEvery;
             x = reshape(vertcat(reshape(x,breakEvery,[]),NaN(1,len)),1,[]);

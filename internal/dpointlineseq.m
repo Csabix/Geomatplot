@@ -21,7 +21,7 @@ methods (Static)
                 outs{1} = xy(1,:);  outs{2} = xy(2,:);
             elseif isempty(xy)
                 %warning 'Callback with empty output.'
-                outs{1} = [];        outs{2} = [];
+                outs{1} = [];       outs{2} = [];
             else
                 error 'Callback output is of the wrong shape.'
             end

@@ -91,6 +91,12 @@ methods (Access = public, Hidden)
             end
         end
     end
+
+    function ret = call_and_parse(o,varargin)
+        outs = cell(1,abs(nargout(o.callback)));
+        [outs{:}] = o.callback(varargin{:},o.inputs{:});
+        ret = o.parseOutputs(outs);
+    end
 end
 
 methods (Access = protected)
@@ -132,6 +138,8 @@ methods (Access = protected)
             ts = tic;                        % (((
             try
                 [outs{:}] = o.callback(varargin{:},o.inputs{:});
+                % call call_and_parse instead? changes times and error
+                % behaviour, but might be better. TODO
             catch ME
                 o.defined = false;
                 o.exception = ME;

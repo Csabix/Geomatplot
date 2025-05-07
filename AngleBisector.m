@@ -20,20 +20,26 @@ function h = AngleBisector(varargin)
 %   h = AngleBisector(___)  returns the created handle.
 %
 %   See also POINT, LINE, SEGMENT, RAY, PerpendicularBisector, INTERSECT
-
+    
     [parent,label,inputs,args] = dlines.parse_inputs(varargin,'angbi',2,4);
+    make_curve = false;
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
         callback = @angle_bisector3;
     elseif drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base','point_base'})
         callback = @angle_bisector4;
+    elseif drawing.isInputPatternMatching(inputs,{'point_base','dcurve'}) % wip
+        make_curve = true;
+        callback = @angle_bissectCurves;
     elseif drawing.isInputPatternMatching(inputs,{'point_base','dlines'}) % wip
         callback = @angle_bissectLines;
     else
         throw(MException('AngleBisector:invalidInputPattern','Unknown overload.'));
     end
-
-    h_ = dlines(parent,label,inputs,callback,args);
-
+    if make_curve
+        h_ = dcurve(parent,label,inputs,callback,args,inputs{2}.Resolution);
+    else
+        h_ = dlines(parent,label,inputs,callback,args);
+    end
     if nargout == 1; h = h_; end
     
 end
@@ -59,5 +65,19 @@ function vv = angle_bissectLines(a,ls)
     b = (p+q)*0.5;
     v = (a-b)*[0 1;-1 0];
     t = -0.5*sum((a-b).*(q-p),2) ./ sum(v.*(q-p),2);
+    vv = 0.5*(a+b)+t.*v;
+end
+
+function vv = angle_bissectCurves(t,A,curve)
+    eps = 1e-7;
+    a = A.value;
+    function r = c(t)
+        ret = curve.call_and_parse(t);
+        r = horzcat(ret{:});
+    end
+    b = c(t);
+    pq = c(t+eps)-c(t-eps);
+    v = (a-b)*[0 1;-1 0];
+    t = -0.5*sum((a-b).*pq,2) ./ sum(v.*pq,2);
     vv = 0.5*(a+b)+t.*v;
 end

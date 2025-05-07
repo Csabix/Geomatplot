@@ -1,4 +1,4 @@
-function [h,O,r,alpha,beta] = CircularArc(varargin)
+function [h,angle,O,r] = CircularArc(varargin)
 % CircularArc  draws an circular arc
 %   CircularArc(O,B,C) draws a circluar arc around O starting from B until it meets the OC line in
 %       anticlockwise direction.
@@ -28,45 +28,33 @@ function [h,O,r,alpha,beta] = CircularArc(varargin)
 %
 %   [h,O,r,alpha,beta] = CircularArc(___)  returns the start angle compared to the x axis.
 %
-%   See also Circle, POINT, DISTANCE, SEGMENT, INTERSECT
+%   See also Circle, CircumcircularArc, DISTANCE, SEGMENT, INTERSECT
 
     [parent,label,inputs,args] = dlines.parse_inputs(varargin,'carc',3,3);
 
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
     % (center, starting_point, third_point) -- third_point sets the arc angle
-        c_ = inputs{1};
-        r_ = Distance(parent,inputs(1:2));
-        beta_ = dscalar(parent, parent.getNextLabel('small'), inputs(1:2), @base_angle);
-        alpha_ = dscalar(parent, parent.getNextLabel('small'), inputs, @angle_between);
+        angle = dscalar(parent, parent.getNextLabel('small'), inputs, @angle_between);
     elseif drawing.isInputPatternMatching(inputs,{'point_base','point_base','dscalar'})
     % (center, starting_point, angle)
-        c_ = inputs{1};
-        r_ = Distance(parent,inputs(1:2));
-        beta_ = dscalar(parent, parent.getNextLabel('small'), inputs(1:2), @base_angle);
-        alpha_ = inputs{3};
+        angle = inputs{3};
     else
         throw(MException('CircularArc:invalidInputPattern','Unsupported input label types or unknown overload.'));
     end
-    
-    h_ = dcurve(parent,label,{c_,r_,beta_,alpha_},@circ_arc,args);
-
-    if nargout >= 1; h = h_; end
-    if nargout >= 2; O = c_; end
-    if nargout >= 3; r = r_; end
-    if nargout >= 4; alpha = alpha_; end
-    if nargout >= 5; beta = beta_; end
+    O = inputs{1};
+    r = Distance(parent,inputs(1:2));
+    h = dcurve(parent,label,{O,r,inputs{2},angle},@circ_arc_fused,args);
     
 end
 
-function v = circ_arc(t,c,r,a,b)
-    t = a.value + b.value*t;
-    v = c.value + r.value*[cos(t) sin(t)];
+function o = polar(A) % deviation from the x-axis [-pi,pi]
+    o = atan2(A(2),A(1));
 end
 
-% deviation of b-a from the x-axis [-pi,pi]
-function o = base_angle(a,b)
-    e = b.value - a.value;
-    o = atan2(e(2),e(1));
+function v = circ_arc_fused(t,O_,r,A,angle)
+    O = O_.value;
+    t = polar(A.value-O) + angle.value*t;
+    v = O + r.value*[cos(t) sin(t)];
 end
 
 % angle between three points [0,2pi]

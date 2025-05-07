@@ -54,8 +54,8 @@ function [h,O,r] = Circle(varargin)
     
 end
 
-function o = equidistpoint(a,b,c)
-    a = a.value; b = b.value; c = c.value;
+function o = equidistpoint(a_,b_,c_)
+    a = a_.value; b = b_.value; c = c_.value;
     n = a-b; m = b-c;
     o = 0.5*[(a+b)*n' (b+c)*m']/[n;m]';
 end

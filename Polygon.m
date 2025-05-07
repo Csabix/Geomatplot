@@ -38,6 +38,7 @@ function h = Polygon(varargin)
     else
         if isfield(parent.inivalues, label)
             position = parent.inivalues.(label);
+            position = position(1:end-1,:);
         end
         args = parse_mpolygon(position,varargin{:});
         h_ = mpolygon(parent,label,args);
@@ -62,6 +63,7 @@ function args = parse_mpolygon(position,color,args) % todo linespec!
         args.LabelTextColor             {drawing.mustBeColor}
         args.LineWidth  (1,1) double    {mustBePositive}
         args.FaceAlpha  (1,1) double    {mustBeInRange(args.FaceAlpha,0,1)} = 0.15
+        args.EdgeAlpha  (1,1) double    {mustBeInRange(args.EdgeAlpha,0,1)} = 1
         args.FaceSelectable (1,1) logical                                   = true
         args.InteractionsAllowed (1,:) char {mustBeMember(args.InteractionsAllowed,{'all','none','translate','reshape'})} = 'all'
     end

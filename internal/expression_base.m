@@ -71,6 +71,10 @@ methods (Hidden)
         args = args{1};
         exp = o.expression;
         exp = expression_base.substituteConstants(exp, o.constants);
+        % sort names to replace correctly
+        lens = cellfun(@strlength, f);
+        [~,ids] = sortrows(lens,'descend');
+        f = f(ids);
         exp = replace(exp, f, f + ".value");
         callbackStr = ['@(' args ')' exp];
         callback = eval(callbackStr);

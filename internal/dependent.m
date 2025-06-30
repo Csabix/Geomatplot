@@ -44,7 +44,13 @@ end
 
 methods
     function o = dependent(parent,label,fig,inputs,callback,hidden)
-        o = o@drawing(parent,label,fig);
+        if nargin == 0
+            params = {};
+        else
+            params = {parent,label,fig};
+        end
+        o = o@drawing(params{:});
+        if nargin ==0; return; end
         o.inputs = inputs;
         o.parent.deps.(label)=o;
         o.hidden = hidden;
@@ -85,6 +91,12 @@ methods (Access = public, Hidden)
             end
         end
     end
+
+    function ret = call_and_parse(o,varargin)
+        outs = cell(1,abs(nargout(o.callback)));
+        [outs{:}] = o.callback(varargin{:},o.inputs{:});
+        ret = o.parseOutputs(outs);
+    end
 end
 
 methods (Access = protected)
@@ -107,7 +119,8 @@ methods (Access = protected)
             h = inputs{i};
             if isa(h,'moveable')
                 o.movs.(h.label) = h;
-            else
+            end
+            if isa(h,'dependent')
                 f = fieldnames(h.movs); % merge structs
                 for j = 1:length(f)
                     o.movs.(f{j}) = h.movs.(f{j});
@@ -126,6 +139,8 @@ methods (Access = protected)
             ts = tic;                        % (((
             try
                 [outs{:}] = o.callback(varargin{:},o.inputs{:});
+                % call call_and_parse instead? changes times and error
+                % behaviour, but might be better. TODO
             catch ME
                 o.defined = false;
                 o.exception = ME;

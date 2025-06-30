@@ -3,8 +3,8 @@ properties
     deps  % struct mapping label -> dependent class handles
 end
 properties (Hidden)
-    move_total_time (1,1) double = 0;
-    stop_total_time (1,1) double = 0;
+    move_total_time_m (1,1) double = 0;
+    stop_total_time_m (1,1) double = 0;
     move_timing_num (1,1) double = 0;
     stop_timing_num (1,1) double = 0;
 end
@@ -14,16 +14,17 @@ methods
         o.parent.movs.(label) = o;
         o.fig.UserData = o;
         o.deps = struct;
-        addlistener(o.fig,'ROIMoved' ,@moveable.update); % todo @update ?
-        addlistener(o.fig,'MovingROI',@moveable.update);
+        addlistener(o.fig,'ROIMoved'  ,@moveable.static_update); % todo @update ?
+        addlistener(o.fig,'MovingROI' ,@moveable.static_update);
+        addlistener(o.fig,'ROIClicked',@drawing.hit);
     end
     function addCallback(o,dep)
         o.deps.(dep.label) = dep;
-        o.fig.bringToFront;
+        o.fig.bringToFront; % TODO why is this here? it seems to mess up the drawing order
     end
 end
 methods (Static)
-    function update(fig,evt)
+    function static_update(fig,evt)
         t_total_stamp = tic;
         o = fig.UserData;
         switch evt.EventName
@@ -62,9 +63,10 @@ methods (Static)
         t_total_time = toc(t_total_stamp);
         switch evt.EventName
         case 'MovingROI'
-            o.move_total_time = o.move_total_time*(1-rate) + t_total_time*rate;
+            o.move_total_time_m = o.move_total_time_m*(1-rate) + t_total_time*rate;
         case 'ROIMoved'
-            o.stop_total_time = o.stop_total_time*(1-rate) + t_total_time*rate;
+            o.stop_total_time_m = o.stop_total_time_m*(1-rate) + t_total_time*rate;
+            o.parent.saveCurrentMovablesToIniFile();
         end
     end
 end

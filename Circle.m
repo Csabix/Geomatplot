@@ -31,19 +31,22 @@ function [h,O,r] = Circle(varargin)
 
     [parent,label,inputs,args] = dlines.parse_inputs(varargin,'circ',2,3);
 
+    gen_dist = [];
     if drawing.isInputPatternMatching(inputs,{'point_base','point_base','point_base'})
         c_ = dpoint(parent,parent.getNextLabel('center'),inputs,@equidistpoint);
         r_ = Distance(parent,{c_,inputs{1}});
+        gen_dist = r_;
     elseif drawing.isInputPatternMatching(inputs,{'point_base','dscalar'})
         c_ = inputs{1}; r_ = inputs{2};
     elseif drawing.isInputPatternMatching(inputs,{'point_base',{'point_base','dpointlineseq','polygon_base'}})
         c_ = inputs{1};
         r_ = Distance(parent,{c_,inputs{2}});
+        gen_dist = r_;
     else
         throw(MException('CircularArc:invalidInputPattern','Unsupported input label types or unknown overload.'));
     end
 
-    h_ = dcircle(parent,label,c_,r_,args);
+    h_ = dcircle(parent,label,c_,r_,gen_dist,false,args);
 
     if nargout >= 1; h = h_; end
     if nargout >= 2; O = c_; end
@@ -51,8 +54,8 @@ function [h,O,r] = Circle(varargin)
     
 end
 
-function o = equidistpoint(a,b,c)
-    a = a.value; b = b.value; c = c.value;
+function o = equidistpoint(a_,b_,c_)
+    a = a_.value; b = b_.value; c = c_.value;
     n = a-b; m = b-c;
     o = 0.5*[(a+b)*n' (b+c)*m']/[n;m]';
 end

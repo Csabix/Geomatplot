@@ -2,7 +2,7 @@ classdef mpolygon < moveable & polygon_base
 methods
     function o=mpolygon(parent,label,args)
         args = namedargs2cell(args);
-        h = drawpolygon(args{:});
+        h = drawpolygon(parent.ax,args{:});
         o = o@moveable(parent,label,h);
     end
 % TODO .value not consistent with dpolygon

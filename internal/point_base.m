@@ -21,6 +21,9 @@ methods
         elseif isa(b,'point_base'); b = epoint.fromDrawing(b); end
         c = a - b;
     end
+    function v = value(o)
+        v = o.fig.Position;
+    end
 end
 
 methods (Access=public,Static,Hidden)

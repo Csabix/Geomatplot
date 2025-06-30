@@ -7,11 +7,11 @@ methods
         end
         hidden = strcmp(args.Visible,'off');
         args = namedargs2cell(args);
-        fig = drawpoint('InteractionsAllowed','none',args{:},'Position',[0 0]);
+        fig = drawpoint(parent.ax,args{:},'Position',[0 0],'Deletable',0);
         o = o@dependent(parent,label,fig,inputs,callback,hidden);
-    end
-    function v = value(o)
-        v = o.fig.Position;
+        addlistener(o.fig,'ROIMoved'  ,@dpoint.move);
+        addlistener(o.fig,'MovingROI' ,@dpoint.move);
+        addlistener(o.fig,'ROIClicked',@drawing.hit);
     end
     function updatePlot(o,pos)
         if ~any(isnan(pos))
@@ -22,9 +22,18 @@ methods
     end
 end
 methods (Static)
+    
+    function move(fig,evt)
+        fig.Position = evt.PreviousPosition;
+    end
+
     function outs = parseOutputs(args)
-        if length(args)==1
-            outs{1} = args{1}(:)';
+        if isscalar(args)
+            if isreal(args{1})
+                outs{1} = args{1}(:)';
+            else
+                outs{1} = [real(args{1}(:)) imag(args{1}(:))];
+            end
         elseif length(args)==2
             outs{1} = [args{1}(:) args{2}(:)];
         else

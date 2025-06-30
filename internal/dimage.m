@@ -1,13 +1,15 @@
 classdef dimage < dependent
 properties
-    Resolution (1,1) double = 1024;
+    Resolution (1,1) double = 1024
     corner0
     corner1
+    img_fun
+    fun = []
 end
 methods
-    function o = dimage(parent,label,inputs,callback,c0,c1,args,options)
+    function o = dimage(parent,label,inputs,callback,c0,c1,args,options,img_fun)
         args = namedargs2cell(args);
-        fig = imagesc('XData',[0 1],'YData',[0 1],'CData',0,args{:});
+        fig = imagesc(parent.ax,'XData',[0 1],'YData',[0 1],'CData',0,args{:});
         uistack(fig,'bottom');
         o = o@dependent(parent,label,fig,inputs,[],false);
         if nargin >= 8; o.Resolution = options.Resolution; end
@@ -23,6 +25,7 @@ methods
             if options.gpuArray; s = s + "GPU."; else; s = s + "CPU."; end
             disp(s);
         end
+        o.img_fun = img_fun;
     end
 
     function v = value(o)
@@ -45,6 +48,13 @@ methods
         end
         o.fig.CData = C;
         [o.fig.XData,o.fig.YData] = o.getRanges;
+    end
+    function f = get.fun(o)
+        if isempty(o.fun)
+            nlabel = o.parent.extractLabel({},'custom');
+            o.fun = dcustomvalue(o.parent,nlabel,{o}, @(o) @(xy) o.img_fun(xy,o.inputs{:}) );
+        end
+        f = o.fun;
     end
     
 end

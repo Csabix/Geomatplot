@@ -8,12 +8,9 @@ methods
         fig = fill(parent.ax,0,0,C,args{:});
         hidden = false;
         o = o@dpointlineseq(parent,label,fig,inputs,callback,hidden);
+        addlistener(o.fig,'Hit',@drawing.hit);
     end
 end
 
 % TODO .value not consistent with mpolygon
-
-methods (Static,Hidden)
-    
-end
 end

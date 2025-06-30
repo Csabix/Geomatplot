@@ -39,10 +39,14 @@ end
 
 methods (Abstract)
 	value(o) % current value: positions matrix or a struct
-    update(o,~)
 end
 
 methods (Access=public,Static,Hidden)
+
+    function hit(fig,~)
+        o = fig.UserData;
+        o.parent.pushData(o);
+    end
 
     function [position,args] = extractPosition(args,maxpositions)
         if nargin <2; maxpositions = 1; end

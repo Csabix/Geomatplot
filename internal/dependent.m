@@ -119,7 +119,8 @@ methods (Access = protected)
             h = inputs{i};
             if isa(h,'moveable')
                 o.movs.(h.label) = h;
-            else
+            end
+            if isa(h,'dependent')
                 f = fieldnames(h.movs); % merge structs
                 for j = 1:length(f)
                     o.movs.(f{j}) = h.movs.(f{j});

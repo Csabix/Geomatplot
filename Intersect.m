@@ -80,7 +80,19 @@ end
 function v = intersect_poly2poly(a,b)
 % maybe try this? https://www.mathworks.com/matlabcentral/fileexchange/22444-minimum-distance-between-two-polygons
     a = a.value; b = b.value; 
-    [v(:,1), v(:,2)] = polyxpoly(a(:,1),a(:,2),b(:,1),b(:,2));
+    %[v(:,1), v(:,2)] = polyxpoly(a(:,1),a(:,2),b(:,1),b(:,2));
+    b0x = b(1:end-1, 1);  b0y = b(1:end-1, 2);
+    bvx = b(2:end,1)-b0x; bvy = b(2:end,2)-b0y;
+    v = [];
+    for i = 1:size(a,1)-1
+        a0x = a(i,1);       a0y = a(i,2);
+        avx = a(i+1,1)-a0x; avy = a(i+1,2)-a0y;
+        det = 1./(-avx*bvy+avy*bvx);
+        t = det.*( -(b0x-a0x).*bvy +(b0y-a0y).*bvx );
+        s = det.*( -(b0x-a0x).*avy +(b0y-a0y).*avx );
+        m = 0 <= t & t < 1 & 0 <= s & s < 1;
+        v = [v; a0x+t(m)*avx, a0y+t(m)*avy];
+    end
 end
 
 function v = intersect_circle2polyline(c,p)

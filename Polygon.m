@@ -33,8 +33,8 @@ function h = Polygon(varargin)
     
     if isempty(position) && ~isempty(varargin)
         [inputs,varargin] = parent.extractInputs(varargin,0,inf);
-        args = parse_dpolygon(varargin{:}); % todo check inputs
-        h_ = dpolygon(parent,label,inputs,@dpoly_callback,args);
+        [args,hidden] = parse_dpolygon(varargin{:}); % todo check inputs
+        h_ = dpolygon(parent,label,inputs,@dpoly_callback,args,hidden);
     else
         if isfield(parent.inivalues, label)
             position = parent.inivalues.(label);
@@ -72,7 +72,7 @@ function args = parse_mpolygon(position,color,args) % todo linespec!
     if ~isempty(position); args.Position = position; end
 end
 
-function params = parse_dpolygon(linespec,linewidth,params) % todo more functionality!
+function [params,hidden] = parse_dpolygon(linespec,linewidth,params) % todo more functionality!
     arguments
         linespec          (1,:) char   {drawing.mustBeLineSpec}              = 'k'
         linewidth         (1,1) double {mustBePositive}                      =  1
@@ -82,7 +82,9 @@ function params = parse_dpolygon(linespec,linewidth,params) % todo more function
         params.LineStyle  (1,:) char
         params.Marker     (1,:) char
         params.Color                   %{drawing.mustBeColor}
+        params.Visible    (1,:) char   {mustBeMember(params.Visible,{'on','off'})} = 'on' 
     end
     if ~isfield(params,'LineWidth'); params.LineWidth = linewidth; end
     params = dlines.applyLineSpec(params,linespec);
+    hidden = strcmp(params.Visible,'off');
 end

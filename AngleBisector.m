@@ -76,7 +76,7 @@ function vv = angle_bissectCurves(t,A,curve)
         r = horzcat(ret{:});
     end
     b = c(t);
-    pq = c(t+eps)-c(t-eps);
+    pq = c(min(t+eps,1))-c(max(t-eps,0));
     v = (a-b)*[0 1;-1 0];
     t = -0.5*sum((a-b).*pq,2) ./ sum(v.*pq,2);
     vv = 0.5*(a+b)+t.*v;

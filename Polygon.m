@@ -82,9 +82,12 @@ function [params,hidden] = parse_dpolygon(linespec,linewidth,params) % todo more
         params.LineStyle  (1,:) char
         params.Marker     (1,:) char
         params.Color                   %{drawing.mustBeColor}
+        params.EdgeColor               %{drawing.mustBeColor}
+        params.EdgeAlpha  (1,1) double {mustBeInRange(params.EdgeAlpha,0,1)} = 1
         params.Visible    (1,:) char   {mustBeMember(params.Visible,{'on','off'})} = 'on' 
     end
     if ~isfield(params,'LineWidth'); params.LineWidth = linewidth; end
     params = dlines.applyLineSpec(params,linespec);
+    if ~isfield(params,'EdgeColor'); params.EdgeColor=params.Color; end
     hidden = strcmp(params.Visible,'off');
 end

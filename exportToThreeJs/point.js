@@ -1,4 +1,3 @@
-// point.js
 import * as THREE from "three";
 
 /**
@@ -11,7 +10,7 @@ import * as THREE from "three";
  * @param {number} color - Color in hex (optional, default 0xff0000).
  * @returns {THREE.Mesh} The created mesh.
  */
-export function Point(scene, x, y, z = 0, size = 10, color = 0xff0000) {
+export function point(scene, x, y, z = 0, size = 10, color = 0xff0000) {
   const geometry = new THREE.SphereGeometry(size, 16, 16);
   const material = new THREE.MeshBasicMaterial({ color });
   const point = new THREE.Mesh(geometry, material);

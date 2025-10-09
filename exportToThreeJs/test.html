@@ -115,14 +115,14 @@
           10000
         );
 
-        camera.rotation.x = Math.PI * 1.5;
-        camera.position.set(0, 1000, 0);
+        camera.position.set(0, 500, 1000);
+        camera.lookAt(0, 0, 0);
         scene.add(camera);
 
-        const point_1 = point(scene, 10, 50);
+        const point_1 = point(scene, 200, 250);
         const point_2 = point(scene, 200, 500);
         const point_3 = point(scene, -200, 250);
-        const point_4 = point(scene, -400, -100);
+        const point_4 = point(scene, -500, -100);
 
         createUniformCurve(scene, [point_1, point_2, point_3, point_4]);
 

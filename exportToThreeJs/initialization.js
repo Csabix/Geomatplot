@@ -16,13 +16,13 @@ export function init() {
 
   function onWindowResize() {
     updateOrthoFrustum();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    const { w, h } = sizeFromContainer(container);
+    renderer.setSize(w, h);
     renderer.render(scene, camera);
   }
 
   function updateOrthoFrustum() {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const { w, h } = sizeFromContainer(container);
     camera.left = -w / 2;
     camera.right = w / 2;
     camera.top = h / 2;
@@ -31,8 +31,7 @@ export function init() {
   }
 
   function createCamera() {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const { w, h } = sizeFromContainer(container);
     camera = new THREE.OrthographicCamera(
       -w / 2,
       w / 2,
@@ -41,11 +40,16 @@ export function init() {
       1,
       5000
     );
-    camera.position.set(0, 2000, 1000);
+    camera.position.set(0, 0, 1000);
     camera.lookAt(0, 0, 0);
     camera.zoom = 1;
     camera.updateProjectionMatrix();
     scene.add(camera);
+  }
+
+  function sizeFromContainer(container) {
+    const r = container.getBoundingClientRect();
+    return { w: Math.round(r.width), h: Math.round(r.height) };
   }
 
   function createScene() {
@@ -56,7 +60,8 @@ export function init() {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    const { w, h } = sizeFromContainer(container);
+    renderer.setSize(w, h);
     renderer.shadowMap.enabled = true;
     container.appendChild(renderer.domElement);
   }

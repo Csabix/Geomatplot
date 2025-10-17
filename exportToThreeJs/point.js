@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { addDraggableObject } from "./dragging.js";
 
 /**
  * Creates a point (small sphere or cube) and adds it to the given scene.
@@ -14,6 +15,8 @@ export function point(scene, x, y, size = 10, color = 0xff0000) {
   const material = new THREE.MeshBasicMaterial({ color });
   const point = new THREE.Mesh(geometry, material);
   point.position.set(x, y, 0);
+  point.userData.isPoint = true;
   scene.add(point);
+  addDraggableObject(point);
   return point;
 }

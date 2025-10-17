@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { createControls } from "./dragging.js";
 
 export function init() {
   let container, camera, scene, renderer;
@@ -8,6 +9,7 @@ export function init() {
   createScene();
   createCamera();
   createRenderer();
+  createControls(camera, renderer, scene);
 
   scene.add(new THREE.AmbientLight(0xf0f0f0, 3));
   window.addEventListener("resize", onWindowResize);

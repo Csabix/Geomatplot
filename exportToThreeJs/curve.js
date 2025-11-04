@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { addDependency } from "./dependency.js";
 
 function toVec3(p) {
   // Mesh/Object3D with position
@@ -15,6 +16,22 @@ function toVec3(p) {
   throw new Error(
     "Point must be Mesh/Object3D with .position, Vector3, [x,y,z], or {x,y,z}."
   );
+}
+
+function extractMeshes(inputOrArray) {
+  const arr = Array.isArray(inputOrArray) ? inputOrArray : [inputOrArray];
+  return arr.filter((o) => o && o.position && o.position.isVector3);
+}
+
+function rebuildLineGeometry(line, pts, type, tension) {
+  const vecs = (Array.isArray(pts) ? pts : [pts]).map((p) =>
+    p && p.position && p.position.isVector3 ? p.position.clone() : toVec3(p)
+  );
+  const clean = vecs.length === 2 ? withControlIfTwo(vecs) : vecs;
+  const curve = new THREE.CatmullRomCurve3(clean, false, type, tension);
+  line.geometry.setFromPoints(curve.getPoints(200));
+  line.geometry.attributes.position.needsUpdate = true;
+  line.geometry.computeBoundingSphere?.();
 }
 
 function normalizePoints(pointsLike) {
@@ -86,28 +103,47 @@ function withControlIfTwo(points) {
  */
 function makeCurve(scene, arg1, arg2, arg3, type, color) {
   let points, tension;
+  let meshSources = [];
 
   if (Array.isArray(arg1)) {
     // Overload: (scene, pointsArray, tension?)
     points = normalizePoints(arg1);
     tension = typeof arg2 === "number" ? arg2 : 0.5;
+    meshSources = extractMeshes(arg1);
   } else {
     // Overload: (scene, p1, p2, tension?)
     const p1 = toVec3(arg1);
     const p2 = toVec3(arg2);
     points = withControlIfTwo([p1, p2]);
     tension = typeof arg3 === "number" ? arg3 : 0.5;
+    meshSources = extractMeshes([arg1, arg2]);
   }
 
   if (points.length < 2) throw new Error("At least two points are required.");
 
-  const curve = new THREE.CatmullRomCurve3(points, false, type, tension);
-  const geometry = new THREE.BufferGeometry().setFromPoints(
-    curve.getPoints(200)
-  );
+  const geometry = new THREE.BufferGeometry();
   const material = new THREE.LineBasicMaterial({ color });
   const line = new THREE.Line(geometry, material);
   scene.add(line);
+
+  rebuildLineGeometry(
+    line,
+    Array.isArray(arg1) ? arg1 : [arg1, arg2],
+    type,
+    tension
+  );
+
+  for (const src of meshSources) {
+    addDependency(src, line, () => {
+      rebuildLineGeometry(
+        line,
+        Array.isArray(arg1) ? arg1 : [arg1, arg2],
+        type,
+        tension
+      );
+    });
+  }
+
   return line;
 }
 

@@ -4,13 +4,13 @@ import {
   createCentripetalCurve,
   createChordalCurve,
 } from "./curve.js";
+import { circle } from "./circle.js";
 
 export function draw(scene) {
   const point_1 = point(scene, 50, 50);
-  const point_2 = point(scene, 20, 50);
+  const point_2 = point(scene, 20, 160);
   const point_3 = point(scene, -20, 50);
   const point_4 = point(scene, -50, -100);
-
   const point_5 = point(scene, 150, 50);
   const point_6 = point(scene, -200, -100);
 
@@ -25,4 +25,10 @@ export function draw(scene) {
     10,
     "green"
   );
+
+  const circ1 = circle(scene, point_1, point_2, point_3, {
+    color: 0x0066ff,
+  });
+  const circ2 = circle(scene, point_1, point_2, { color: 0x22aa22 });
+  const circ3 = circle(scene, [300, -150], 120, { color: 0xaa2222 });
 }

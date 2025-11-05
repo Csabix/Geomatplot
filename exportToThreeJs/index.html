@@ -53,7 +53,8 @@
   <body>
     <div id="container"></div>
 
-    <!-- <script type="importmap">  //TODO: Should check if it works without imports here
+    <!-- TODO: Should check if it works without imports here -->
+    <script type="importmap">
       {
         "imports": {
           "three": "https://unpkg.com/three@0.168.0/build/three.module.js",
@@ -62,10 +63,11 @@
           "./draw.js": "./draw.js",
           "./point.js": "./point.js",
           "./curve.js": "./curve.js",
+          "./circle.js": "./circle.js",
           "./dragging.js": "./dragging.js"
         }
       }
-    </script> -->
+    </script>
 
     <script type="module">
       import { init } from "./initialization.js";

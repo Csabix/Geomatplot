@@ -38,7 +38,9 @@ methods (Access = public)
                 pbaspect(o.ax, [1 1 1]);
                 o.ax.XLimMode = 'manual';
                 o.ax.YLimMode = 'manual';
-            else; axis(o.ax,'equal'); axis(o.ax,'manual'); 
+            else
+                axis(o.ax,'manual')
+                axis(o.ax,'equal');
             end
             o.ax.Interactions = [panInteraction zoomInteraction]; % disableDefaultInteractivity(o.ax);
             o.movs = struct; o.deps = struct;

@@ -3,6 +3,21 @@ properties
     % val  (1,2) double
     pt  = [] %  (1,1) dpoint
 end
+methods (Static)
+    function outs = parseOutputs(args)
+        if isscalar(args)
+            if isreal(args{1})
+                outs{1} = args{1}(:)';
+            else
+                outs{1} = [real(args{1}(:)) imag(args{1}(:))];
+            end
+        elseif length(args)==2
+            outs{1} = [args{1}(:) args{2}(:)];
+        else
+            error 'Callback has too many outputs.'
+        end
+    end
+end
 methods
     function o = dvector(parent,label,inputs,callback,pt,args)
         o=o@dnumeric(parent,label,inputs,callback);

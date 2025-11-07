@@ -58,6 +58,9 @@ methods
         [parent,inputs,constants,expression] = expression_base.assembleExpression(a,b,'dot',[1 2]);
         c = escalar(parent,inputs,constants,expression);
     end
+    function b = normalize(a)
+        b = normalize(eval(a));
+    end
     function d = evalimpl(o,label)
         [inputs,callback] = o.createCallback();
         d = dvector(o.parent,label,inputs,callback);

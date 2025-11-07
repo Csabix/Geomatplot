@@ -93,6 +93,10 @@ methods
         elseif isa(b,'dvector'); b = evector.fromDrawing(b); end
         c = dot(a,b);
     end
+    function c = normalize(a) %% hacky (no need to check args because its dvector)
+        expression_base.warning_if_unused(nargout);
+        c = evector(a.parent,{a},{},"("+a.label + "/sqrt(dot(" + a.label + "," + a.label + ")))");
+    end
 end
 methods(Static,Hidden)
 

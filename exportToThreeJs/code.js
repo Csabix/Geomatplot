@@ -7,6 +7,7 @@ import {
 import { circle } from "./circle.js";
 import { distance } from "./distance.js";
 import { segment } from "./segment.js";
+import { pointSequence } from "./pointSequence.js";
 
 export function draw(scene) {
   /* ----- POINT ----- */
@@ -60,9 +61,39 @@ export function draw(scene) {
 
   /* ----- SEGMENT ----- */
 
-  const s1 = segment(scene, point_1, point_2, {
-    color: 0x333333,
-    linewidth: 2,
-  });
-  const s2 = segment(scene, point_1, [80, -40], { dashed: true });
+  // const s1 = segment(scene, point_1, point_2, {
+  //   color: 0x333333,
+  //   linewidth: 2,
+  // });
+  // const s2 = segment(scene, point_1, [80, -40], { dashed: true });
+
+  /* ----- POINT SEQUENCE ----- */
+
+  const seq1 = pointSequence(
+    scene,
+    point_1,
+    point_2,
+    [
+      [0, 0],
+      [100, 100],
+    ],
+    { color: 0x3366ff, markerSize: 2 }
+  );
+
+  // const seq2 = pointSequence(
+  //   scene,
+  //   point_1,
+  //   point_2,
+  //   point_3,
+  //   (a, b, c) => {
+  //     return [a, b, c].map(([x, y]) => [x, -y]);
+  //   },
+  //   { color: 0xdd5522 }
+  // );
+
+  // const poly = createUniformCurve(scene, [point_1, point_2, point_3]);
+  // const seq3 = pointSequence(scene, seq1, poly, {
+  //   color: 0x22aa22,
+  //   markerSize: 1.5,
+  // });
 }

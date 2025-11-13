@@ -80,20 +80,20 @@ export function draw(scene) {
     { color: 0x3366ff, markerSize: 2 }
   );
 
-  // const seq2 = pointSequence(
-  //   scene,
-  //   point_1,
-  //   point_2,
-  //   point_3,
-  //   (a, b, c) => {
-  //     return [a, b, c].map(([x, y]) => [x, -y]);
-  //   },
-  //   { color: 0xdd5522 }
-  // );
+  const seq2 = pointSequence(
+    scene,
+    point_1,
+    point_2,
+    point_3,
+    (a, b, c) => {
+      return [a, b, c].map(([x, y]) => [x, -y]);
+    },
+    { color: 0xdd5522 }
+  );
 
-  // const poly = createUniformCurve(scene, [point_1, point_2, point_3]);
-  // const seq3 = pointSequence(scene, seq1, poly, {
-  //   color: 0x22aa22,
-  //   markerSize: 1.5,
-  // });
+  const poly = createUniformCurve(scene, [point_1, point_2, point_3]);
+  const seq3 = pointSequence(scene, seq1, poly, {
+    color: 0x22aa22,
+    markerSize: 1.5,
+  });
 }

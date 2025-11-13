@@ -69,8 +69,11 @@ export function pointSequence(...args) {
   const geom = new THREE.BufferGeometry();
   const mat = new THREE.PointsMaterial({
     color: new THREE.Color(color),
-    size: 16 * markerSize,
+    size: 8 * markerSize,
     sizeAttenuation,
+    map: makeCircleTexture(64),
+    transparent: true,
+    alphaTest: 0.5,
   });
   const points = new THREE.Points(geom, mat);
   group.add(points);
@@ -235,4 +238,27 @@ function arrayFromLine(line) {
     out.push([pos.getX(i), pos.getY(i)]);
   }
   return out;
+}
+
+function makeCircleTexture(size = 64, color = "white") {
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  const r = size / 2;
+
+  const grad = ctx.createRadialGradient(r, r, 0, r, r, r);
+  grad.addColorStop(0, color);
+  grad.addColorStop(0.9, color);
+  grad.addColorStop(1, "rgba(255,255,255,0)");
+
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(r, r, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.minFilter = THREE.LinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.needsUpdate = true;
+  return tex;
 }

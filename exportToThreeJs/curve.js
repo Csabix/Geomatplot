@@ -23,17 +23,6 @@ function extractMeshes(inputOrArray) {
   return arr.filter((o) => o && o.position && o.position.isVector3);
 }
 
-function rebuildLineGeometry(line, pts, type, tension) {
-  const vecs = (Array.isArray(pts) ? pts : [pts]).map((p) =>
-    p && p.position && p.position.isVector3 ? p.position.clone() : toVec3(p)
-  );
-  const clean = vecs.length === 2 ? withControlIfTwo(vecs) : vecs;
-  const curve = new THREE.CatmullRomCurve3(clean, false, type, tension);
-  line.geometry.setFromPoints(curve.getPoints(200));
-  line.geometry.attributes.position.needsUpdate = true;
-  line.geometry.computeBoundingSphere?.();
-}
-
 function normalizePoints(pointsLike) {
   return pointsLike.map(toVec3);
 }
@@ -48,6 +37,17 @@ function withControlIfTwo(points) {
   return [a, control, b];
 }
 
+function rebuildLineGeometry(line, pts, type, tension) {
+  const vecs = (Array.isArray(pts) ? pts : [pts]).map((p) =>
+    p && p.position && p.position.isVector3 ? p.position.clone() : toVec3(p)
+  );
+  const clean = vecs.length === 2 ? withControlIfTwo(vecs) : vecs;
+  const curve = new THREE.CatmullRomCurve3(clean, false, type, tension);
+  line.geometry.setFromPoints(curve.getPoints(200));
+  line.geometry.attributes.position.needsUpdate = true;
+  line.geometry.computeBoundingSphere?.();
+}
+
 /**
  * Creates and returns a Catmull–Rom curve (THREE.Line) and adds it to the given scene.
  *
@@ -56,52 +56,8 @@ function withControlIfTwo(points) {
  *    - Connects two points (adds a lifted midpoint automatically for curvature)
  * 2. `makeCurve(scene, pointsArray, tension, type, color)`
  *    - Connects any number (≥2) of points directly
- *
- * ### Supported point types
- * - `THREE.Mesh` / `THREE.Object3D` (uses `.position`)
- * - `THREE.Vector3`
- * - `[x, y, z]`
- * - `{ x, y, z }`
- *
- * @param {THREE.Scene} scene
- *   The scene to add the resulting curve line to.
- *
- * @param {THREE.Mesh|THREE.Object3D|THREE.Vector3|Array|Object|Array.<THREE.Mesh|THREE.Object3D|THREE.Vector3|Array|Object>} arg1
- *   Either:
- *   - The first point (in two-point form), or
- *   - An array of points (in N-point form)
- *
- * @param {THREE.Mesh|THREE.Object3D|THREE.Vector3|Array|Object|number} [arg2]
- *   In two-point form: the second point.
- *   In N-point form: optional numeric tension value.
- *
- * @param {number} [arg3]
- *   In two-point form: the optional numeric tension value (defaults to 0.5).
- *   Ignored in N-point form.
- *
- * @param {'catmullrom'|'centripetal'|'chordal'} type
- *   The Catmull–Rom curve type.
- *
- * @param {number|string} [color=0xff0000]
- *   The color of the line, as a hex number or CSS-style string.
- *
- * @returns {THREE.Line}
- *   The created THREE.Line mesh already added to the scene.
- *
- * @throws {Error}
- *   If fewer than two points are provided or an unsupported point format is used.
- *
- * @example
- * // Two-point usage
- * const p1 = point(scene, 0, 0);
- * const p2 = point(scene, 200, 200);
- * makeCurve(scene, p1, p2, 0.6, 'catmullrom', 0xff0000);
- *
- * // Multi-point usage
- * const p3 = point(scene, 400, 50);
- * makeCurve(scene, [p1, p2, p3], 0.5, 'centripetal', 0x00ff00);
  */
-function makeCurve(scene, arg1, arg2, arg3, type, color) {
+function makeCurve(scene, arg1, arg2, arg3, type, color = 0xff0000) {
   let points, tension;
   let meshSources = [];
 
@@ -160,4 +116,150 @@ export function createCentripetalCurve(scene, a, b, c, color = "red") {
 /** Creates a Chordal Catmull–Rom curve */
 export function createChordalCurve(scene, a, b, c, color = "red") {
   return makeCurve(scene, a, b, c, "chordal", color);
+}
+
+/**
+ * createCustomCurve(scene, ...sources, callback, opts?)
+ *
+ * General parametric / dependent curve, similar to Geomatplot's dcurve.
+ *
+ * - You can pass **any number of sources** (points, scalars, etc.).
+ * - The callback is invoked as:
+ *       callback(t, ...values) -> pointLike
+ *   where:
+ *     - t ∈ [0,1] is the curve parameter,
+ *     - values are derived from your sources:
+ *         * for points:   their position (THREE.Vector3)
+ *         * for scalars:  src.getValue() or src.value if present
+ *         * otherwise:    the source object itself
+ *     - pointLike is anything `toVec3` understands (Vector3, [x,y], {x,y}, mesh…).
+ *
+ * opts:
+ *   {
+ *     segments?: number      // number of samples along t, default 200
+ *     color?:    number|string // line color, default 0x000000
+ *     lineWidth?: number     // LineBasicMaterial linewidth, default 1
+ *   }
+ *
+ * Returns:
+ *   THREE.Line  (already added to scene)
+ *
+ * Examples
+ * --------
+ *
+ * // Pure sine curve (no sources)
+ * createCustomCurve(
+ *   scene,
+ *   (t) => {
+ *     const x = t * 400 - 200;
+ *     const y = Math.sin(t * Math.PI * 4) * 50;
+ *     return [x, y];
+ *   },
+ *   { color: 0x3366ff, segments: 400 }
+ * );
+ *
+ * // Curve that depends on two points A,B (e.g. an arc between them)
+ * createCustomCurve(
+ *   scene,
+ *   A,
+ *   B,
+ *   (t, aPos, bPos) => {
+ *     const mid = aPos.clone().add(bPos).multiplyScalar(0.5);
+ *     const dir = bPos.clone().sub(aPos);
+ *     const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
+ *     const y = THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
+ *               Math.sin(t * Math.PI) * dir.length() * 0.25;
+ *     return new THREE.Vector3(x, y, 0);
+ *   },
+ *   { color: 0xdd5522 }
+ * );
+ */
+export function createCustomCurve(scene, ...args) {
+  if (!scene || !scene.isScene) {
+    throw new Error("createCustomCurve: first argument must be a THREE.Scene");
+  }
+
+  if (args.length === 0) {
+    throw new Error("createCustomCurve: missing callback.");
+  }
+
+  // ---- parse opts (last plain-object arg) ----
+  let opts = {};
+  if (
+    args.length &&
+    isPlainObject(args[args.length - 1]) &&
+    typeof args[args.length - 1] !== "function"
+  ) {
+    opts = args.pop();
+  }
+
+  // ---- find callback ----
+  const fnIndex = args.findIndex((a) => typeof a === "function");
+  if (fnIndex === -1) {
+    throw new Error("createCustomCurve: a callback function is required.");
+  }
+
+  const sources = args.slice(0, fnIndex);
+  const callback = args[fnIndex];
+
+  const segments = opts.segments ?? 200;
+  const color = opts.color ?? 0x000000;
+  const lineWidth = opts.lineWidth ?? 1;
+
+  // ---- line setup ----
+  const geometry = new THREE.BufferGeometry();
+  const material = new THREE.LineBasicMaterial({ color, linewidth: lineWidth });
+  const line = new THREE.Line(geometry, material);
+  scene.add(line);
+
+  // ---- helpers to extract values from sources ----
+  const extractValue = (src) => {
+    if (!src) return src;
+    if (typeof src.getValue === "function") return src.getValue();
+    if ("value" in src) return src.value;
+    if (src.position && src.position.isVector3) return src.position;
+    if (src.isVector3) return src;
+    return src;
+  };
+
+  const rebuild = () => {
+    const pts = [];
+    for (let i = 0; i < segments; i++) {
+      const t = segments === 1 ? 0 : i / (segments - 1);
+      const values = sources.map(extractValue);
+      const res = callback(t, ...values);
+      const v = toVec3(res);
+      pts.push(v);
+    }
+    line.geometry.setFromPoints(pts);
+    line.geometry.attributes.position.needsUpdate = true;
+    line.geometry.computeBoundingSphere?.();
+  };
+
+  // initial build
+  rebuild();
+
+  // ---- attach dependencies ----
+  const attachDep = (src) => {
+    if (!src) return;
+    // Simple rule: if it looks like an object that can change, wire it
+    if (
+      src.isObject3D ||
+      (src.position && src.position.isVector3) ||
+      typeof src.getValue === "function" ||
+      "value" in src
+    ) {
+      addDependency(src, line, () => rebuild());
+    }
+  };
+
+  sources.forEach(attachDep);
+
+  return line;
+}
+
+/* ---------------- small helper ---------------- */
+
+function isPlainObject(o) {
+  return !!o && typeof o === "object" && !o.isObject3D && !Array.isArray(o);
 }

@@ -1,8 +1,10 @@
+import * as THREE from "three";
 import { point, dPoint } from "./point.js";
 import {
   createUniformCurve,
   createCentripetalCurve,
   createChordalCurve,
+  createCustomCurve,
 } from "./curve.js";
 import { circle } from "./circle.js";
 import { distance } from "./distance.js";
@@ -23,8 +25,30 @@ export function draw(scene) {
 
   /* ----- CURVE ----- */
 
-  createUniformCurve(scene, [point_1, point_2, point_3, point_4]);
-  createUniformCurve(scene, point_5, point_6, 0.5, "green"); // @TODO: Függvényt lehessen ábrázolni (callback-el)
+  // createUniformCurve(scene, [point_1, point_2, point_3, point_4]);
+  // createUniformCurve(scene, point_5, point_6, 0.5, "green");
+  createCustomCurve(
+    scene,
+    (t) => {
+      const x = t * 400 - 200;
+      const y = Math.sin(t * Math.PI * 4) * 50;
+      return [x, y];
+    },
+    { color: 0x3366ff, segments: 400 }
+  );
+  createCustomCurve(
+    scene,
+    point_1,
+    point_2,
+    (t, aPos, bPos) => {
+      const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
+      const y =
+        THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
+        Math.sin(t * Math.PI * 3) * 40;
+      return new THREE.Vector3(x, y, 0);
+    },
+    { color: 0xdd5522, segments: 300 }
+  );
 
   /* ----- DEPENDENT POINT ----- */
 

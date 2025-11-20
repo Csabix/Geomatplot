@@ -68,7 +68,8 @@
           "./distance.js": "./distance.js",
           "./segment.js": "./segment.js",
           "./pointSequence.js": "./pointSequence.js",
-          "./polygon.js": "./polygon.js"
+          "./polygon.js": "./polygon.js",
+          "./text.js": "./text.js"
         }
       }
     </script>
@@ -80,6 +81,10 @@
       let { container, camera, scene, renderer } = init();
 
       draw(scene);
+
+      // @TODO: Globális scene, ehhez kell egy globális SceneObject wrapper (új osztály)
+      // A dependency rendszer példányosíthatónak kell lennie
+      // Egy dependency rendszerhez több megjelenítő is tartozhat
 
       renderer.render(scene, camera);
     </script>

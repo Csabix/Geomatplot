@@ -12,55 +12,72 @@ import { segment } from "./segment.js";
 import { pointSequence } from "./pointSequence.js";
 import { polygon } from "./polygon.js";
 import { text } from "./text.js";
+import { createDependencySystem } from "./dependency.js";
+import { addImagePlane, createFunctionImage2D } from "./image.js";
 
 export function draw(scene) {
+  /* ----- LOCAL DEPENDENCY ------ */
+
+  const localDeps = createDependencySystem();
+  const localDeps2 = createDependencySystem();
+
   /* ----- POINT ----- */
 
   const point_1 = point(scene, 50, 50);
   const point_2 = point(scene, 20, 160);
   const point_3 = point(scene, -20, 50);
-  const point_4 = point(scene, -50, -100);
-  const point_5 = point(scene, 150, 50);
-  const point_6 = point(scene, -200, -100);
+  // const point_4 = point(scene, -50, -100);
+  // const point_5 = point(scene, 150, 50);
+  // const point_6 = point(scene, -200, -100);
 
   /* ----- CURVE ----- */
 
   // createUniformCurve(scene, [point_1, point_2, point_3, point_4]);
   // createUniformCurve(scene, point_5, point_6, 0.5, "green");
-  createCustomCurve(
-    scene,
-    (t) => {
-      const x = t * 400 - 200;
-      const y = Math.sin(t * Math.PI * 4) * 50;
-      return [x, y];
-    },
-    { color: 0x3366ff, segments: 400 }
-  );
-  createCustomCurve(
-    scene,
-    point_1,
-    point_2,
-    (t, aPos, bPos) => {
-      const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
-      const y =
-        THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
-        Math.sin(t * Math.PI * 3) * 40;
-      return new THREE.Vector3(x, y, 0);
-    },
-    { color: 0xdd5522, segments: 300 }
-  );
+  // const curve = createCustomCurve(
+  //   scene,
+  //   (t) => {
+  //     const x = t * 400 - 200;
+  //     const y = Math.sin(t * Math.PI * 4) * 50;
+  //     return [x, y];
+  //   },
+  //   { color: 0x3366ff, segments: 400 }
+  // );
+  // createCustomCurve(
+  //   scene,
+  //   point_1,
+  //   point_2,
+  //   (t, aPos, bPos) => {
+  //     const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
+  //     const y =
+  //       THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
+  //       Math.sin(t * Math.PI * 3) * 40;
+  //     return new THREE.Vector3(x, y, 0);
+  //   },
+  //   { color: 0xdd5522, segments: 300 }
+  // );
 
   /* ----- DEPENDENT POINT ----- */
 
-  dPoint(
-    scene,
-    point_1,
-    point_6,
-    point_4,
-    (a, b, c) => a.clone().add(b).add(c).multiplyScalar(0.5), // @TODO: Finomítást igényel, hogy szebb legyen
-    10,
-    "green"
-  );
+  // dPoint(
+  //   scene,
+  //   point_1,
+  //   point_6,
+  //   point_4,
+  //   (a, b, c) => a.clone().add(b).add(c).multiplyScalar(0.8),
+  //   10,
+  //   "green"
+  // );
+
+  // dPoint(
+  //   scene,
+  //   point_1,
+  //   point_6,
+  //   (a, b) => a.clone().add(b).multiplyScalar(0.5),
+  //   10,
+  //   "green",
+  //   { dependencySystem: localDeps }
+  // );
 
   /* ----- CIRCLE ----- */
 
@@ -74,6 +91,8 @@ export function draw(scene) {
 
   // const dAB = distance(point_2, point_5);
   // dAB.onChange((v) => console.log("|AB| =", v));
+
+  // @TODO Lehessen callback-et megadni, hogy hoygan száámolódjon a távolság (ez is lehet paraméter)
 
   // const dA_to_many = distance(point_1, [point_4, point_5, [200, 10]]);
   // dA_to_many.onChange((v) => console.log("min dist(A, seq) =", v));
@@ -89,23 +108,23 @@ export function draw(scene) {
   /* ----- SEGMENT ----- */
 
   // const s1 = segment(scene, point_1, point_2, {
-  //   // @TODO: Engedélyezni kéne több point-ot is / throw warning hogy nem lehet
   //   color: 0x333333,
   //   linewidth: 2,
   // });
-  // const s2 = segment(scene, point_1, [80, -40], { dashed: true });
+
+  // const s2 = segment(scene, point_1, point_2, point_3, point_4, {
+  //   color: 0x555555,
+  //   linewidth: 1.5,
+  // });
+
+  // const s3 = segment(scene, point_1, [80, -40], { dashed: true });
 
   /* ----- POLYGON ----- */
 
-  // const poly1 = polygon(
-  //   scene,
-  //   [
-  //     [0, 0],
-  //     [100, 0], // @TODO: Lehessen keverni is akár, itt pl. egy point_2 -> Háttérben a koordinátát egy ponttá alakítani
-  //     [80, 60],
-  //   ],
-  //   { color: 0x0088ff, faceAlpha: 0.2 }
-  // );
+  // const poly1 = polygon(scene, [point_1, [0, 0], point_4, [30, 10]], {
+  //   color: 0x0088ff,
+  //   faceAlpha: 0.2,
+  // });
 
   // const poly2 = polygon(scene, point_1, point_2, point_3, {
   //   color: 0xdd5522,
@@ -167,4 +186,63 @@ export function draw(scene) {
   //   fontSize: 200,
   //   offset: { x: 10, y: 10 },
   // });
+
+  /* ----- IMAGE ----- */
+
+  //   const vertexShader = `
+  //   varying vec2 vUv;
+  //   void main() {
+  //     vUv = uv;
+  //     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  //   }
+  // `;
+
+  //   const fragmentShader = `
+  //   uniform sampler2D uTexture;
+  //   varying vec2 vUv;
+  //   void main() {
+  //     vec4 color = texture2D(uTexture, vUv);
+  //     float g = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+  //     gl_FragColor = vec4(vec3(g), color.a);
+  //   }
+  // `;
+
+  createFunctionImage2D(scene, {
+    callback: (x, y) => {
+      let minD = Infinity;
+      for (const p of [point_1, point_2, point_3]) {
+        const px = p.position.x;
+        const py = p.position.y;
+        const dx = x - px;
+        const dy = y - py;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < minD) minD = d;
+      }
+      return minD; // scalar -> turned into color by colormap
+    },
+    corner0: [-200, -100], // visualize over [0,1]x[0,1]
+    corner1: [200, 250],
+    resolution: 512,
+    colormap: "jet",
+    z: -0.01, // slightly behind points/curves
+  });
+
+  // const img = addImagePlane(scene, "textures/my-image.png", {
+  //   width: 200,
+  //   position: { x: 100, y: 50, z: 0 },
+  // });
+
+  // addImagePlane(scene, "textures/picture.jpg", {
+  //   width: 250,
+  //   shader: {
+  //     vertexShader,
+  //     fragmentShader,
+  //     transparent: true,
+  //   },
+  // });
+
+  /* ----- CUSTOM VALUE ----- */
+
+  //@TODO: Tetszőleges érték, aminek a callbackjébe bármennyi pontot vagy értéket meg lehet adni,
+  // majd utána egy egyedi számítást végezni és máshol akár felhasználni
 }

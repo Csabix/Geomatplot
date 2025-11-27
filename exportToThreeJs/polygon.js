@@ -231,8 +231,20 @@ function verticesFromInput(inp) {
     }
     return out;
   }
-  if (Array.isArray(inp) && inp.length && Array.isArray(inp[0])) {
-    return inp.map(([x, y]) => [+x || 0, +y || 0]);
+  if (Array.isArray(inp) && inp.length) {
+    const out = [];
+    for (const item of inp) {
+      if (Array.isArray(item)) {
+        // [x,y]
+        const [x, y] = item;
+        out.push([+x || 0, +y || 0]);
+      } else {
+        // point-like (mesh, vec3, object ...)
+        const v = toVec3Like(item);
+        out.push([v.x, v.y]);
+      }
+    }
+    return out;
   }
   const v = toVec3Like(inp);
   return [[v.x, v.y]];
@@ -250,8 +262,15 @@ function attachDependencyForInput(inp, callback, group) {
   } else if (isPolygon(inp)) {
     addDependency(inp.group, group, wrapped);
   } else if (Array.isArray(inp)) {
-    for (const p of inp) {
-      if (isMesh(p)) addDependency(p, group, wrapped);
+    for (const item of inp) {
+      if (isMesh(item)) {
+        addDependency(item, group, wrapped);
+      } else if (!Array.isArray(item)) {
+        try {
+          const v = toVec3Like(item);
+          addDependency(item, group, wrapped);
+        } catch {}
+      }
     }
   }
 }

@@ -2,15 +2,21 @@ import * as THREE from "three";
 import { addDependency } from "./dependency.js";
 
 /**
- * SEGMENT  draws a straight segment (A,B) or (A, A+v).
+ * SEGMENT  draws straight segments.
  *
  * Overloads:
- *   segment(scene, A, B, opts?)
- *     - A, B: point-like (mesh with .position, Vector3, [x,y,(z)], {x,y,(z)})
+ *   1) segment(scene, A, B, opts?)
+ *      - A, B: point-like (mesh with .position, Vector3, [x,y,(z)], {x,y,(z)})
+ *      → single segment A–B
  *
- *   segment(scene, A, v, opts?)
- *     - A: point-like
- *     - v: vector-like (Vector3, [x,y,(z)], {x,y,(z)}, or object with getVector():Vector3)
+ *   2) segment(scene, A, v, opts?)
+ *      - A: point-like
+ *      - v: vector-like (Vector3, [x,y,(z)], {x,y,(z)}, or object with getVector():Vector3)
+ *      → single segment A–(A+v)
+ *
+ *   3) segment(scene, P1, P2, ..., Pn, opts?)   (n >= 2)
+ *      - all Pi: point-like
+ *      → polyline P1–P2–...–Pn
  *
  * opts:
  *   - color?: number|string = 0x000000
@@ -21,6 +27,7 @@ import { addDependency } from "./dependency.js";
  *   {
  *     line: THREE.Line,
  *     getEndpoints(): { A: THREE.Vector3, B: THREE.Vector3 },
+ *     getPoints(): THREE.Vector3[],
  *     setColor(c): void,
  *     setLinewidth(w): void
  *   }
@@ -31,6 +38,14 @@ function isMesh(o) {
 }
 function isVec3(o) {
   return !!(o && o.isVector3);
+}
+function isPointLike(o) {
+  return (
+    isMesh(o) ||
+    isVec3(o) ||
+    Array.isArray(o) ||
+    (o && typeof o === "object" && "x" in o && "y" in o)
+  );
 }
 function toVec3(o) {
   if (isMesh(o)) return o.position.clone();
@@ -44,19 +59,52 @@ function toVec3(o) {
 function isVectorProvider(o) {
   return !!(o && typeof o.getVector === "function");
 }
+function isPlainOpts(o) {
+  return (
+    !!o &&
+    typeof o === "object" &&
+    !Array.isArray(o) &&
+    !isMesh(o) &&
+    !isVec3(o) &&
+    !("x" in o && "y" in o) &&
+    !isVectorProvider(o)
+  );
+}
 
-export function segment(scene, A, B_or_v, opts = {}) {
+export function segment(scene, ...args) {
+  if (!scene || !scene.isScene) {
+    throw new Error("segment: first argument must be a THREE.Scene");
+  }
+
+  if (args.length < 2) {
+    throw new Error("segment: expected at least 2 arguments after scene.");
+  }
+
+  // Extract opts if last arg is a plain object
+  let opts = {};
+  if (isPlainOpts(args[args.length - 1])) {
+    opts = args.pop();
+  }
+
+  const inputs = args; // P1, P2, ..., Pn  OR (A, B_or_v)
+
+  if (inputs.length < 2) {
+    throw new Error("segment: need at least two points/vectors.");
+  }
+
   const color = opts.color ?? 0x000000;
   const linewidth = opts.linewidth ?? 1;
   const dashed = !!opts.dashed;
 
-  const B_is_pointlike =
-    isMesh(B_or_v) ||
-    isVec3(B_or_v) ||
-    Array.isArray(B_or_v) ||
-    (B_or_v && typeof B_or_v === "object" && "x" in B_or_v && "y" in B_or_v);
+  let mode = "polyline"; // default: multi-point
+  let A = inputs[0];
+  let B_or_v = inputs[1];
 
-  const mode = B_is_pointlike ? "point_point" : "point_vector";
+  // If exactly 2 inputs, we keep old point_point / point_vector mode behaviour
+  if (inputs.length === 2) {
+    const B_is_pointlike = isPointLike(B_or_v);
+    mode = B_is_pointlike ? "point_point" : "point_vector";
+  }
 
   const material = dashed
     ? new THREE.LineDashedMaterial({
@@ -71,7 +119,18 @@ export function segment(scene, A, B_or_v, opts = {}) {
   const line = new THREE.Line(geometry, material);
   scene.add(line);
 
-  function endpointsNow() {
+  function pointsNow() {
+    if (mode === "polyline") {
+      // Any number of point-like inputs P1..Pn
+      const pts = inputs.map((p) => {
+        const v = toVec3(p);
+        v.z = 0;
+        return v;
+      });
+      return pts;
+    }
+
+    // point_point / point_vector legacy behaviour
     const a = toVec3(A);
     let b;
     if (mode === "point_point") {
@@ -89,12 +148,11 @@ export function segment(scene, A, B_or_v, opts = {}) {
 
     a.z = 0;
     b.z = 0;
-    return { a, b };
+    return [a, b];
   }
 
   function rebuild() {
-    const { a, b } = endpointsNow();
-    const pts = [a, b];
+    const pts = pointsNow();
     line.geometry.dispose();
     line.geometry = new THREE.BufferGeometry().setFromPoints(pts);
     if (line.material && line.material.isLineDashedMaterial) {
@@ -104,22 +162,41 @@ export function segment(scene, A, B_or_v, opts = {}) {
 
   rebuild();
 
-  if (isMesh(A)) {
-    addDependency(A, line, rebuild);
-  }
-  if (mode === "point_point") {
-    if (isMesh(B_or_v)) addDependency(B_or_v, line, rebuild);
+  // Dependencies: whenever an input mesh or vector provider changes, rebuild
+  const addDepsForInput = (inp) => {
+    if (isMesh(inp)) {
+      addDependency(inp, line, () => rebuild());
+    } else if (isVectorProvider(inp)) {
+      addDependency(inp, line, () => rebuild());
+    }
+  };
+
+  if (mode === "polyline") {
+    for (const p of inputs) addDepsForInput(p);
   } else {
-    if (isVectorProvider(B_or_v)) {
-      addDependency(B_or_v, line, rebuild);
+    addDepsForInput(A);
+    if (mode === "point_point" || isVectorProvider(B_or_v)) {
+      addDepsForInput(B_or_v);
     }
   }
 
   return {
     line,
     getEndpoints() {
-      const { a, b } = endpointsNow();
-      return { A: a.clone(), B: b.clone() };
+      const pts = pointsNow();
+      if (pts.length === 0) {
+        return {
+          A: new THREE.Vector3(),
+          B: new THREE.Vector3(),
+        };
+      }
+      return {
+        A: pts[0].clone(),
+        B: pts[pts.length - 1].clone(),
+      };
+    },
+    getPoints() {
+      return pointsNow().map((v) => v.clone());
     },
     setColor(c) {
       if (line.material) {

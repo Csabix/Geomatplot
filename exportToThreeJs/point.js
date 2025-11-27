@@ -1,6 +1,11 @@
 import * as THREE from "three";
 import { addDraggableObject } from "./dragging.js";
-import { addDependency, updateDependencies } from "./dependency.js";
+import {
+  addDependency,
+  updateDependencies,
+  globalDependencySystem,
+  DependencySystem,
+} from "./dependency.js";
 
 /**
  * Creates a point (small sphere or cube) and adds it to the given scene.
@@ -22,6 +27,14 @@ export function point(scene, x, y, size = 10, color = 0xff0000) {
   return point;
 }
 
+/**
+ * dPoint(scene, ...points, fn, size?, color?, opts?)
+ *
+ * opts:
+ *   {
+ *     dependencySystem?: DependencySystem   // default: globalDependencySystem
+ *   }
+ */
 export function dPoint(scene, ...args) {
   if (!scene || !scene.isScene) {
     throw new Error("dPoint: first argument must be a THREE.Scene");
@@ -34,18 +47,35 @@ export function dPoint(scene, ...args) {
 
   const pointObjs = args.slice(0, fnIndex);
   const fn = args[fnIndex];
-  const tail = args.slice(fnIndex + 1);
+  let tail = args.slice(fnIndex + 1);
 
   let size = 8;
   let color = 0x00ffff;
+  let depSystem = globalDependencySystem;
 
-  if (tail.length >= 1) size = tail[0];
-  if (tail.length >= 2) color = tail[1];
+  if (tail.length >= 1 && typeof tail[0] === "number") {
+    size = tail[0];
+    tail = tail.slice(1);
+  }
+  if (
+    tail.length >= 1 &&
+    (typeof tail[0] === "number" || typeof tail[0] === "string")
+  ) {
+    color = tail[0];
+    tail = tail.slice(1);
+  }
+  if (tail.length >= 1 && tail[0] && typeof tail[0] === "object") {
+    const opts = tail[0];
+    if (opts.dependencySystem instanceof DependencySystem) {
+      depSystem = opts.dependencySystem;
+    }
+  }
 
   const geom = new THREE.CircleGeometry(size, 32);
   const mat = new THREE.MeshBasicMaterial({ color });
   const mesh = new THREE.Mesh(geom, mat);
-  mesh.userData.isPoint = true;
+  mesh.userData.isPoint = false;
+  mesh.userData.isDPoint = true;
   scene.add(mesh);
 
   const toPos = (p) => {
@@ -71,12 +101,8 @@ export function dPoint(scene, ...args) {
 
   for (const p of pointObjs) {
     if (p && p.position && p.position.isVector3) {
-      addDependency(p, mesh, rebuild);
+      depSystem.addDependency(p, mesh, () => rebuild());
     }
-  }
-
-  if (pointObjs[0]) {
-    updateDependencies(pointObjs[0]);
   }
 
   return mesh;

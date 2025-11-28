@@ -190,7 +190,7 @@ export function draw(scene) {
 
   /* ----- IMAGE ----- */
 
-  //   const vertexShader = `
+  // const vertexShader = `
   //   varying vec2 vUv;
   //   void main() {
   //     vUv = uv;
@@ -198,7 +198,7 @@ export function draw(scene) {
   //   }
   // `;
 
-  //   const fragmentShader = `
+  // const fragmentShader = `
   //   uniform sampler2D uTexture;
   //   varying vec2 vUv;
   //   void main() {
@@ -208,37 +208,64 @@ export function draw(scene) {
   //   }
   // `;
 
-  createFunctionImage2D(scene, {
-    callback: (x, y) => {
-      let minD = Infinity;
-      for (const p of [point_1, point_2, point_3]) {
-        const px = p.position.x;
-        const py = p.position.y;
-        const dx = x - px;
-        const dy = y - py;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        if (d < minD) minD = d;
-      }
-      return minD; // scalar -> turned into color by colormap
-    },
-    corner0: [-200, -100], // visualize over [0,1]x[0,1]
-    corner1: [200, 250],
-    resolution: 512,
-    colormap: "jet",
-    z: -0.01, // slightly behind points/curves
+  // createFunctionImage2D(scene, {
+  //   callback: (x, y) => {
+  //     let minD = Infinity;
+  //     for (const p of [point_1, point_2, point_3]) {
+  //       const px = p.position.x;
+  //       const py = p.position.y;
+  //       const dx = x - px;
+  //       const dy = y - py;
+  //       const d = Math.sqrt(dx * dx + dy * dy);
+  //       if (d < minD) minD = d;
+  //     }
+  //     return minD;
+  //   },
+  //   corner0: [-150, -50], // lower-left of domain
+  //   corner1: [200, 250], // upper-right of domain
+  //   resolution: 512,
+  //   colormap: "grayscale",
+  //   z: -0.01,
+  // });
+
+  const poly = createUniformCurve(scene, [point_1, point_2, point_3]);
+  const seq = pointSequence(scene, [point_1, point_2, point_3], poly, {
+    color: 0x22aa22,
+    markerSize: 1.5,
+    visible: false,
   });
 
-  // const img = addImagePlane(scene, "textures/my-image.png", {
+  createFunctionImage2D(scene, {
+    callback: (x, y) => {
+      let minD2 = Infinity;
+
+      for (const [sx, sy] of seq.getArray()) {
+        const dx = x - sx;
+        const dy = y - sy;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < minD2) minD2 = d2;
+      }
+
+      return Math.sqrt(minD2);
+    },
+
+    corner0: [-150, -50], // lower-left of domain
+    corner1: [200, 250], // upper-right of domain
+    resolution: 512,
+    colormap: "jet",
+    z: -1,
+  });
+
+  // addImagePlane(scene, "../examples/bez.png", {
   //   width: 200,
   //   position: { x: 100, y: 50, z: 0 },
   // });
 
-  // addImagePlane(scene, "textures/picture.jpg", {
-  //   width: 250,
+  // addImagePlane(scene, "../examples/triangle.png", {
+  //   position: { x: -100, y: -250, z: 0 },
   //   shader: {
   //     vertexShader,
   //     fragmentShader,
-  //     transparent: true,
   //   },
   // });
 
@@ -246,13 +273,13 @@ export function draw(scene) {
 
   const dAB = distance(point_1, point_2);
 
-  const dAB2 = customValue([dAB], (d) => d * d);
+  const customVal = customValue([dAB], (d) => d / 2);
 
-  console.log("d^2 =", dAB2.getValue());
+  console.log("d^2 =", customVal.getValue());
 
-  dAB2.onChange((v) => {
+  customVal.onChange((v) => {
     console.log("updated d^2 =", v);
   });
 
-  circle(scene, point_1, dAB.getValue(), { color: 0xaa2222 });
+  circle(scene, point_1, customVal.getValue(), { color: 0xaa2222 });
 }

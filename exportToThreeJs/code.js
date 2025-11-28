@@ -14,6 +14,7 @@ import { polygon } from "./polygon.js";
 import { text } from "./text.js";
 import { createDependencySystem } from "./dependency.js";
 import { addImagePlane, createFunctionImage2D } from "./image.js";
+import { customValue } from "./customValue.js";
 
 export function draw(scene) {
   /* ----- LOCAL DEPENDENCY ------ */
@@ -243,6 +244,15 @@ export function draw(scene) {
 
   /* ----- CUSTOM VALUE ----- */
 
-  //@TODO: Tetszőleges érték, aminek a callbackjébe bármennyi pontot vagy értéket meg lehet adni,
-  // majd utána egy egyedi számítást végezni és máshol akár felhasználni
+  const dAB = distance(point_1, point_2);
+
+  const dAB2 = customValue([dAB], (d) => d * d);
+
+  console.log("d^2 =", dAB2.getValue());
+
+  dAB2.onChange((v) => {
+    console.log("updated d^2 =", v);
+  });
+
+  circle(scene, point_1, dAB.getValue(), { color: 0xaa2222 });
 }

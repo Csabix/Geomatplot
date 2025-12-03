@@ -25,7 +25,7 @@ export function createControls(camera, renderer, scene) {
 
   controls.addEventListener("drag", (event) => {
     updateDependencies(event.object);
-    localDeps.updateDependencies(event.object);
+    // localDeps.updateDependencies(event.object);
     renderer.render(scene, camera);
   });
 }

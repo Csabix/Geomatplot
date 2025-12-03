@@ -24,12 +24,12 @@ export function draw(scene) {
 
   /* ----- POINT ----- */
 
-  const point_1 = point(scene, 50, 50);
-  const point_2 = point(scene, 20, 160);
+  const point_1 = point(scene, 50, 50, 10, "blue");
+  const point_2 = point(scene, 20, 160, 10, "green");
   const point_3 = point(scene, -20, 50);
-  // const point_4 = point(scene, -50, -100);
-  // const point_5 = point(scene, 150, 50);
-  // const point_6 = point(scene, -200, -100);
+  const point_4 = point(scene, -50, -100);
+  const point_5 = point(scene, 150, 50);
+  const point_6 = point(scene, -200, -100);
 
   /* ----- CURVE ----- */
 
@@ -93,7 +93,7 @@ export function draw(scene) {
   // const dAB = distance(point_2, point_5);
   // dAB.onChange((v) => console.log("|AB| =", v));
 
-  // @TODO Lehessen callback-et megadni, hogy hoygan száámolódjon a távolság (ez is lehet paraméter)
+  // @TODO Lehessen callback-et megadni, hogy hoygan száámolódjon a távolság (ez is lehet paraméter) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   // const dA_to_many = distance(point_1, [point_4, point_5, [200, 10]]);
   // dA_to_many.onChange((v) => console.log("min dist(A, seq) =", v));
@@ -228,33 +228,33 @@ export function draw(scene) {
   //   z: -0.01,
   // });
 
-  const poly = createUniformCurve(scene, [point_1, point_2, point_3]);
-  const seq = pointSequence(scene, [point_1, point_2, point_3], poly, {
-    color: 0x22aa22,
-    markerSize: 1.5,
-    visible: false,
-  });
+  // const poly = createUniformCurve(scene, [point_1, point_2, point_3]);
+  // const seq = pointSequence(scene, [point_1, point_2, point_3], poly, {
+  //   color: 0x22aa22,
+  //   markerSize: 1.5,
+  //   visible: false,
+  // });
 
-  createFunctionImage2D(scene, {
-    callback: (x, y) => {
-      let minD2 = Infinity;
+  // createFunctionImage2D(scene, {
+  //   callback: (x, y) => {
+  //     let minD2 = Infinity;
 
-      for (const [sx, sy] of seq.getArray()) {
-        const dx = x - sx;
-        const dy = y - sy;
-        const d2 = dx * dx + dy * dy;
-        if (d2 < minD2) minD2 = d2;
-      }
+  //     for (const [sx, sy] of seq.getArray()) {
+  //       const dx = x - sx;
+  //       const dy = y - sy;
+  //       const d2 = dx * dx + dy * dy;
+  //       if (d2 < minD2) minD2 = d2;
+  //     }
 
-      return Math.sqrt(minD2);
-    },
+  //     return Math.sqrt(minD2);
+  //   },
 
-    corner0: [-150, -50], // lower-left of domain
-    corner1: [200, 250], // upper-right of domain
-    resolution: 512,
-    colormap: "jet",
-    z: -1,
-  });
+  //   corner0: [-150, -50], // lower-left of domain
+  //   corner1: [200, 250], // upper-right of domain
+  //   resolution: 512,
+  //   colormap: "jet",
+  //   z: -1,
+  // });
 
   // addImagePlane(scene, "../examples/bez.png", {
   //   width: 200,
@@ -272,14 +272,61 @@ export function draw(scene) {
   /* ----- CUSTOM VALUE ----- */
 
   const dAB = distance(point_1, point_2);
-
-  const customVal = customValue([dAB], (d) => d / 2);
-
-  console.log("d^2 =", customVal.getValue());
-
-  customVal.onChange((v) => {
-    console.log("updated d^2 =", v);
+  const customVal = customValue([dAB], (d) => {
+    return { a: d / 2 };
   });
 
-  circle(scene, point_1, customVal.getValue(), { color: 0xaa2222 });
+  createCustomCurve(
+    scene,
+    point_1,
+    point_2,
+    customVal,
+    (t, aPos, bPos, cval) => {
+      const mid = aPos.clone().add(bPos).multiplyScalar(0.5);
+      const dir = bPos.clone().sub(aPos);
+      const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
+      const y =
+        THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
+        Math.sin(t * Math.PI) * dir.length() * 0.25;
+      return new THREE.Vector3(x + cval.a, y, 0);
+    },
+    { color: 0xdd5522 }
+  );
+
+  // cur(scene, customVal, (a) => [0, a.getValue()], 10, "yellow");
+
+  // circle(scene, point_1, customVal.getValue(), { color: 0xaa2222 }); // TODO:
+
+  /*
+    @TODO
+    - Átnézni a kódbázist, hogy hol van még esetleg todo ami elmaradt
+    - Mindenre implementálni, hogy lehessen akár objektumot, akár tömböt (mint  koordináta) megadni
+    - Callback-et megnézni a dPoiint-ra, mert weird a működése
+    - Megnézni, miért nem frissül a customValue után a circle mérete -> A circle-t nem callback-ből akarjuk létrehozni,
+      Azonban a dependent objektumokat tetszőleges típusból akarjuk létrehozni
+    - dPoint, dScalar-nál is működjön a callback mint itt:
+      createCustomCurve(
+        scene,
+        point_1,
+        point_2,
+        customVal,
+        (t, aPos, bPos, cval) => {
+          const mid = aPos.clone().add(bPos).multiplyScalar(0.5);
+          const dir = bPos.clone().sub(aPos);
+          const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
+          const y =
+            THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
+            Math.sin(t * Math.PI) * dir.length() * 0.25;
+          return new THREE.Vector3(x + cval, y, 0);
+        },
+        { color: 0xdd5522 }
+      );    
+
+      - Image: Frissülnie kell a képnek, kell bele a dependency rendszer 
+        (trükk: Amíg mozgatunk valamit, addig a felbontás kisebb legyen)
+        - CPU-n számítás költséges, kell a GPU-s shader alapú megoldás is (WebGL shader) -> 
+            A shader-nek kell számolnia a heatmap-et (a színt számolja a shader)
+              - Akár csak string-esen megadni és elődefiniált funkciókat használni
+        - Legyen resolution paraméter
+  */
 }

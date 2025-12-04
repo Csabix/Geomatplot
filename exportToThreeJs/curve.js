@@ -104,18 +104,21 @@ function makeCurve(scene, arg1, arg2, arg3, type, color = 0xff0000) {
 }
 
 /** Creates a Uniform Catmull–Rom curve */
-export function createUniformCurve(scene, a, b, c, color = "red") {
-  return makeCurve(scene, a, b, c, "catmullrom", color);
+export function createUniformCurve(scene, ...args) {
+  const { points, tension, color } = parseCurveArgs(args);
+  return makeCurve(scene, points, tension, undefined, "catmullrom", color);
 }
 
 /** Creates a Centripetal Catmull–Rom curve */
-export function createCentripetalCurve(scene, a, b, c, color = "red") {
-  return makeCurve(scene, a, b, c, "centripetal", color);
+export function createCentripetalCurve(scene, ...args) {
+  const { points, tension, color } = parseCurveArgs(args);
+  return makeCurve(scene, points, tension, undefined, "centripetal", color);
 }
 
 /** Creates a Chordal Catmull–Rom curve */
-export function createChordalCurve(scene, a, b, c, color = "red") {
-  return makeCurve(scene, a, b, c, "chordal", color);
+export function createChordalCurve(scene, ...args) {
+  const { points, tension, color } = parseCurveArgs(args);
+  return makeCurve(scene, points, tension, undefined, "chordal", color);
 }
 
 /**
@@ -214,11 +217,15 @@ export function createCustomCurve(scene, ...args) {
 
   // ---- helpers to extract values from sources ----
   const extractValue = (src) => {
-    if (!src) return src;
+    if (src == null) return src;
     if (typeof src.getValue === "function") return src.getValue();
     if ("value" in src) return src.value;
     if (src.position && src.position.isVector3) return src.position;
     if (src.isVector3) return src;
+    // Allow passing raw coordinates like [x,y] or {x,y,z}
+    if (Array.isArray(src)) return toVec3(src);
+    if (typeof src === "object" && ("x" in src || "y" in src || "z" in src))
+      return toVec3(src);
     return src;
   };
 
@@ -262,4 +269,35 @@ export function createCustomCurve(scene, ...args) {
 
 function isPlainObject(o) {
   return !!o && typeof o === "object" && !o.isObject3D && !Array.isArray(o);
+}
+
+function isCurveOptions(o) {
+  if (!isPlainObject(o)) return false;
+  const hasStyle = "color" in o || "tension" in o;
+  const looksLikePoint = "x" in o || "y" in o || "z" in o;
+  return hasStyle && !looksLikePoint;
+}
+
+function parseCurveArgs(args) {
+  const arr = [...args];
+  let opts = {};
+  if (arr.length && isCurveOptions(arr[arr.length - 1])) {
+    opts = arr.pop();
+  }
+
+  let tension =
+    typeof opts.tension === "number" ? opts.tension : undefined;
+  if (tension === undefined && arr.length) {
+    const maybeTension = arr[arr.length - 1];
+    if (typeof maybeTension === "number") {
+      tension = arr.pop();
+    }
+  }
+
+  const color = opts.color ?? "red";
+
+  const points =
+    arr.length === 1 && Array.isArray(arr[0]) ? arr[0] : arr;
+
+  return { points, tension, color };
 }

@@ -1,7 +1,26 @@
 import * as THREE from "three";
 import { addDependency } from "./dependency.js";
 
-export function distance(a, b, opts = {}) {
+export function distance(...args) {
+  // Allow final plain-object options (currently unused, kept for future parity)
+  let opts = {};
+  if (args.length >= 3 && isPlainObject(args[args.length - 1])) {
+    opts = args.pop(); // eslint-disable-line no-unused-vars
+  }
+
+  // Optional callback overload: distance(...sources, fn, opts?)
+  const fnIndex = args.findIndex((a) => typeof a === "function");
+  if (fnIndex !== -1) {
+    const callback = args[fnIndex];
+    const sources = args.slice(0, fnIndex).concat(args.slice(fnIndex + 1));
+    return distanceWithCallback(sources, callback);
+  }
+
+  if (args.length < 2) {
+    throw new Error("distance: expected at least two inputs.");
+  }
+
+  const [a, b] = args;
   const listeners = new Set();
   const notify = () => listeners.forEach((fn) => fn(scalar.value));
 
@@ -174,4 +193,84 @@ export function distance(a, b, opts = {}) {
   }
 
   return scalar;
+}
+
+// ---- Custom callback overload ----
+function distanceWithCallback(sources, callback) {
+  const listeners = new Set();
+  const notify = () => listeners.forEach((fn) => fn(scalar.value));
+
+  const scalar = {
+    value: 0,
+    getValue() {
+      return this.value;
+    },
+    onChange(fn) {
+      if (typeof fn === "function") listeners.add(fn);
+    },
+    unlink() {},
+  };
+
+  const extractValue = (src) => {
+    if (src == null) return src;
+    if (typeof src.getValue === "function") return src.getValue();
+    if ("value" in src) return src.value;
+    if (src.position && src.position.isVector3) return src.position;
+    if (src.isVector3) return src;
+    if (Array.isArray(src))
+      return new THREE.Vector3(src[0] ?? 0, src[1] ?? 0, src[2] ?? 0);
+    if (typeof src === "object" && ("x" in src || "y" in src || "z" in src))
+      return new THREE.Vector3(src.x ?? 0, src.y ?? 0, src.z ?? 0);
+    return src;
+  };
+
+  const toVec3Like = (v, label) => {
+    if (v && v.isVector3) return v;
+    if (v && v.position && v.position.isVector3) return v.position;
+    if (Array.isArray(v))
+      return new THREE.Vector3(v[0] ?? 0, v[1] ?? 0, v[2] ?? 0);
+    if (typeof v === "object" && v && ("x" in v || "y" in v || "z" in v))
+      return new THREE.Vector3(v.x ?? 0, v.y ?? 0, v.z ?? 0);
+    throw new Error(`distance: cannot compute base distance, invalid ${label}.`);
+  };
+
+  const recompute = () => {
+    const values = sources.map(extractValue);
+    if (values.length < 2) {
+      throw new Error("distance: callback overload needs at least two positional inputs.");
+    }
+    const p0 = toVec3Like(values[0], "first point");
+    const p1 = toVec3Like(values[1], "second point");
+    const baseDist = p0.distanceTo(p1);
+    const res = callback(baseDist, ...values);
+    if (!Number.isFinite(res)) {
+      throw new Error("distance: callback must return a finite number.");
+    }
+    scalar.value = res;
+    notify();
+  };
+
+  recompute();
+
+  const attachDep = (src) => {
+    if (
+      src &&
+      (src.isObject3D ||
+        (src.position && src.position.isVector3) ||
+        typeof src.getValue === "function" ||
+        "value" in src)
+    ) {
+      addDependency(src, scalar, recompute);
+    }
+  };
+
+  sources.forEach(attachDep);
+
+  return scalar;
+}
+
+function isPlainObject(o) {
+  if (!o || typeof o !== "object") return false;
+  const proto = Object.getPrototypeOf(o);
+  return proto === Object.prototype || proto === null;
 }

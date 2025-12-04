@@ -33,7 +33,8 @@ export function draw(scene) {
 
   /* ----- CURVE ----- */
 
-  // createUniformCurve(scene, [point_1, point_2, point_3, point_4]);
+  // createUniformCurve(scene, [point_1, point_2, [10, 10], point_4]);
+
   // createUniformCurve(scene, point_5, point_6, 0.5, "green");
   // const curve = createCustomCurve(
   //   scene,
@@ -44,10 +45,11 @@ export function draw(scene) {
   //   },
   //   { color: 0x3366ff, segments: 400 }
   // );
+
   // createCustomCurve(
   //   scene,
   //   point_1,
-  //   point_2,
+  //   [10, 10],
   //   (t, aPos, bPos) => {
   //     const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
   //     const y =
@@ -62,10 +64,10 @@ export function draw(scene) {
 
   // dPoint(
   //   scene,
-  //   point_1,
+  //   [10, 10],
   //   point_6,
   //   point_4,
-  //   (a, b, c) => a.clone().add(b).add(c).multiplyScalar(0.8),
+  //   (a, b) => a.clone().add(b).multiplyScalar(0.5),
   //   10,
   //   "green"
   // );
@@ -90,10 +92,14 @@ export function draw(scene) {
 
   /* ----- DISTANCE ----- */
 
-  // const dAB = distance(point_2, point_5);
+  const dAB = distance(point_2, [10, 10], (d, aPos, bPos) => {
+    return d - aPos.distanceTo(bPos) + 20;
+  });
   // dAB.onChange((v) => console.log("|AB| =", v));
 
-  // @TODO Lehessen callback-et megadni, hogy hoygan száámolódjon a távolság (ez is lehet paraméter) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  const circ1 = circle(scene, point_1, dAB.getValue(), {
+    color: 0x0066ff,
+  });
 
   // const dA_to_many = distance(point_1, [point_4, point_5, [200, 10]]);
   // dA_to_many.onChange((v) => console.log("min dist(A, seq) =", v));
@@ -271,36 +277,64 @@ export function draw(scene) {
 
   /* ----- CUSTOM VALUE ----- */
 
-  const dAB = distance(point_1, point_2);
-  const customVal = customValue([dAB], (d) => {
-    return { a: d / 2 };
-  });
+  // const dAB = distance(point_1, point_2);
+  // const customVal = customValue([dAB], (d) => {
+  //   return { a: d / 2 };
+  // });
 
-  createCustomCurve(
-    scene,
-    point_1,
-    point_2,
-    customVal,
-    (t, aPos, bPos, cval) => {
-      const mid = aPos.clone().add(bPos).multiplyScalar(0.5);
-      const dir = bPos.clone().sub(aPos);
-      const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
-      const y =
-        THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
-        Math.sin(t * Math.PI) * dir.length() * 0.25;
-      return new THREE.Vector3(x + cval.a, y, 0);
-    },
-    { color: 0xdd5522 }
-  );
+  // createCustomCurve(
+  //   scene,
+  //   point_1,
+  //   point_2,
+  //   customVal,
+  //   (t, aPos, bPos, cval) => {
+  //     const mid = aPos.clone().add(bPos).multiplyScalar(0.5);
+  //     const dir = bPos.clone().sub(aPos);
+  //     const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
+  //     const y =
+  //       THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
+  //       Math.sin(t * Math.PI) * dir.length() * 0.25;
+  //     return new THREE.Vector3(x + cval.a, y, 0);
+  //   },
+  //   { color: 0xdd5522 }
+  // );
 
-  // cur(scene, customVal, (a) => [0, a.getValue()], 10, "yellow");
+  // curve(scene, customVal, (a) => [0, a.getValue()], 10, "yellow");
 
   // circle(scene, point_1, customVal.getValue(), { color: 0xaa2222 }); // TODO:
 
   /*
     @TODO
     - Átnézni a kódbázist, hogy hol van még esetleg todo ami elmaradt
+      ✅ - Distance now accepts callback:
+            const dAB = distance(point_2, [10, 10], (d, aPos, bPos) => {
+              return d - aPos.distanceTo(bPos) + 20;
+            });
+            const circ1 = circle(scene, point_1, dAB.getValue(), {
+              color: 0x0066ff,
+            });
     - Mindenre implementálni, hogy lehessen akár objektumot, akár tömböt (mint  koordináta) megadni
+      ✅ - Custom curve
+          // createCustomCurve(
+          //   scene,
+          //   point_1,
+          //   [10, 10],
+          //   (t, aPos, bPos) => {
+          //     const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
+          //     const y =
+          //       THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
+          //       Math.sin(t * Math.PI * 3) * 40;
+          //     return new THREE.Vector3(x, y, 0);
+          //   },
+          //   { color: 0xdd5522, segments: 300 }
+          // );
+        ✅  - Összes curve (bármennyi object/array)
+        // createUniformCurve(scene, point_1, point_2, point_3, { color: "green" });
+        // createCentripetalCurve(scene, point_1, point_2, [10, 10], point_4, {
+        //   color: "red",
+        // });
+        // createChordalCurve(scene, point_1, [15, 20], { color: "blue" });
+
     - Callback-et megnézni a dPoiint-ra, mert weird a működése
     - Megnézni, miért nem frissül a customValue után a circle mérete -> A circle-t nem callback-ből akarjuk létrehozni,
       Azonban a dependent objektumokat tetszőleges típusból akarjuk létrehozni
@@ -320,11 +354,11 @@ export function draw(scene) {
           return new THREE.Vector3(x + cval, y, 0);
         },
         { color: 0xdd5522 }
-      );    
+      );
 
-      - Image: Frissülnie kell a képnek, kell bele a dependency rendszer 
+      - Image: Frissülnie kell a képnek, kell bele a dependency rendszer
         (trükk: Amíg mozgatunk valamit, addig a felbontás kisebb legyen)
-        - CPU-n számítás költséges, kell a GPU-s shader alapú megoldás is (WebGL shader) -> 
+        - CPU-n számítás költséges, kell a GPU-s shader alapú megoldás is (WebGL shader) ->
             A shader-nek kell számolnia a heatmap-et (a színt számolja a shader)
               - Akár csak string-esen megadni és elődefiniált funkciókat használni
         - Legyen resolution paraméter

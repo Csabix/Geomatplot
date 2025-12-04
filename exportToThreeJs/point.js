@@ -33,6 +33,7 @@ export function point(scene, x, y, size = 10, color = 0xff0000) {
  * opts:
  *   {
  *     dependencySystem?: DependencySystem   // default: globalDependencySystem
+ *     componentParams?: boolean            // if true, callback receives [x,y,z] arrays instead of Vector3s
  *   }
  */
 export function dPoint(scene, ...args) {
@@ -64,12 +65,13 @@ export function dPoint(scene, ...args) {
     color = tail[0];
     tail = tail.slice(1);
   }
-  if (tail.length >= 1 && tail[0] && typeof tail[0] === "object") {
-    const opts = tail[0];
-    if (opts.dependencySystem instanceof DependencySystem) {
-      depSystem = opts.dependencySystem;
-    }
+  const opts = tail.length >= 1 && tail[0] && typeof tail[0] === "object"
+    ? tail[0]
+    : {};
+  if (opts.dependencySystem instanceof DependencySystem) {
+    depSystem = opts.dependencySystem;
   }
+  const componentParams = !!opts.componentParams;
 
   const geom = new THREE.CircleGeometry(size, 32);
   const mat = new THREE.MeshBasicMaterial({ color });
@@ -79,8 +81,8 @@ export function dPoint(scene, ...args) {
   scene.add(mesh);
 
   const toPos = (p) => {
-    if (p && p.position && p.position.isVector3) return p.position;
-    if (p && p.isVector3) return p;
+    if (p && p.position && p.position.isVector3) return p.position.clone();
+    if (p && p.isVector3) return p.clone();
     if (Array.isArray(p))
       return new THREE.Vector3(p[0] ?? 0, p[1] ?? 0, p[2] ?? 0);
     if (p && typeof p === "object" && "x" in p && "y" in p)
@@ -88,13 +90,28 @@ export function dPoint(scene, ...args) {
     throw new Error("dPoint: unsupported point input.");
   };
 
+  const toVec3 = (v) => {
+    if (v && v.isVector3) return v;
+    if (Array.isArray(v))
+      return new THREE.Vector3(v[0] ?? 0, v[1] ?? 0, v[2] ?? 0);
+    if (v && typeof v === "object" && "x" in v && "y" in v)
+      return new THREE.Vector3(v.x ?? 0, v.y ?? 0, v.z ?? 0);
+    throw new Error(
+      "dPoint callback must return a THREE.Vector3, [x,y,z], or {x,y,z}."
+    );
+  };
+
+  const toPlain = (p) => {
+    const v = toPos(p);
+    return [v.x, v.y, v.z];
+  };
+
   const rebuild = () => {
-    const posList = pointObjs.map(toPos);
-    const result = fn(...posList);
-    if (!result || !result.isVector3) {
-      throw new Error("dPoint callback must return a THREE.Vector3.");
-    }
-    mesh.position.copy(result);
+    const params = componentParams
+      ? pointObjs.map(toPlain)
+      : pointObjs.map(toPos);
+    const result = fn(...params);
+    mesh.position.copy(toVec3(result));
   };
 
   rebuild();

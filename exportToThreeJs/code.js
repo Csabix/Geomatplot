@@ -328,7 +328,7 @@ export function draw(scene) {
           //   },
           //   { color: 0xdd5522, segments: 300 }
           // );
-        ✅  - Összes curve (bármennyi object/array)
+      ✅  - Összes curve (bármennyi object/array)
         // createUniformCurve(scene, point_1, point_2, point_3, { color: "green" });
         // createCentripetalCurve(scene, point_1, point_2, [10, 10], point_4, {
         //   color: "red",
@@ -336,6 +336,15 @@ export function draw(scene) {
         // createChordalCurve(scene, point_1, [15, 20], { color: "blue" });
 
     - Callback-et megnézni a dPoiint-ra, mert weird a működése
+        ✅// dPoint(
+        //   scene,
+        //   point_1,
+        //   point_6,
+        //   ([ax, ay], [bx, by]) => [(ax + bx) / 2, (ay + by) / 2],
+        //   10,
+        //   "green",
+        //   { componentParams: true }
+        // );
     - Megnézni, miért nem frissül a customValue után a circle mérete -> A circle-t nem callback-ből akarjuk létrehozni,
       Azonban a dependent objektumokat tetszőleges típusból akarjuk létrehozni
     - dPoint, dScalar-nál is működjön a callback mint itt:

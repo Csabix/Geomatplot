@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { addDependency } from "./dependency.js";
+import { addDependency, updateDependencies } from "./dependency.js";
 
 export function distance(...args) {
   // Allow final plain-object options (currently unused, kept for future parity)
@@ -154,6 +154,7 @@ export function distance(...args) {
       scalar.value = dist2(A2, B2);
     }
     notify();
+    updateDependencies(scalar);
   }
 
   recompute();
@@ -248,6 +249,7 @@ function distanceWithCallback(sources, callback) {
     }
     scalar.value = res;
     notify();
+    updateDependencies(scalar);
   };
 
   recompute();

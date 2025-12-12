@@ -22,6 +22,21 @@ function isMesh(p) {
   return !!(p && p.position && p.position.isVector3 && p.isObject3D);
 }
 
+function isScalarLike(v) {
+  return (
+    typeof v === "number" ||
+    (v &&
+      (typeof v.getValue === "function" || typeof v.value === "number"))
+  );
+}
+
+function isScalarSource(v) {
+  return (
+    v &&
+    (typeof v.getValue === "function" || typeof v.value === "number")
+  );
+}
+
 function buildCircleGeometry(center, radius, segments = 128) {
   const pts = [];
   const cx = center.x,
@@ -61,6 +76,7 @@ function circumcircle2D(A, B, C) {
 export function circle(scene, A, B, C_or_opts, maybeOpts) {
   let mode;
   let C = undefined;
+  let radiusSource = undefined;
   let opts =
     typeof C_or_opts === "object" &&
     !Array.isArray(C_or_opts) &&
@@ -72,8 +88,9 @@ export function circle(scene, A, B, C_or_opts, maybeOpts) {
   if (C_or_opts !== undefined && C_or_opts !== opts) {
     C = C_or_opts;
     mode = "three";
-  } else if (typeof B === "number") {
+  } else if (isScalarLike(B)) {
     mode = "fixedRadius";
+    radiusSource = B;
   } else {
     mode = "throughPoint";
   }
@@ -96,6 +113,16 @@ export function circle(scene, A, B, C_or_opts, maybeOpts) {
 
   let currentCenter = new THREE.Vector3(0, 0, 0);
   let currentRadius = 0;
+
+  const readRadius = () => {
+    if (!isScalarLike(radiusSource)) return /** @type {number} */ (B);
+    if (typeof radiusSource.getValue === "function") {
+      const v = radiusSource.getValue();
+      return v && typeof v.__depValue !== "undefined" ? v.__depValue : v;
+    }
+    if (typeof radiusSource.value === "number") return radiusSource.value;
+    return /** @type {number} */ (radiusSource);
+  };
 
   function rebuild() {
     if (mode === "three") {
@@ -136,7 +163,7 @@ export function circle(scene, A, B, C_or_opts, maybeOpts) {
     } else {
       const a = toVec3Like(A);
       currentCenter.set(a.x, a.y, 0);
-      currentRadius = /** @type {number} */ (B);
+      currentRadius = readRadius();
       line.visible = true;
       centerMarker.visible = true;
       line.geometry.dispose();
@@ -156,6 +183,9 @@ export function circle(scene, A, B, C_or_opts, maybeOpts) {
   if (mode === "throughPoint" && isMesh(B)) sources.push(B);
   if (mode === "three" && isMesh(B)) sources.push(B);
   if (mode === "three" && C && isMesh(C)) sources.push(C);
+  if (mode === "fixedRadius" && isScalarSource(radiusSource)) {
+    sources.push(radiusSource);
+  }
 
   for (const s of sources) {
     addDependency(s, line, rebuild);

@@ -81,6 +81,16 @@ export function dPoint(scene, ...args) {
   scene.add(mesh);
 
   const toPos = (p) => {
+    if (p && typeof p.__depValue !== "undefined") {
+      return toPos(p.__depValue);
+    }
+    if (p && typeof p.__depSource === "object" && p.__depSource !== null) {
+      const v = p.__depSource.getValue?.();
+      return toPos(v);
+    }
+    if (p && typeof p.getValue === "function") {
+      return toPos(p.getValue());
+    }
     if (p && p.position && p.position.isVector3) return p.position.clone();
     if (p && p.isVector3) return p.clone();
     if (Array.isArray(p))
@@ -117,8 +127,19 @@ export function dPoint(scene, ...args) {
   rebuild();
 
   for (const p of pointObjs) {
-    if (p && p.position && p.position.isVector3) {
-      depSystem.addDependency(p, mesh, () => rebuild());
+    const depSrc =
+      p && typeof p.__depSource === "object" && p.__depSource !== null
+        ? p.__depSource
+        : p;
+
+    if (
+      depSrc &&
+      (depSrc.isObject3D ||
+        (depSrc.position && depSrc.position.isVector3) ||
+        typeof depSrc.getValue === "function" ||
+        "value" in depSrc)
+    ) {
+      depSystem.addDependency(depSrc, mesh, () => rebuild());
     }
   }
 

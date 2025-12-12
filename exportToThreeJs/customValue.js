@@ -1,4 +1,8 @@
-import { addDependency } from "./dependency.js";
+import {
+  addDependency,
+  updateDependencies,
+  DependencySystem,
+} from "./dependency.js";
 
 /**
  * CustomValue
@@ -30,7 +34,10 @@ export function customValue(inputs, userCallback, options = {}) {
     );
   }
 
-  const depSys = options.dependencySystem; // optional local system
+  const depSys =
+    options.dependencySystem instanceof DependencySystem
+      ? options.dependencySystem
+      : null; // optional local system
 
   // Normalize inputs to array
   const inArray = Array.isArray(inputs) ? inputs : [inputs];
@@ -72,45 +79,13 @@ export function customValue(inputs, userCallback, options = {}) {
     }
   }
 
-  // --- Rebuild function (called when any input changes) -------------------
-  function rebuild() {
-    try {
-      const args = inArray.map(extractValue);
-      const v = userCallback(...args);
-      currentValue = v;
-      notify(v);
-    } catch (e) {
-      console.warn(
-        "customValue: callback threw error, marking value undefined.",
-        e
-      );
-      currentValue = undefined;
-      notify(undefined);
-    }
-  }
-
-  // --- Register dependencies ---------------------------------------------
-  // We don't really use the "target" object later, but dependency system
-  // wants a source + target to know what to update.
-  const target = { __isCustomValue: true };
-
-  for (const src of inArray) {
-    // Only things that can change need to be wired (points, other dependents)
-    if (src && (src.isObject3D || typeof src === "object")) {
-      addDependency(src, target, rebuild, depSys);
-    }
-  }
-
-  // Initial computation
-  rebuild();
-
-  // --- Public API ---------------------------------------------------------
-  return {
+  // --- Public API object (also used as dependency target) -----------------
+  const self = {
     /**
      * Get the current value (may be undefined if callback failed).
      */
     getValue() {
-      return currentValue;
+      return wrapValue(currentValue, self);
     },
 
     /**
@@ -128,11 +103,59 @@ export function customValue(inputs, userCallback, options = {}) {
     /**
      * Force recompute (usually not needed; dependency system calls rebuild).
      */
-    recompute: rebuild,
+    recompute: () => rebuild(),
 
     /**
      * Expose raw inputs for debugging.
      */
     inputs: inArray,
+  };
+
+  // --- Rebuild function (called when any input changes) -------------------
+  function rebuild() {
+    try {
+      const args = inArray.map(extractValue);
+      const v = userCallback(...args);
+      currentValue = v;
+      notify(v);
+    } catch (e) {
+      console.warn(
+        "customValue: callback threw error, marking value undefined.",
+        e
+      );
+      currentValue = undefined;
+      notify(undefined);
+    }
+    wrapValue.sourceRef = self;
+    const updater = depSys
+      ? depSys.updateDependencies.bind(depSys)
+      : updateDependencies;
+    updater(self);
+  }
+
+  // --- Register dependencies ---------------------------------------------
+  for (const src of inArray) {
+    // Only things that can change need to be wired (points, other dependents)
+    if (src && (src.isObject3D || typeof src === "object")) {
+      if (depSys) {
+        depSys.addDependency(src, self, rebuild);
+      } else {
+        addDependency(src, self, rebuild);
+      }
+    }
+  }
+
+  // Initial computation
+  rebuild();
+
+  // --- Public API ---------------------------------------------------------
+  return self;
+}
+
+function wrapValue(v, sourceRef) {
+  // Always return a wrapper object so consumers can find the source and unwrap safely.
+  return {
+    __depSource: sourceRef,
+    __depValue: v,
   };
 }

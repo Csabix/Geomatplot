@@ -25,7 +25,7 @@ export function draw(scene) {
   /* ----- POINT ----- */
 
   const point_1 = point(scene, 50, 50, 10, "blue");
-  const point_2 = point(scene, 20, 160, 10, "green");
+  const point_2 = point(scene, 20, 160, 10, "yellow");
   const point_3 = point(scene, -20, 50);
   const point_4 = point(scene, -50, -100);
   const point_5 = point(scene, 150, 50);
@@ -92,14 +92,14 @@ export function draw(scene) {
 
   /* ----- DISTANCE ----- */
 
-  const dAB = distance(point_2, [10, 10], (d, aPos, bPos) => {
-    return d - aPos.distanceTo(bPos) + 20;
-  });
+  // const dAB = distance(point_2, [10, 10], (d, aPos, bPos) => {
+  //   return d - aPos.distanceTo(bPos) + 20;
+  // });
   // dAB.onChange((v) => console.log("|AB| =", v));
 
-  const circ1 = circle(scene, point_1, dAB.getValue(), {
-    color: 0x0066ff,
-  });
+  // const circ1 = circle(scene, point_1, dAB.getValue(), {
+  //   color: 0x0066ff,
+  // });
 
   // const dA_to_many = distance(point_1, [point_4, point_5, [200, 10]]);
   // dA_to_many.onChange((v) => console.log("min dist(A, seq) =", v));
@@ -279,9 +279,85 @@ export function draw(scene) {
 
   // const dAB = distance(point_1, point_2);
   // const customVal = customValue([dAB], (d) => {
-  //   return { a: d / 2 };
+  //   return d / 2;
   // });
 
+  // const circ1 = circle(scene, point_1, customVal, {
+  //   color: 0x0066ff,
+  // });
+
+  //🆕 @TODO: Distance és dScalar külön vétele, dScalar-nak kell a callback, nem a distance-nak
+
+  // @TODO
+  // - Átnézni a kódbázist, hogy hol van még esetleg todo ami elmaradt
+  //   ✅ - Distance now accepts callback with any number of arguments:
+  const dAB = distance(point_2, [10, 10], (d, aPos, bPos) => {
+    return d - aPos.distanceTo(bPos) + 20;
+  });
+  // const circ1 = circle(scene, point_1, dAB, {
+  //   color: 0x0066ff,
+  // });
+  // - Mindenre implementálni, hogy lehessen akár objektumot, akár tömböt (mint  koordináta) megadni
+  //   ✅ - Custom curve
+  // const customVal2 = customValue([dAB], (d) => {
+  //   // return d / 2;
+  //   return [10, 10];
+  // });
+  // createCustomCurve(
+  //   scene,
+  //   point_1,
+  //   point_2,
+  //   customVal2,
+  //   (t, aPos, bPos, cusVal) => {
+  //     console.log(cusVal["__depValue"]); --> !!!!!!!!!!!!
+  //     🆕 @TODO: depValue-t ki kell csomagolni alapból, így akkor a dependency system-et is át kell nézni
+  //     const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
+  //     const y =
+  //       THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
+  //       Math.sin(t * Math.PI * 3) * 40;
+  //     return new THREE.Vector3(x, y, 0);
+  //   },
+  //   { color: 0xdd5522, segments: 300 }
+  // );
+  //   ✅  - Összes curve (bármennyi object/array)
+  //     createUniformCurve(scene, point_1, point_2, point_3, { color: "green" });
+  //     createCentripetalCurve(scene, point_1, point_2, [10, 10], point_4, {
+  //       color: "red",
+  //     });
+  //     createChordalCurve(scene, point_1, [15, 20], { color: "blue" });
+  //     🆕 Opcionális argument-eknél legyen mindenhol egy hidden boolean, ami ha == true, akkor elrejti az objektumot
+
+  // - Callback-et megnézni a dPoiint-ra, mert weird a működése
+  // dPoint(
+  //   // 🆕 Automatikusan detektálni, hogy milyen fajta, ne kelljen a componentParams
+  //   scene,
+  //   point_1,
+  //   point_6, // 🆕 El kell fogadnia másféle paramétert is, pl. curve vagy circle. Ilyen esetekben a curve-nek a pont halmazát adja vissza, azzal tudunk számolni a paraméterben.
+  //   // Circle-nél a getValue() jó.
+  //   // A paramétereket eygesével kell nézni, mert itt is lehet, hogy az egyik pont, a másik nem, de a másikat nem akarjuk szétbontani
+  //   // Automatikus detekció erősen ajánlott
+  //   ([ax, ay], [bx, by]) => [(ax + bx) / 2, (ay + by) / 2],
+  //   10,
+  //   "green", // 🆕 Bekerülni az utolsó arhument-be, mint opcionális paraméterek (átnézni mindet)
+  //   { componentParams: true }
+  // );
+  // -   ✅Megnézni, miért nem frissül a customValue után a circle mérete -> A circle-t nem callback-ből akarjuk létrehozni,
+  //   Azonban a dependent objektumokat tetszőleges típusból akarjuk létrehozni
+  // const dAB = distance(point_1, point_2);
+  const customVal = customValue([dAB], (d) => {
+    return d / 2;
+    // return [10, d];
+  });
+
+  // dPoint(scene, point_1, customVal, ([px, py], [dx, dy]) => {
+  //   return [px + dx, py + dy];
+  // });
+
+  // const circ1 = circle(scene, point_1, dAB, {
+  //   color: 0x0066ff,
+  // });
+
+  // - dPoint, dScalar-nál is működjön a callback mint itt: --> 🛑 Distance-ra még meg kell csinálni
   // createCustomCurve(
   //   scene,
   //   point_1,
@@ -294,82 +370,16 @@ export function draw(scene) {
   //     const y =
   //       THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
   //       Math.sin(t * Math.PI) * dir.length() * 0.25;
-  //     return new THREE.Vector3(x + cval.a, y, 0);
+  //     return new THREE.Vector3(x + cval, y, 0);
   //   },
   //   { color: 0xdd5522 }
   // );
 
-  // curve(scene, customVal, (a) => [0, a.getValue()], 10, "yellow");
-
-  // circle(scene, point_1, customVal.getValue(), { color: 0xaa2222 }); // TODO:
-
-  /*
-    @TODO
-    - Átnézni a kódbázist, hogy hol van még esetleg todo ami elmaradt
-      ✅ - Distance now accepts callback:
-            const dAB = distance(point_2, [10, 10], (d, aPos, bPos) => {
-              return d - aPos.distanceTo(bPos) + 20;
-            });
-            const circ1 = circle(scene, point_1, dAB.getValue(), {
-              color: 0x0066ff,
-            });
-    - Mindenre implementálni, hogy lehessen akár objektumot, akár tömböt (mint  koordináta) megadni
-      ✅ - Custom curve
-          // createCustomCurve(
-          //   scene,
-          //   point_1,
-          //   [10, 10],
-          //   (t, aPos, bPos) => {
-          //     const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
-          //     const y =
-          //       THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
-          //       Math.sin(t * Math.PI * 3) * 40;
-          //     return new THREE.Vector3(x, y, 0);
-          //   },
-          //   { color: 0xdd5522, segments: 300 }
-          // );
-      ✅  - Összes curve (bármennyi object/array)
-        // createUniformCurve(scene, point_1, point_2, point_3, { color: "green" });
-        // createCentripetalCurve(scene, point_1, point_2, [10, 10], point_4, {
-        //   color: "red",
-        // });
-        // createChordalCurve(scene, point_1, [15, 20], { color: "blue" });
-
-    - Callback-et megnézni a dPoiint-ra, mert weird a működése
-        ✅// dPoint(
-        //   scene,
-        //   point_1,
-        //   point_6,
-        //   ([ax, ay], [bx, by]) => [(ax + bx) / 2, (ay + by) / 2],
-        //   10,
-        //   "green",
-        //   { componentParams: true }
-        // );
-    - Megnézni, miért nem frissül a customValue után a circle mérete -> A circle-t nem callback-ből akarjuk létrehozni,
-      Azonban a dependent objektumokat tetszőleges típusból akarjuk létrehozni
-    - dPoint, dScalar-nál is működjön a callback mint itt:
-      createCustomCurve(
-        scene,
-        point_1,
-        point_2,
-        customVal,
-        (t, aPos, bPos, cval) => {
-          const mid = aPos.clone().add(bPos).multiplyScalar(0.5);
-          const dir = bPos.clone().sub(aPos);
-          const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
-          const y =
-            THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
-            Math.sin(t * Math.PI) * dir.length() * 0.25;
-          return new THREE.Vector3(x + cval, y, 0);
-        },
-        { color: 0xdd5522 }
-      );
-
-      - Image: Frissülnie kell a képnek, kell bele a dependency rendszer
-        (trükk: Amíg mozgatunk valamit, addig a felbontás kisebb legyen)
-        - CPU-n számítás költséges, kell a GPU-s shader alapú megoldás is (WebGL shader) ->
-            A shader-nek kell számolnia a heatmap-et (a színt számolja a shader)
-              - Akár csak string-esen megadni és elődefiniált funkciókat használni
-        - Legyen resolution paraméter
-  */
+  //   🛑- Image: Frissülnie kell a képnek, kell bele a dependency rendszer
+  //     (trükk: Amíg mozgatunk valamit, addig a felbontás kisebb legyen)
+  //     - CPU-n számítás költséges, kell a GPU-s shader alapú megoldás is (WebGL shader) ->
+  //         A shader-nek kell számolnia a heatmap-et (a színt számolja a shader)
+  //           - Akár csak string-esen megadni és elődefiniált funkciókat használni
+  //     - Legyen resolution paraméter
+  //     - Beállítási lehetőség, bilinear/nearest neighbour mintavételezés (filtering), threeJs-ben benne lehet, csak cpu-nál számít
 }

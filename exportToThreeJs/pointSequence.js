@@ -22,6 +22,7 @@ import { addDependency } from "./dependency.js";
  *    color?: number|string,      // default 'black'
  *    markerSize?: number,         // default 2 (matlab scaled ~ 32px)
  *    visible?: boolean,           // default true
+ *    hidden?: boolean,            // default false (alias for visible=false)
  *    sizeAttenuation?: boolean    // default false (pixel-sized points)
  *  }
  *
@@ -62,7 +63,7 @@ export function pointSequence(...args) {
 
   const color = opts.color ?? 0x000000;
   const markerSize = opts.markerSize ?? 2;
-  const visible = opts.visible ?? true;
+  const visible = opts.hidden ? false : opts.visible ?? true;
   const sizeAttenuation = opts.sizeAttenuation ?? false;
 
   const group = new THREE.Group();

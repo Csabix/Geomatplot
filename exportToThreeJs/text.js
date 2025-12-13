@@ -32,6 +32,7 @@ import { addDependency } from "./dependency.js";
  *     fontSize?: number,       // CSS px, default: 18
  *     fontFamily?: string,     // default: "Arial"
  *     offset?: {x:number,y:number} // screen-space-ish world offset, default {x:0,y:0}
+ *     hidden?: boolean         // default false; if true, sprite is hidden
  *   }
  *
  * Returns:
@@ -61,6 +62,7 @@ export function text(scene, pos, arg2, arg3, arg4) {
   const fontSize = opts.fontSize ?? 18;
   const fontFamily = opts.fontFamily ?? "Arial";
   const offset = opts.offset ?? { x: 0, y: 0 };
+  const hidden = !!opts.hidden;
 
   let constantText = null;
   let sources = [];
@@ -86,7 +88,7 @@ export function text(scene, pos, arg2, arg3, arg4) {
       transparent: true,
     })
   );
-
+  sprite.visible = !hidden;
   updateSpriteScaleFromMap(sprite);
 
   scene.add(sprite);

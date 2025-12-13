@@ -99,16 +99,18 @@ export function circle(scene, A, B, C_or_opts, maybeOpts) {
   const segments = opts.segments ?? 128;
   const centerSize = opts.centerSize ?? 4;
   const centerColor = opts.centerColor ?? 0x8888ff;
+  const hidden = !!opts.hidden;
 
   const material = new THREE.LineBasicMaterial({ color });
   const line = new THREE.Line(new THREE.BufferGeometry(), material);
+  line.visible = !hidden;
   scene.add(line);
 
   const centerMarker = new THREE.Mesh(
     new THREE.CircleGeometry(centerSize, 24),
     new THREE.MeshBasicMaterial({ color: centerColor })
   );
-  centerMarker.visible = true;
+  centerMarker.visible = !hidden;
   scene.add(centerMarker);
 
   let currentCenter = new THREE.Vector3(0, 0, 0);
@@ -125,6 +127,12 @@ export function circle(scene, A, B, C_or_opts, maybeOpts) {
   };
 
   function rebuild() {
+    if (hidden) {
+      line.visible = false;
+      centerMarker.visible = false;
+      return;
+    }
+
     if (mode === "three") {
       const a2 = toVec2(A),
         b2 = toVec2(B),

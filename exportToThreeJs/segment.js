@@ -22,6 +22,7 @@ import { addDependency } from "./dependency.js";
  *   - color?: number|string = 0x000000
  *   - linewidth?: number = 1
  *   - dashed?: boolean = false
+ *   - hidden?: boolean = false
  *
  * Returns:
  *   {
@@ -95,6 +96,7 @@ export function segment(scene, ...args) {
   const color = opts.color ?? 0x000000;
   const linewidth = opts.linewidth ?? 1;
   const dashed = !!opts.dashed;
+  const hidden = !!opts.hidden;
 
   let mode = "polyline"; // default: multi-point
   let A = inputs[0];
@@ -117,6 +119,7 @@ export function segment(scene, ...args) {
 
   const geometry = new THREE.BufferGeometry();
   const line = new THREE.Line(geometry, material);
+  line.visible = !hidden;
   scene.add(line);
 
   function pointsNow() {

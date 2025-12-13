@@ -49,15 +49,15 @@ function rebuildLineGeometry(line, pts, type, tension) {
 }
 
 /**
- * Creates and returns a Catmull–Rom curve (THREE.Line) and adds it to the given scene.
+ * Creates and returns a Catmullâ€“Rom curve (THREE.Line) and adds it to the given scene.
  *
  * ### Overloads
  * 1. `makeCurve(scene, p1, p2, tension, type, color)`
  *    - Connects two points (adds a lifted midpoint automatically for curvature)
  * 2. `makeCurve(scene, pointsArray, tension, type, color)`
- *    - Connects any number (≥2) of points directly
+ *    - Connects any number (â‰Ą2) of points directly
  */
-function makeCurve(scene, arg1, arg2, arg3, type, color = 0xff0000) {
+function makeCurve(scene, arg1, arg2, arg3, type, color = 0xff0000, hidden = false) {
   let points, tension;
   let meshSources = [];
 
@@ -80,6 +80,7 @@ function makeCurve(scene, arg1, arg2, arg3, type, color = 0xff0000) {
   const geometry = new THREE.BufferGeometry();
   const material = new THREE.LineBasicMaterial({ color });
   const line = new THREE.Line(geometry, material);
+  line.visible = !hidden;
   scene.add(line);
 
   rebuildLineGeometry(
@@ -103,22 +104,22 @@ function makeCurve(scene, arg1, arg2, arg3, type, color = 0xff0000) {
   return line;
 }
 
-/** Creates a Uniform Catmull–Rom curve */
+/** Creates a Uniform Catmull2?"Rom curve */
 export function createUniformCurve(scene, ...args) {
-  const { points, tension, color } = parseCurveArgs(args);
-  return makeCurve(scene, points, tension, undefined, "catmullrom", color);
+  const { points, tension, color, hidden } = parseCurveArgs(args);
+  return makeCurve(scene, points, tension, undefined, "catmullrom", color, hidden);
 }
 
-/** Creates a Centripetal Catmull–Rom curve */
+/** Creates a Centripetal Catmull2?"Rom curve */
 export function createCentripetalCurve(scene, ...args) {
-  const { points, tension, color } = parseCurveArgs(args);
-  return makeCurve(scene, points, tension, undefined, "centripetal", color);
+  const { points, tension, color, hidden } = parseCurveArgs(args);
+  return makeCurve(scene, points, tension, undefined, "centripetal", color, hidden);
 }
 
-/** Creates a Chordal Catmull–Rom curve */
+/** Creates a Chordal Catmull2?"Rom curve */
 export function createChordalCurve(scene, ...args) {
-  const { points, tension, color } = parseCurveArgs(args);
-  return makeCurve(scene, points, tension, undefined, "chordal", color);
+  const { points, tension, color, hidden } = parseCurveArgs(args);
+  return makeCurve(scene, points, tension, undefined, "chordal", color, hidden);
 }
 
 /**
@@ -130,18 +131,19 @@ export function createChordalCurve(scene, ...args) {
  * - The callback is invoked as:
  *       callback(t, ...values) -> pointLike
  *   where:
- *     - t ∈ [0,1] is the curve parameter,
+ *     - t â [0,1] is the curve parameter,
  *     - values are derived from your sources:
  *         * for points:   their position (THREE.Vector3)
  *         * for scalars:  src.getValue() or src.value if present
  *         * otherwise:    the source object itself
- *     - pointLike is anything `toVec3` understands (Vector3, [x,y], {x,y}, mesh…).
+ *     - pointLike is anything `toVec3` understands (Vector3, [x,y], {x,y}, meshâ€¦).
  *
  * opts:
  *   {
  *     segments?: number      // number of samples along t, default 200
  *     color?:    number|string // line color, default 0x000000
  *     lineWidth?: number     // LineBasicMaterial linewidth, default 1
+ *     hidden?:   boolean     // if true, curve is created but not visible
  *   }
  *
  * Returns:
@@ -208,11 +210,13 @@ export function createCustomCurve(scene, ...args) {
   const segments = opts.segments ?? 200;
   const color = opts.color ?? 0x000000;
   const lineWidth = opts.lineWidth ?? 1;
+  const hidden = !!opts.hidden;
 
   // ---- line setup ----
   const geometry = new THREE.BufferGeometry();
   const material = new THREE.LineBasicMaterial({ color, linewidth: lineWidth });
   const line = new THREE.Line(geometry, material);
+  line.visible = !hidden;
   scene.add(line);
 
   // ---- helpers to extract values from sources ----
@@ -273,7 +277,7 @@ function isPlainObject(o) {
 
 function isCurveOptions(o) {
   if (!isPlainObject(o)) return false;
-  const hasStyle = "color" in o || "tension" in o;
+  const hasStyle = "color" in o || "tension" in o || "hidden" in o;
   const looksLikePoint = "x" in o || "y" in o || "z" in o;
   return hasStyle && !looksLikePoint;
 }
@@ -295,9 +299,10 @@ function parseCurveArgs(args) {
   }
 
   const color = opts.color ?? "red";
+  const hidden = !!opts.hidden;
 
   const points =
     arr.length === 1 && Array.isArray(arr[0]) ? arr[0] : arr;
 
-  return { points, tension, color };
+  return { points, tension, color, hidden };
 }

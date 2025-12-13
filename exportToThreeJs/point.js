@@ -12,28 +12,49 @@ import {
  * @param {THREE.Scene} scene - The scene to add the point to.
  * @param {number} x - X position.
  * @param {number} y - Y position.
- * @param {number} size - Point size (optional, default 10).
- * @param {number} color - Color in hex (optional, default 0xff0000).
+ * @param {object|number|string} opts - Optional params (object preferred).
+ *        opts.size?: number (default 10)
+ *        opts.color?: number|string (default 0xff0000)
+ *        opts.hidden?: boolean (default false; if true, mesh is not rendered)
  * @returns {THREE.Mesh} The created mesh.
  */
-export function point(scene, x, y, size = 10, color = 0xff0000) {
+export function point(scene, x, y, opts = {}) {
+  let size = 10;
+  let color = 0xff0000;
+  let hidden = false;
+
+  // Legacy support: point(scene, x, y, size, color)
+  if (typeof opts === "number" || typeof opts === "string") {
+    if (typeof opts === "number") size = opts;
+    if (typeof opts === "string") color = opts;
+    if (arguments.length >= 5) color = arguments[4];
+  } else if (opts && typeof opts === "object") {
+    size = opts.size ?? size;
+    color = opts.color ?? color;
+    hidden = !!opts.hidden;
+  }
+
   const geometry = new THREE.CircleGeometry(size, 32);
   const material = new THREE.MeshBasicMaterial({ color });
   const point = new THREE.Mesh(geometry, material);
   point.position.set(x, y, 0);
   point.userData.isPoint = true;
+  point.visible = !hidden;
   scene.add(point);
   addDraggableObject(point);
   return point;
 }
 
 /**
- * dPoint(scene, ...points, fn, size?, color?, opts?)
+ * dPoint(scene, ...points, fn, opts?)
  *
  * opts:
  *   {
  *     dependencySystem?: DependencySystem   // default: globalDependencySystem
- *     componentParams?: boolean            // if true, callback receives [x,y,z] arrays instead of Vector3s
+ *     componentParams?: boolean            // if true, force callback to get [x,y,z]; if false, force Vector3; if unset, auto-detect
+ *     size?: number                        // point size (default 8)
+ *     color?: number|string                // point color (default 0x00ffff)
+ *     hidden?: boolean                     // hide the point if true (default false)
  *   }
  */
 export function dPoint(scene, ...args) {
@@ -53,31 +74,30 @@ export function dPoint(scene, ...args) {
   let size = 8;
   let color = 0x00ffff;
   let depSystem = globalDependencySystem;
+  let hidden = false;
 
-  if (tail.length >= 1 && typeof tail[0] === "number") {
-    size = tail[0];
-    tail = tail.slice(1);
-  }
-  if (
-    tail.length >= 1 &&
-    (typeof tail[0] === "number" || typeof tail[0] === "string")
-  ) {
-    color = tail[0];
-    tail = tail.slice(1);
-  }
-  const opts = tail.length >= 1 && tail[0] && typeof tail[0] === "object"
-    ? tail[0]
-    : {};
+  const opts =
+    tail.length >= 1 && tail[0] && typeof tail[0] === "object" ? tail[0] : {};
+  if (opts.size !== undefined) size = opts.size;
+  if (opts.color !== undefined) color = opts.color;
+  hidden = !!opts.hidden;
   if (opts.dependencySystem instanceof DependencySystem) {
     depSystem = opts.dependencySystem;
   }
-  const componentParams = !!opts.componentParams;
+  // paramMode: "plain" (arrays), "vector" (Vector3), null (auto-detect)
+  let paramMode =
+    opts.componentParams === true
+      ? "plain"
+      : opts.componentParams === false
+      ? "vector"
+      : null;
 
   const geom = new THREE.CircleGeometry(size, 32);
   const mat = new THREE.MeshBasicMaterial({ color });
   const mesh = new THREE.Mesh(geom, mat);
   mesh.userData.isPoint = false;
   mesh.userData.isDPoint = true;
+  mesh.visible = !hidden;
   scene.add(mesh);
 
   const toPos = (p) => {
@@ -116,11 +136,29 @@ export function dPoint(scene, ...args) {
     return [v.x, v.y, v.z];
   };
 
+  const callParams = (mode) =>
+    mode === "plain" ? pointObjs.map(toPlain) : pointObjs.map(toPos);
+
   const rebuild = () => {
-    const params = componentParams
-      ? pointObjs.map(toPlain)
-      : pointObjs.map(toPos);
-    const result = fn(...params);
+    let result;
+    if (paramMode === "plain") {
+      result = fn(...callParams("plain"));
+    } else if (paramMode === "vector") {
+      result = fn(...callParams("vector"));
+    } else {
+      try {
+        result = fn(...callParams("vector"));
+        paramMode = "vector";
+      } catch (eVec) {
+        try {
+          result = fn(...callParams("plain"));
+          paramMode = "plain";
+        } catch (ePlain) {
+          console.warn("dPoint: callback failed (vector and plain):", eVec, ePlain);
+          return;
+        }
+      }
+    }
     mesh.position.copy(toVec3(result));
   };
 

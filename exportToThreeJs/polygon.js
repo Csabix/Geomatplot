@@ -21,7 +21,8 @@ import { addDependency } from "./dependency.js";
  *     color?: number|string,    // edge & fill color, default 0x0000ff (like 'b')
  *     lineWidth?: number,       // outline width, default 1
  *     faceAlpha?: number,       // [0,1], default 0.15 (MATLAB default)
- *     visible?: boolean         // default true
+ *     visible?: boolean,        // default true
+ *     hidden?: boolean          // if true, hides the polygon (alias for visible=false)
  *   }
  *
  * Returns:
@@ -55,7 +56,7 @@ export function polygon(scene, ...args) {
   const color = opts.color ?? 0x0000ff;
   const lineWidth = opts.lineWidth ?? 1;
   const faceAlpha = opts.faceAlpha ?? 0.15;
-  const visible = opts.visible ?? true;
+  const visible = opts.hidden ? false : opts.visible ?? true;
 
   let inputs = args;
 

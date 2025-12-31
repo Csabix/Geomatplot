@@ -105,7 +105,8 @@ export function draw(scene) {
   const dAB = distance(point_2, [10, 10], (d, aPos, bPos) => {
     return d - aPos.distanceTo(bPos) + 20;
   });
-  dAB.onChange((v) => console.log("|AB| =", v));
+
+  // dAB.onChange((v) => console.log("|AB| =", v));
 
   const circ1 = circle(scene, point_1, dAB.getValue(), {
     color: 0x0066ff,
@@ -113,7 +114,7 @@ export function draw(scene) {
   });
 
   const dA_to_many = distance(point_1, [point_4, point_5, [200, 10]]);
-  dA_to_many.onChange((v) => console.log("min dist(A, seq) =", v));
+  // dA_to_many.onChange((v) => console.log("min dist(A, seq) =", v));
 
   const dA_to_circ = distance(point_1, circ1);
   // dA_to_circ.onChange((v) => console.log("gap(A, circle) =", v));
@@ -418,7 +419,7 @@ export function draw(scene) {
       seq_poly.getArray().map(([x, y]) => new THREE.Vector2(x, y)),
     __depSource: seq_poly.group,
   };
-  // 🆕 Utána nézni, hogy miért Vector2-nél mardtunk végül Vector2 helyett
+  // 🆕 Utána nézni, hogy miért Vector3-nél mardtunk végül Vector2 helyett
   // 🆕 Inputokat tömb ként átadni, és akkor lenne nekik neve pl.: {elso_pont: point_1} így lehetne rá hivatkozni a shader-ben
 
   // createFunctionImage2D(scene, {
@@ -444,7 +445,7 @@ export function draw(scene) {
     { size: 8, color: "magenta" }
   );
 
-  // 🆕 Component params is still in use
+  // ✅🆕 Component params is still in use
 
   // dPoint(
   //   scene,
@@ -458,7 +459,7 @@ export function draw(scene) {
     scene,
     point_1,
     point_2,
-    ([xx, yy], /* { x, y } */ b) => [(x + xx) / 2, (y + yy) / 2],
+    ([xx, yy], [x, y]) => [(x + xx) / 2, (y + yy) / 2],
     { size: 8, color: "magenta" }
   );
 
@@ -510,5 +511,5 @@ export function draw(scene) {
 
   // 🆕 Elkülöníteni a ThreeJS dependenciákat. Ne legyenek össze vissza a dependenciák, hogy később akár
   //    le lehessen cserélni valami más technológiára
-  // 🆕 Legyen egy doksi arról (README), hogy hogyan kell lokálisan fejleszteni a projektet
+  // ✅🆕 Legyen egy doksi arról (README), hogy hogyan kell lokálisan fejleszteni a projektet
 }

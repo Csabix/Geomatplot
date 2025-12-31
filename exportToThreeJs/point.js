@@ -54,7 +54,6 @@ export function point(scene, x, y, opts = {}) {
  * opts:
  *   {
  *     dependencySystem?: DependencySystem   // default: globalDependencySystem
- *     componentParams?: boolean            // if true, force callback to get [x,y]; if false, force Vector2; if unset, auto-detect
  *     size?: number                        // point size (default 8)
  *     color?: number|string                // point color (default 0x00ffff)
  *     hidden?: boolean                     // hide the point if true (default false)
@@ -87,13 +86,6 @@ export function dPoint(scene, ...args) {
   if (opts.dependencySystem instanceof DependencySystem) {
     depSystem = opts.dependencySystem;
   }
-  // paramMode: "plain" (arrays), "vector" (Vector2), null (auto-detect)
-  let paramMode =
-    opts.componentParams === true
-      ? "plain"
-      : opts.componentParams === false
-      ? "vector"
-      : null;
 
   const geom = new THREE.CircleGeometry(size, 32);
   const mat = new THREE.MeshBasicMaterial({ color });
@@ -146,28 +138,21 @@ export function dPoint(scene, ...args) {
 
   const rebuild = () => {
     let result;
-    if (paramMode === "plain") {
-      result = fn(...callParams("plain"));
-    } else if (paramMode === "vector") {
+    try {
       result = fn(...callParams("vector"));
-    } else {
+    } catch (eVec) {
       try {
-        result = fn(...callParams("vector"));
-        paramMode = "vector";
-      } catch (eVec) {
-        try {
-          result = fn(...callParams("plain"));
-          paramMode = "plain";
-        } catch (ePlain) {
-          console.warn(
-            "dPoint: callback failed (vector and plain):",
-            eVec,
-            ePlain
-          );
-          return;
-        }
+        result = fn(...callParams("plain"));
+      } catch (ePlain) {
+        console.warn(
+          "dPoint: callback failed (vector and plain):",
+          eVec,
+          ePlain
+        );
+        return;
       }
     }
+
     mesh.position.copy(toVec3ForPosition(result));
   };
 

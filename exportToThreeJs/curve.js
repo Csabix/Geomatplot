@@ -49,15 +49,23 @@ function rebuildLineGeometry(line, pts, type, tension) {
 }
 
 /**
- * Creates and returns a Catmullâ€“Rom curve (THREE.Line) and adds it to the given scene.
+ * Creates and returns a CatmullRom curve (THREE.Line) and adds it to the given scene.
  *
  * ### Overloads
  * 1. `makeCurve(scene, p1, p2, tension, type, color)`
  *    - Connects two points (adds a lifted midpoint automatically for curvature)
  * 2. `makeCurve(scene, pointsArray, tension, type, color)`
- *    - Connects any number (â‰Ą2) of points directly
+ *    - Connects any number of points directly
  */
-function makeCurve(scene, arg1, arg2, arg3, type, color = 0xff0000, hidden = false) {
+function makeCurve(
+  scene,
+  arg1,
+  arg2,
+  arg3,
+  type,
+  color = 0xff0000,
+  hidden = false
+) {
   let points, tension;
   let meshSources = [];
 
@@ -104,19 +112,35 @@ function makeCurve(scene, arg1, arg2, arg3, type, color = 0xff0000, hidden = fal
   return line;
 }
 
-/** Creates a Uniform Catmull2?"Rom curve */
+/** Creates a Uniform Catmull2?"Rom curve */
 export function createUniformCurve(scene, ...args) {
   const { points, tension, color, hidden } = parseCurveArgs(args);
-  return makeCurve(scene, points, tension, undefined, "catmullrom", color, hidden);
+  return makeCurve(
+    scene,
+    points,
+    tension,
+    undefined,
+    "catmullrom",
+    color,
+    hidden
+  );
 }
 
-/** Creates a Centripetal Catmull2?"Rom curve */
+/** Creates a Centripetal Catmull2?"Rom curve */
 export function createCentripetalCurve(scene, ...args) {
   const { points, tension, color, hidden } = parseCurveArgs(args);
-  return makeCurve(scene, points, tension, undefined, "centripetal", color, hidden);
+  return makeCurve(
+    scene,
+    points,
+    tension,
+    undefined,
+    "centripetal",
+    color,
+    hidden
+  );
 }
 
-/** Creates a Chordal Catmull2?"Rom curve */
+/** Creates a Chordal Catmull2?"Rom curve */
 export function createChordalCurve(scene, ...args) {
   const { points, tension, color, hidden } = parseCurveArgs(args);
   return makeCurve(scene, points, tension, undefined, "chordal", color, hidden);
@@ -299,8 +323,7 @@ function parseCurveArgs(args) {
     opts = arr.pop();
   }
 
-  let tension =
-    typeof opts.tension === "number" ? opts.tension : undefined;
+  let tension = typeof opts.tension === "number" ? opts.tension : undefined;
   if (tension === undefined && arr.length) {
     const maybeTension = arr[arr.length - 1];
     if (typeof maybeTension === "number") {
@@ -311,8 +334,7 @@ function parseCurveArgs(args) {
   const color = opts.color ?? "red";
   const hidden = !!opts.hidden;
 
-  const points =
-    arr.length === 1 && Array.isArray(arr[0]) ? arr[0] : arr;
+  const points = arr.length === 1 && Array.isArray(arr[0]) ? arr[0] : arr;
 
   return { points, tension, color, hidden };
 }

@@ -6,12 +6,12 @@ import { addDependency } from "./dependency.js";
  *
  * Overloads:
  *   1) segment(scene, A, B, opts?)
- *      - A, B: point-like (mesh with .position, Vector3, [x,y,(z)], {x,y,(z)})
+ *      - A, B: point-like (mesh with .position, Vector2/Vector3, [x,y,(z)], {x,y,(z)})
  *      → single segment A–B
  *
  *   2) segment(scene, A, v, opts?)
  *      - A: point-like
- *      - v: vector-like (Vector3, [x,y,(z)], {x,y,(z)}, or object with getVector():Vector3)
+ *      - v: vector-like (Vector2/Vector3, [x,y,(z)], {x,y,(z)}, or object with getVector():Vector3)
  *      → single segment A–(A+v)
  *
  *   3) segment(scene, P1, P2, ..., Pn, opts?)   (n >= 2)
@@ -27,8 +27,8 @@ import { addDependency } from "./dependency.js";
  * Returns:
  *   {
  *     line: THREE.Line,
- *     getEndpoints(): { A: THREE.Vector3, B: THREE.Vector3 },
- *     getPoints(): THREE.Vector3[],
+ *     getEndpoints(): { A: THREE.Vector2, B: THREE.Vector2 },
+ *     getPoints(): THREE.Vector2[],
  *     setColor(c): void,
  *     setLinewidth(w): void
  *   }
@@ -37,24 +37,28 @@ import { addDependency } from "./dependency.js";
 function isMesh(o) {
   return !!(o && o.isObject3D && o.position && o.position.isVector3);
 }
+function isVec2(o) {
+  return !!(o && o.isVector2);
+}
 function isVec3(o) {
   return !!(o && o.isVector3);
 }
 function isPointLike(o) {
   return (
     isMesh(o) ||
+    isVec2(o) ||
     isVec3(o) ||
     Array.isArray(o) ||
     (o && typeof o === "object" && "x" in o && "y" in o)
   );
 }
-function toVec3(o) {
-  if (isMesh(o)) return o.position.clone();
-  if (isVec3(o)) return o.clone();
-  if (Array.isArray(o))
-    return new THREE.Vector3(o[0] ?? 0, o[1] ?? 0, o[2] ?? 0);
+function toVec2(o) {
+  if (isMesh(o)) return new THREE.Vector2(o.position.x, o.position.y);
+  if (isVec2(o)) return o.clone();
+  if (isVec3(o)) return new THREE.Vector2(o.x, o.y);
+  if (Array.isArray(o)) return new THREE.Vector2(o[0] ?? 0, o[1] ?? 0);
   if (o && typeof o === "object" && "x" in o && "y" in o)
-    return new THREE.Vector3(o.x ?? 0, o.y ?? 0, o.z ?? 0);
+    return new THREE.Vector2(o.x ?? 0, o.y ?? 0);
   throw new Error("Unsupported point/vector input.");
 }
 function isVectorProvider(o) {
@@ -66,6 +70,7 @@ function isPlainOpts(o) {
     typeof o === "object" &&
     !Array.isArray(o) &&
     !isMesh(o) &&
+    !isVec2(o) &&
     !isVec3(o) &&
     !("x" in o && "y" in o) &&
     !isVectorProvider(o)
@@ -126,38 +131,34 @@ export function segment(scene, ...args) {
     if (mode === "polyline") {
       // Any number of point-like inputs P1..Pn
       const pts = inputs.map((p) => {
-        const v = toVec3(p);
-        v.z = 0;
-        return v;
+        return toVec2(p);
       });
       return pts;
     }
 
     // point_point / point_vector legacy behaviour
-    const a = toVec3(A);
+    const a = toVec2(A);
     let b;
     if (mode === "point_point") {
-      b = toVec3(B_or_v);
+      b = toVec2(B_or_v);
     } else {
       if (isVectorProvider(B_or_v)) {
         const v = B_or_v.getVector();
-        const vv = isVec3(v) ? v : toVec3(v);
+        const vv = isVec2(v) ? v : toVec2(v);
         b = a.clone().add(vv);
       } else {
-        const v = toVec3(B_or_v);
+        const v = toVec2(B_or_v);
         b = a.clone().add(v);
       }
     }
-
-    a.z = 0;
-    b.z = 0;
     return [a, b];
   }
 
   function rebuild() {
     const pts = pointsNow();
     line.geometry.dispose();
-    line.geometry = new THREE.BufferGeometry().setFromPoints(pts);
+    const pts3 = pts.map((v) => new THREE.Vector3(v.x, v.y, 0));
+    line.geometry = new THREE.BufferGeometry().setFromPoints(pts3);
     if (line.material && line.material.isLineDashedMaterial) {
       line.computeLineDistances();
     }
@@ -189,8 +190,8 @@ export function segment(scene, ...args) {
       const pts = pointsNow();
       if (pts.length === 0) {
         return {
-          A: new THREE.Vector3(),
-          B: new THREE.Vector3(),
+          A: new THREE.Vector2(),
+          B: new THREE.Vector2(),
         };
       }
       return {

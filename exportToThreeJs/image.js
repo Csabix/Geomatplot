@@ -571,6 +571,8 @@ export function createFunctionImage2D(scene, options = {}) {
         const writeVec = (vec, v) => {
           if (v && v.isVector3) {
             vec.copy(v);
+          } else if (v && v.isVector2) {
+            vec.set(v.x, v.y, 0);
           } else if (v && v.position && v.position.isVector3) {
             vec.copy(v.position);
           } else if (Array.isArray(v)) {
@@ -594,7 +596,8 @@ export function createFunctionImage2D(scene, options = {}) {
           if (
             Array.isArray(v) &&
             v.length &&
-            (Array.isArray(v[0]) || (v[0] && v[0].isVector3))
+            (Array.isArray(v[0]) ||
+              (v[0] && (v[0].isVector2 || v[0].isVector3)))
           ) {
             ensureSize(writeIndex + v.length);
             for (let j = 0; j < v.length && writeIndex < maxShaderInputs; j++) {

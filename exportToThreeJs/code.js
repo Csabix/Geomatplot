@@ -57,7 +57,7 @@ export function draw(scene) {
       const y =
         THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
         Math.sin(t * Math.PI * 3) * 40;
-      return new THREE.Vector3(x, y, 0);
+      return new THREE.Vector2(x, y);
     },
     { color: 0xdd5522, segments: 300, hidden: true }
   );
@@ -109,7 +109,7 @@ export function draw(scene) {
 
   const circ1 = circle(scene, point_1, dAB.getValue(), {
     color: 0x0066ff,
-    hidden: true,
+    hidden: false,
   });
 
   const dA_to_many = distance(point_1, [point_4, point_5, [200, 10]]);
@@ -415,10 +415,10 @@ export function draw(scene) {
 
   const seqInput = {
     getValue: () =>
-      seq_poly.getArray().map(([x, y]) => new THREE.Vector3(x, y, 0)),
+      seq_poly.getArray().map(([x, y]) => new THREE.Vector2(x, y)),
     __depSource: seq_poly.group,
   };
-  // 🆕 Utána nézni, hogy miért Vector3-nál mardtunk végül Vector2 helyett
+  // 🆕 Utána nézni, hogy miért Vector2-nél mardtunk végül Vector2 helyett
   // 🆕 Inputokat tömb ként átadni, és akkor lenne nekik neve pl.: {elso_pont: point_1} így lehetne rá hivatkozni a shader-ben
 
   // createFunctionImage2D(scene, {
@@ -440,8 +440,7 @@ export function draw(scene) {
     scene,
     point_1,
     point_2,
-    (a, { x, y }) =>
-      a.clone().add(new THREE.Vector3(x, y, 0)).multiplyScalar(0.5),
+    (a, { x, y }) => a.clone().add(new THREE.Vector2(x, y)).multiplyScalar(0.5),
     { size: 8, color: "magenta" }
   );
 
@@ -483,7 +482,7 @@ export function draw(scene) {
   //     const y =
   //       THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
   //       Math.sin(t * Math.PI) * dir.length() * 0.25;
-  //     return new THREE.Vector3(x + cval, y, 0);
+  //     return new THREE.Vector2(x + cval, y);
   //   },
   //   { color: 0xdd5522 }
   // );
@@ -504,7 +503,7 @@ export function draw(scene) {
   //     const y =
   //       THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
   //       Math.sin(t * Math.PI * 3) * 40;
-  //     return new THREE.Vector3(x, y, 0);
+  //     return new THREE.Vector2(x, y);
   //   },
   //   { color: 0xdd5522, segments: 300 }
   // );

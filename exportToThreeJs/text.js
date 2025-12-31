@@ -96,28 +96,22 @@ export function text(scene, pos, arg2, arg3, arg4) {
   let currentText = constantText ?? "";
 
   function getPosVec3() {
+    let z = 0;
+    let v2;
     if (isMesh(pos)) {
-      return new THREE.Vector3(
-        pos.position.x + offset.x,
-        pos.position.y + offset.y,
-        0
-      );
+      v2 = new THREE.Vector2(pos.position.x, pos.position.y);
+      z = 0;
+    } else if (Array.isArray(pos)) {
+      v2 = new THREE.Vector2(pos[0] ?? 0, pos[1] ?? 0);
+      z = pos[2] ?? 0;
+    } else if (pos && typeof pos === "object" && "x" in pos && "y" in pos) {
+      v2 = new THREE.Vector2(pos.x ?? 0, pos.y ?? 0);
+      z = pos.z ?? 0;
+    } else {
+      throw new Error("text: unsupported pos type.");
     }
-    if (Array.isArray(pos)) {
-      return new THREE.Vector3(
-        (pos[0] ?? 0) + offset.x,
-        (pos[1] ?? 0) + offset.y,
-        pos[2] ?? 0
-      );
-    }
-    if (pos && typeof pos === "object" && "x" in pos && "y" in pos) {
-      return new THREE.Vector3(
-        (pos.x ?? 0) + offset.x,
-        (pos.y ?? 0) + offset.y,
-        pos.z ?? 0
-      );
-    }
-    throw new Error("text: unsupported pos type.");
+    v2.add(new THREE.Vector2(offset.x ?? 0, offset.y ?? 0));
+    return new THREE.Vector3(v2.x, v2.y, z);
   }
 
   function extractValue(src) {
@@ -131,7 +125,7 @@ export function text(scene, pos, arg2, arg3, arg4) {
       return src;
     }
     if (isMesh(src)) {
-      return { x: src.position.x, y: src.position.y, z: src.position.z };
+      return new THREE.Vector2(src.position.x, src.position.y);
     }
     return src;
   }

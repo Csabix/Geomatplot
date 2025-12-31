@@ -41,18 +41,17 @@ export function distance(...args) {
   function isVec3(o) {
     return !!(o && o.isVector3);
   }
-  function toVec3Like(o) {
-    if (isMesh(o)) return o.position;
-    if (isVec3(o)) return o;
-    if (Array.isArray(o))
-      return new THREE.Vector3(o[0] ?? 0, o[1] ?? 0, o[2] ?? 0);
-    if (o && typeof o === "object" && "x" in o && "y" in o)
-      return new THREE.Vector3(o.x ?? 0, o.y ?? 0, o.z ?? 0);
-    throw new Error("Unsupported point-like input.");
+  function isVec2(o) {
+    return !!(o && o.isVector2);
   }
   function toVec2(o) {
-    const v = toVec3Like(o);
-    return new THREE.Vector2(v.x, v.y);
+    if (isMesh(o)) return new THREE.Vector2(o.position.x, o.position.y);
+    if (isVec2(o)) return o.clone();
+    if (isVec3(o)) return new THREE.Vector2(o.x, o.y);
+    if (Array.isArray(o)) return new THREE.Vector2(o[0] ?? 0, o[1] ?? 0);
+    if (o && typeof o === "object" && "x" in o && "y" in o)
+      return new THREE.Vector2(o.x ?? 0, o.y ?? 0);
+    throw new Error("Unsupported point-like input.");
   }
   function isCircleObj(o) {
     return !!(
@@ -122,6 +121,7 @@ export function distance(...args) {
     Array.isArray(b) &&
     b.length &&
     (isMesh(b[0]) ||
+      isVec2(b[0]) ||
       isVec3(b[0]) ||
       Array.isArray(b[0]) ||
       (b[0] && typeof b[0] === "object" && "x" in b[0]))
@@ -216,22 +216,25 @@ function distanceWithCallback(sources, callback) {
     if (src == null) return src;
     if (typeof src.getValue === "function") return src.getValue();
     if ("value" in src) return src.value;
-    if (src.position && src.position.isVector3) return src.position;
-    if (src.isVector3) return src;
+    if (src.position && src.position.isVector3)
+      return new THREE.Vector2(src.position.x, src.position.y);
+    if (src.isVector2) return src;
+    if (src.isVector3) return new THREE.Vector2(src.x, src.y);
     if (Array.isArray(src))
-      return new THREE.Vector3(src[0] ?? 0, src[1] ?? 0, src[2] ?? 0);
+      return new THREE.Vector2(src[0] ?? 0, src[1] ?? 0);
     if (typeof src === "object" && ("x" in src || "y" in src || "z" in src))
-      return new THREE.Vector3(src.x ?? 0, src.y ?? 0, src.z ?? 0);
+      return new THREE.Vector2(src.x ?? 0, src.y ?? 0);
     return src;
   };
 
-  const toVec3Like = (v, label) => {
-    if (v && v.isVector3) return v;
-    if (v && v.position && v.position.isVector3) return v.position;
-    if (Array.isArray(v))
-      return new THREE.Vector3(v[0] ?? 0, v[1] ?? 0, v[2] ?? 0);
+  const toVec2Like = (v, label) => {
+    if (v && v.isVector2) return v;
+    if (v && v.isVector3) return new THREE.Vector2(v.x, v.y);
+    if (v && v.position && v.position.isVector3)
+      return new THREE.Vector2(v.position.x, v.position.y);
+    if (Array.isArray(v)) return new THREE.Vector2(v[0] ?? 0, v[1] ?? 0);
     if (typeof v === "object" && v && ("x" in v || "y" in v || "z" in v))
-      return new THREE.Vector3(v.x ?? 0, v.y ?? 0, v.z ?? 0);
+      return new THREE.Vector2(v.x ?? 0, v.y ?? 0);
     throw new Error(`distance: cannot compute base distance, invalid ${label}.`);
   };
 
@@ -240,8 +243,8 @@ function distanceWithCallback(sources, callback) {
     if (values.length < 2) {
       throw new Error("distance: callback overload needs at least two positional inputs.");
     }
-    const p0 = toVec3Like(values[0], "first point");
-    const p1 = toVec3Like(values[1], "second point");
+    const p0 = toVec2Like(values[0], "first point");
+    const p1 = toVec2Like(values[1], "second point");
     const baseDist = p0.distanceTo(p1);
     const res = callback(baseDist, ...values);
     if (!Number.isFinite(res)) {

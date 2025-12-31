@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import {
   addDependency,
   updateDependencies,
@@ -15,7 +16,7 @@ import {
  * Usage:
  *   const cv = customValue([pointA, pointB], (a, b) => {
  *     // a, b are "values" extracted from inputs:
- *     // - for points: THREE.Vector3 (position)
+ *     // - for points: THREE.Vector2 (position)
  *     // - for scalars: number
  *     // - otherwise: passed through
  *     return a.distanceTo(b);
@@ -46,10 +47,13 @@ export function customValue(inputs, userCallback, options = {}) {
   function extractValue(obj) {
     if (obj == null) return obj;
 
-    // Three.js object (point) -> use its position
+    // Three.js object (point) -> use its position (2D)
     if (obj.isObject3D && obj.position && obj.position.isVector3) {
-      return obj.position;
+      return new THREE.Vector2(obj.position.x, obj.position.y);
     }
+
+    if (obj.isVector2) return obj;
+    if (obj.isVector3) return new THREE.Vector2(obj.x, obj.y);
 
     // Objects with getValue() method (e.g. distance, scalar, etc.)
     if (typeof obj.getValue === "function") {

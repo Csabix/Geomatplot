@@ -5,7 +5,7 @@ import { addDependency } from "./dependency.js";
  * PointSequence(scene, ...inputs [, callback] [, opts])
  *
  * Inputs (any mix, any count ≥ 0):
- *  - Point-like:  THREE.Mesh/Object3D (uses .position), THREE.Vector3, [x,y,(z)], {x,y,(z)}
+ *  - Point-like:  THREE.Mesh/Object3D (uses .position), THREE.Vector2/Vector3, [x,y,(z)], {x,y,(z)}
  *  - PointSequence: another object returned by this function
  *  - Polygon/Line: THREE.Line (its geometry positions are used)
  *
@@ -53,7 +53,9 @@ export function pointSequence(...args) {
     inps.length &&
     typeof inps[inps.length - 1] === "object" &&
     !isFunc(inps[inps.length - 1]) &&
-    !isThreeObj(inps[inps.length - 1])
+    !isThreeObj(inps[inps.length - 1]) &&
+    !inps[inps.length - 1].isVector2 &&
+    !inps[inps.length - 1].isVector3
   ) {
     opts = inps.pop();
   }
@@ -89,14 +91,14 @@ export function pointSequence(...args) {
     }
 
     if (isPointLike(inp)) {
-      const v = toVec3Like(inp);
+      const v = toVec2Like(inp);
       return [v.x, v.y];
     }
 
     if (Array.isArray(inp)) {
       if (inp.length && isPointLike(inp[0])) {
         return inp.map((p) => {
-          const v = toVec3Like(p);
+          const v = toVec2Like(p);
           return [v.x, v.y];
         });
       }
@@ -200,6 +202,9 @@ function isThreeObj(o) {
 function isMesh(o) {
   return !!(o && o.isObject3D && o.position && o.position.isVector3);
 }
+function isVec2(o) {
+  return !!(o && o.isVector2);
+}
 function isVec3(o) {
   return !!(o && o.isVector3);
 }
@@ -209,18 +214,19 @@ function isPointSequence(o) {
 function isPointLike(o) {
   return (
     isMesh(o) ||
+    isVec2(o) ||
     isVec3(o) ||
     Array.isArray(o) ||
     (o && typeof o === "object" && "x" in o && "y" in o)
   );
 }
-function toVec3Like(o) {
-  if (isMesh(o)) return o.position;
-  if (isVec3(o)) return o;
-  if (Array.isArray(o))
-    return new THREE.Vector3(o[0] ?? 0, o[1] ?? 0, o[2] ?? 0);
+function toVec2Like(o) {
+  if (isMesh(o)) return new THREE.Vector2(o.position.x, o.position.y);
+  if (isVec2(o)) return o;
+  if (isVec3(o)) return new THREE.Vector2(o.x, o.y);
+  if (Array.isArray(o)) return new THREE.Vector2(o[0] ?? 0, o[1] ?? 0);
   if (o && typeof o === "object" && "x" in o && "y" in o)
-    return new THREE.Vector3(o.x ?? 0, o.y ?? 0, o.z ?? 0);
+    return new THREE.Vector2(o.x ?? 0, o.y ?? 0);
   throw new Error("Unsupported point-like.");
 }
 function isLine(o) {

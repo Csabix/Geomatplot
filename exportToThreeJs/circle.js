@@ -1,21 +1,17 @@
 import * as THREE from "three";
 import { addDependency } from "./dependency.js";
 
-function toVec3Like(p) {
-  if (p && p.position && p.position.isVector3) return p.position;
-  if (p && p.isVector3) return p;
-  if (Array.isArray(p))
-    return new THREE.Vector3(p[0] ?? 0, p[1] ?? 0, p[2] ?? 0);
+function toVec2Like(p) {
+  if (p && p.position && p.position.isVector3)
+    return new THREE.Vector2(p.position.x, p.position.y);
+  if (p && p.isVector2) return p;
+  if (p && p.isVector3) return new THREE.Vector2(p.x, p.y);
+  if (Array.isArray(p)) return new THREE.Vector2(p[0] ?? 0, p[1] ?? 0);
   if (p && typeof p === "object" && "x" in p && "y" in p)
-    return new THREE.Vector3(p.x ?? 0, p.y ?? 0, p.z ?? 0);
+    return new THREE.Vector2(p.x ?? 0, p.y ?? 0);
   throw new Error(
-    "Point must be Mesh/Object3D, Vector3, [x,y(,z)], or {x,y(,z)}"
+    "Point must be Mesh/Object3D, Vector2/Vector3, [x,y(,z)], or {x,y(,z)}"
   );
-}
-
-function toVec2(p) {
-  const v = toVec3Like(p);
-  return new THREE.Vector2(v.x, v.y);
 }
 
 function isMesh(p) {
@@ -25,16 +21,12 @@ function isMesh(p) {
 function isScalarLike(v) {
   return (
     typeof v === "number" ||
-    (v &&
-      (typeof v.getValue === "function" || typeof v.value === "number"))
+    (v && (typeof v.getValue === "function" || typeof v.value === "number"))
   );
 }
 
 function isScalarSource(v) {
-  return (
-    v &&
-    (typeof v.getValue === "function" || typeof v.value === "number")
-  );
+  return v && (typeof v.getValue === "function" || typeof v.value === "number");
 }
 
 function buildCircleGeometry(center, radius, segments = 128) {
@@ -44,7 +36,7 @@ function buildCircleGeometry(center, radius, segments = 128) {
   for (let i = 0; i <= segments; i++) {
     const t = (i / segments) * Math.PI * 2;
     pts.push(
-      new THREE.Vector3(cx + Math.cos(t) * radius, cy + Math.sin(t) * radius, 0)
+      new THREE.Vector2(cx + Math.cos(t) * radius, cy + Math.sin(t) * radius)
     );
   }
   return new THREE.BufferGeometry().setFromPoints(pts);
@@ -68,7 +60,7 @@ function circumcircle2D(A, B, C) {
   const ux = (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d;
   const uy = (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d;
 
-  const center = new THREE.Vector3(ux, uy, 0);
+  const center = new THREE.Vector2(ux, uy);
   const radius = Math.hypot(ux - ax, uy - ay);
   return { center, radius };
 }
@@ -81,7 +73,8 @@ export function circle(scene, A, B, C_or_opts, maybeOpts) {
     typeof C_or_opts === "object" &&
     !Array.isArray(C_or_opts) &&
     !isMesh(C_or_opts) &&
-    !("isVector3" in (C_or_opts || {}))
+    !("isVector3" in (C_or_opts || {})) &&
+    !("isVector2" in (C_or_opts || {}))
       ? C_or_opts
       : maybeOpts || {};
 
@@ -113,7 +106,7 @@ export function circle(scene, A, B, C_or_opts, maybeOpts) {
   centerMarker.visible = !hidden;
   scene.add(centerMarker);
 
-  let currentCenter = new THREE.Vector3(0, 0, 0);
+  let currentCenter = new THREE.Vector2(0, 0);
   let currentRadius = 0;
 
   const readRadius = () => {
@@ -134,9 +127,9 @@ export function circle(scene, A, B, C_or_opts, maybeOpts) {
     }
 
     if (mode === "three") {
-      const a2 = toVec2(A),
-        b2 = toVec2(B),
-        c2 = toVec2(C);
+      const a2 = toVec2Like(A),
+        b2 = toVec2Like(B),
+        c2 = toVec2Like(C);
       const cc = circumcircle2D(a2, b2, c2);
       if (!cc) {
         line.visible = false;
@@ -153,11 +146,11 @@ export function circle(scene, A, B, C_or_opts, maybeOpts) {
         currentRadius,
         segments
       );
-      centerMarker.position.copy(currentCenter);
+      centerMarker.position.set(currentCenter.x, currentCenter.y, 0);
     } else if (mode === "throughPoint") {
-      const a = toVec3Like(A);
-      const b = toVec3Like(B);
-      currentCenter.set(a.x, a.y, 0);
+      const a = toVec2Like(A);
+      const b = toVec2Like(B);
+      currentCenter.set(a.x, a.y);
       currentRadius = Math.hypot(b.x - a.x, b.y - a.y);
       line.visible = true;
       centerMarker.visible = true;
@@ -167,10 +160,10 @@ export function circle(scene, A, B, C_or_opts, maybeOpts) {
         currentRadius,
         segments
       );
-      centerMarker.position.copy(currentCenter);
+      centerMarker.position.set(currentCenter.x, currentCenter.y, 0);
     } else {
-      const a = toVec3Like(A);
-      currentCenter.set(a.x, a.y, 0);
+      const a = toVec2Like(A);
+      currentCenter.set(a.x, a.y);
       currentRadius = readRadius();
       line.visible = true;
       centerMarker.visible = true;
@@ -180,7 +173,7 @@ export function circle(scene, A, B, C_or_opts, maybeOpts) {
         currentRadius,
         segments
       );
-      centerMarker.position.copy(currentCenter);
+      centerMarker.position.set(currentCenter.x, currentCenter.y, 0);
     }
   }
 

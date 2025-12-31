@@ -23,6 +23,9 @@ export function point(scene, x, y, opts = {}) {
   let color = 0xff0000;
   let hidden = false;
 
+  if (!(typeof x == "number") || !(typeof y == "number"))
+    throw new Error("x and y should be number for point");
+
   // Legacy support: point(scene, x, y, size, color)
   if (typeof opts === "number" || typeof opts === "string") {
     if (typeof opts === "number") size = opts;
@@ -51,7 +54,7 @@ export function point(scene, x, y, opts = {}) {
  * opts:
  *   {
  *     dependencySystem?: DependencySystem   // default: globalDependencySystem
- *     componentParams?: boolean            // if true, force callback to get [x,y,z]; if false, force Vector3; if unset, auto-detect
+ *     componentParams?: boolean            // if true, force callback to get [x,y]; if false, force Vector2; if unset, auto-detect
  *     size?: number                        // point size (default 8)
  *     color?: number|string                // point color (default 0x00ffff)
  *     hidden?: boolean                     // hide the point if true (default false)
@@ -84,7 +87,7 @@ export function dPoint(scene, ...args) {
   if (opts.dependencySystem instanceof DependencySystem) {
     depSystem = opts.dependencySystem;
   }
-  // paramMode: "plain" (arrays), "vector" (Vector3), null (auto-detect)
+  // paramMode: "plain" (arrays), "vector" (Vector2), null (auto-detect)
   let paramMode =
     opts.componentParams === true
       ? "plain"
@@ -100,44 +103,46 @@ export function dPoint(scene, ...args) {
   mesh.visible = !hidden;
   scene.add(mesh);
 
-  const toPos = (p) => {
+  const toVec2 = (p) => {
     if (p && typeof p.__depValue !== "undefined") {
-      return toPos(p.__depValue);
+      return toVec2(p.__depValue);
     }
     if (p && typeof p.__depSource === "object" && p.__depSource !== null) {
       const v = p.__depSource.getValue?.();
-      return toPos(v);
+      return toVec2(v);
     }
     if (p && typeof p.getValue === "function") {
-      return toPos(p.getValue());
+      return toVec2(p.getValue());
     }
-    if (p && p.position && p.position.isVector3) return p.position.clone();
-    if (p && p.isVector3) return p.clone();
-    if (Array.isArray(p))
-      return new THREE.Vector3(p[0] ?? 0, p[1] ?? 0, p[2] ?? 0);
+    if (p && p.position && p.position.isVector3)
+      return new THREE.Vector2(p.position.x, p.position.y);
+    if (p && p.isVector2) return p.clone();
+    if (p && p.isVector3) return new THREE.Vector2(p.x, p.y);
+    if (Array.isArray(p)) return new THREE.Vector2(p[0] ?? 0, p[1] ?? 0);
     if (p && typeof p === "object" && "x" in p && "y" in p)
-      return new THREE.Vector3(p.x ?? 0, p.y ?? 0, p.z ?? 0);
+      return new THREE.Vector2(p.x ?? 0, p.y ?? 0);
     throw new Error("dPoint: unsupported point input.");
   };
 
-  const toVec3 = (v) => {
+  const toVec3ForPosition = (v) => {
     if (v && v.isVector3) return v;
+    if (v && v.isVector2) return new THREE.Vector3(v.x, v.y, 0);
     if (Array.isArray(v))
       return new THREE.Vector3(v[0] ?? 0, v[1] ?? 0, v[2] ?? 0);
     if (v && typeof v === "object" && "x" in v && "y" in v)
       return new THREE.Vector3(v.x ?? 0, v.y ?? 0, v.z ?? 0);
     throw new Error(
-      "dPoint callback must return a THREE.Vector3, [x,y,z], or {x,y,z}."
+      "dPoint callback must return a Vector2/Vector3, [x,y(,z)], or {x,y(,z)}."
     );
   };
 
   const toPlain = (p) => {
-    const v = toPos(p);
-    return [v.x, v.y, v.z];
+    const v = toVec2(p);
+    return [v.x, v.y];
   };
 
   const callParams = (mode) =>
-    mode === "plain" ? pointObjs.map(toPlain) : pointObjs.map(toPos);
+    mode === "plain" ? pointObjs.map(toPlain) : pointObjs.map(toVec2);
 
   const rebuild = () => {
     let result;
@@ -154,12 +159,16 @@ export function dPoint(scene, ...args) {
           result = fn(...callParams("plain"));
           paramMode = "plain";
         } catch (ePlain) {
-          console.warn("dPoint: callback failed (vector and plain):", eVec, ePlain);
+          console.warn(
+            "dPoint: callback failed (vector and plain):",
+            eVec,
+            ePlain
+          );
           return;
         }
       }
     }
-    mesh.position.copy(toVec3(result));
+    mesh.position.copy(toVec3ForPosition(result));
   };
 
   rebuild();

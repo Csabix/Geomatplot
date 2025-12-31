@@ -10,7 +10,7 @@ import { addDependency } from "./dependency.js";
  *
  *   2) polygon(scene, A, B, ..., opts?)
  *       - dependent polygon: inputs can be
- *           * point-like: mesh with .position, THREE.Vector3, [x,y,(z)], {x,y,(z)}
+ *           * point-like: mesh with .position, THREE.Vector2/Vector3, [x,y,(z)], {x,y,(z)}
  *           * pointSequence object (from pointSequence.js)
  *           * another polygon (this module)
  *           * THREE.Line (polyline – its vertices are used)
@@ -179,13 +179,23 @@ export function polygon(scene, ...args) {
 }
 
 function isPlainObject(o) {
-  return o && typeof o === "object" && !o.isObject3D && !Array.isArray(o);
+  return (
+    o &&
+    typeof o === "object" &&
+    !o.isObject3D &&
+    !o.isVector2 &&
+    !o.isVector3 &&
+    !Array.isArray(o)
+  );
 }
 function isThreeObject(o) {
   return !!(o && o.isObject3D);
 }
 function isMesh(o) {
   return !!(o && o.isObject3D && o.position && o.position.isVector3);
+}
+function isVec2(o) {
+  return !!(o && o.isVector2);
 }
 function isVec3(o) {
   return !!(o && o.isVector3);
@@ -206,13 +216,13 @@ function isLine(o) {
   );
 }
 
-function toVec3Like(o) {
-  if (isMesh(o)) return o.position;
-  if (isVec3(o)) return o;
-  if (Array.isArray(o))
-    return new THREE.Vector3(o[0] ?? 0, o[1] ?? 0, o[2] ?? 0);
+function toVec2Like(o) {
+  if (isMesh(o)) return new THREE.Vector2(o.position.x, o.position.y);
+  if (isVec2(o)) return o;
+  if (isVec3(o)) return new THREE.Vector2(o.x, o.y);
+  if (Array.isArray(o)) return new THREE.Vector2(o[0] ?? 0, o[1] ?? 0);
   if (o && typeof o === "object" && "x" in o && "y" in o) {
-    return new THREE.Vector3(o.x ?? 0, o.y ?? 0, o.z ?? 0);
+    return new THREE.Vector2(o.x ?? 0, o.y ?? 0);
   }
   throw new Error("polygon: unsupported point-like input.");
 }
@@ -241,13 +251,13 @@ function verticesFromInput(inp) {
         out.push([+x || 0, +y || 0]);
       } else {
         // point-like (mesh, vec3, object ...)
-        const v = toVec3Like(item);
+        const v = toVec2Like(item);
         out.push([v.x, v.y]);
       }
     }
     return out;
   }
-  const v = toVec3Like(inp);
+  const v = toVec2Like(inp);
   return [[v.x, v.y]];
 }
 
@@ -268,7 +278,7 @@ function attachDependencyForInput(inp, callback, group) {
         addDependency(item, group, wrapped);
       } else if (!Array.isArray(item)) {
         try {
-          const v = toVec3Like(item);
+          const v = toVec2Like(item);
           addDependency(item, group, wrapped);
         } catch {}
       }

@@ -1,20 +1,21 @@
 import * as THREE from "three";
 import { addDependency } from "./dependency.js";
 
-function toVec3(p) {
+function toVec2(p) {
   // Mesh/Object3D with position
-  if (p && p.position && p.position.isVector3) return p.position.clone();
-  // Already a Vector3
-  if (p && p.isVector3) return p.clone();
-  // [x,y,z]
-  if (Array.isArray(p))
-    return new THREE.Vector3(p[0] ?? 0, p[1] ?? 0, p[2] ?? 0);
-  // {x,y,z}
+  if (p && p.position && p.position.isVector3)
+    return new THREE.Vector2(p.position.x, p.position.y);
+  // Already a Vector2/Vector3
+  if (p && p.isVector2) return p.clone();
+  if (p && p.isVector3) return new THREE.Vector2(p.x, p.y);
+  // [x,y(,z)]
+  if (Array.isArray(p)) return new THREE.Vector2(p[0] ?? 0, p[1] ?? 0);
+  // {x,y(,z)}
   if (p && typeof p === "object" && "x" in p && "y" in p)
-    return new THREE.Vector3(p.x ?? 0, p.y ?? 0, p.z ?? 0);
+    return new THREE.Vector2(p.x ?? 0, p.y ?? 0);
 
   throw new Error(
-    "Point must be Mesh/Object3D with .position, Vector3, [x,y,z], or {x,y,z}."
+    "Point must be Mesh/Object3D with .position, Vector2/Vector3, [x,y(,z)], or {x,y(,z)}."
   );
 }
 
@@ -24,7 +25,7 @@ function extractMeshes(inputOrArray) {
 }
 
 function normalizePoints(pointsLike) {
-  return pointsLike.map(toVec3);
+  return pointsLike.map(toVec2);
 }
 
 // If only two points are provided, synthesize a middle control point to make a visible curve.
@@ -33,16 +34,15 @@ function withControlIfTwo(points) {
   const [a, b] = points;
   const mid = a.clone().add(b).multiplyScalar(0.5);
   const lift = b.clone().sub(a).length() / 4;
-  const control = mid.clone().add(new THREE.Vector3(0, lift, 0));
+  const control = mid.clone().add(new THREE.Vector2(0, lift));
   return [a, control, b];
 }
 
 function rebuildLineGeometry(line, pts, type, tension) {
-  const vecs = (Array.isArray(pts) ? pts : [pts]).map((p) =>
-    p && p.position && p.position.isVector3 ? p.position.clone() : toVec3(p)
-  );
+  const vecs = (Array.isArray(pts) ? pts : [pts]).map((p) => toVec2(p));
   const clean = vecs.length === 2 ? withControlIfTwo(vecs) : vecs;
-  const curve = new THREE.CatmullRomCurve3(clean, false, type, tension);
+  const clean3 = clean.map((v) => new THREE.Vector3(v.x, v.y, 0));
+  const curve = new THREE.CatmullRomCurve3(clean3, false, type, tension);
   line.geometry.setFromPoints(curve.getPoints(200));
   line.geometry.attributes.position.needsUpdate = true;
   line.geometry.computeBoundingSphere?.();
@@ -68,8 +68,8 @@ function makeCurve(scene, arg1, arg2, arg3, type, color = 0xff0000, hidden = fal
     meshSources = extractMeshes(arg1);
   } else {
     // Overload: (scene, p1, p2, tension?)
-    const p1 = toVec3(arg1);
-    const p2 = toVec3(arg2);
+    const p1 = toVec2(arg1);
+    const p2 = toVec2(arg2);
     points = withControlIfTwo([p1, p2]);
     tension = typeof arg3 === "number" ? arg3 : 0.5;
     meshSources = extractMeshes([arg1, arg2]);
@@ -133,7 +133,7 @@ export function createChordalCurve(scene, ...args) {
  *   where:
  *     - t â [0,1] is the curve parameter,
  *     - values are derived from your sources:
- *         * for points:   their position (THREE.Vector3)
+ *         * for points:   their position (THREE.Vector2)
  *         * for scalars:  src.getValue() or src.value if present
  *         * otherwise:    the source object itself
  *     - pointLike is anything `toVec3` understands (Vector3, [x,y], {x,y}, meshâ€¦).
@@ -174,7 +174,7 @@ export function createChordalCurve(scene, ...args) {
  *     const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
  *     const y = THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
  *               Math.sin(t * Math.PI) * dir.length() * 0.25;
- *     return new THREE.Vector3(x, y, 0);
+ *     return new THREE.Vector2(x, y);
  *   },
  *   { color: 0xdd5522 }
  * );
@@ -224,12 +224,14 @@ export function createCustomCurve(scene, ...args) {
     if (src == null) return src;
     if (typeof src.getValue === "function") return src.getValue();
     if ("value" in src) return src.value;
-    if (src.position && src.position.isVector3) return src.position;
-    if (src.isVector3) return src;
+    if (src.position && src.position.isVector3)
+      return new THREE.Vector2(src.position.x, src.position.y);
+    if (src.isVector2) return src;
+    if (src.isVector3) return new THREE.Vector2(src.x, src.y);
     // Allow passing raw coordinates like [x,y] or {x,y,z}
-    if (Array.isArray(src)) return toVec3(src);
+    if (Array.isArray(src)) return toVec2(src);
     if (typeof src === "object" && ("x" in src || "y" in src || "z" in src))
-      return toVec3(src);
+      return toVec2(src);
     return src;
   };
 
@@ -239,10 +241,11 @@ export function createCustomCurve(scene, ...args) {
       const t = segments === 1 ? 0 : i / (segments - 1);
       const values = sources.map(extractValue);
       const res = callback(t, ...values);
-      const v = toVec3(res);
+      const v = toVec2(res);
       pts.push(v);
     }
-    line.geometry.setFromPoints(pts);
+    const pts3 = pts.map((v) => new THREE.Vector3(v.x, v.y, 0));
+    line.geometry.setFromPoints(pts3);
     line.geometry.attributes.position.needsUpdate = true;
     line.geometry.computeBoundingSphere?.();
   };
@@ -272,7 +275,14 @@ export function createCustomCurve(scene, ...args) {
 /* ---------------- small helper ---------------- */
 
 function isPlainObject(o) {
-  return !!o && typeof o === "object" && !o.isObject3D && !Array.isArray(o);
+  return (
+    !!o &&
+    typeof o === "object" &&
+    !o.isObject3D &&
+    !o.isVector2 &&
+    !o.isVector3 &&
+    !Array.isArray(o)
+  );
 }
 
 function isCurveOptions(o) {

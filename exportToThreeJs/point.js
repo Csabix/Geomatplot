@@ -115,6 +115,112 @@ export function dPoint(scene, ...args) {
     throw new Error("dPoint: unsupported point input.");
   };
 
+  const toPointArray = (v) => {
+    if (Array.isArray(v)) return v;
+    if (v && v.position && v.position.isVector3)
+      return [v.position.x, v.position.y];
+    if (v && (v.isVector2 || v.isVector3)) return [v.x, v.y];
+    if (v && typeof v === "object" && "x" in v && "y" in v)
+      return [v.x ?? 0, v.y ?? 0];
+    return v;
+  };
+
+  const toPointObject = (v) => {
+    if (v && v.position && v.position.isVector3)
+      return {
+        x: v.position.x,
+        y: v.position.y,
+        xxx: v.position.x,
+        yyy: v.position.y,
+      };
+    if (v && (v.isVector2 || v.isVector3))
+      return { x: v.x, y: v.y, xxx: v.x, yyy: v.y };
+    if (Array.isArray(v))
+      return {
+        x: v[0] ?? 0,
+        y: v[1] ?? 0,
+        xxx: v[0] ?? 0,
+        yyy: v[1] ?? 0,
+      };
+    if (v && typeof v === "object") {
+      const x = v.x ?? v.xxx;
+      const y = v.y ?? v.yyy;
+      if ("x" in v || "y" in v || "xxx" in v || "yyy" in v) {
+        return {
+          ...v,
+          x,
+          y,
+          xxx: x,
+          yyy: y,
+        };
+      }
+    }
+    return v;
+  };
+
+  const parseExpectedKinds = (fn) => {
+    const src = Function.prototype.toString.call(fn).trim();
+    let params = "";
+
+    if (src.startsWith("function")) {
+      const open = src.indexOf("(");
+      if (open !== -1) {
+        let depth = 0;
+        for (let i = open; i < src.length; i++) {
+          const ch = src[i];
+          if (ch === "(") depth++;
+          if (ch === ")") {
+            depth--;
+            if (depth === 0) {
+              params = src.slice(open + 1, i);
+              break;
+            }
+          }
+        }
+      }
+    } else {
+      const arrow = src.indexOf("=>");
+      if (arrow !== -1) {
+        const head = src.slice(0, arrow).trim();
+        if (head.startsWith("(") && head.endsWith(")")) {
+          params = head.slice(1, -1);
+        } else {
+          params = head;
+        }
+      }
+    }
+
+    const out = [];
+    let buf = "";
+    let depth = 0;
+    for (let i = 0; i < params.length; i++) {
+      const ch = params[i];
+      if (ch === "[" || ch === "{" || ch === "(") depth++;
+      if (ch === "]" || ch === "}" || ch === ")") depth--;
+      if (ch === "," && depth === 0) {
+        out.push(buf.trim());
+        buf = "";
+        continue;
+      }
+      buf += ch;
+    }
+    if (buf.trim()) out.push(buf.trim());
+
+    return out.map((p) => {
+      if (p.startsWith("[")) return "array";
+      if (p.startsWith("{")) return "object";
+      return "any";
+    });
+  };
+
+  const expectedKinds = parseExpectedKinds(fn);
+
+  const coerceByExpected = (v, kind) => {
+    if (kind === "array") return toPointArray(v);
+    if (kind === "object") return toPointObject(v);
+    return v;
+  };
+
   const toVec3ForPosition = (v) => {
     if (v && v.isVector3) return v;
     if (v && v.isVector2) return new THREE.Vector3(v.x, v.y, 0);
@@ -127,7 +233,10 @@ export function dPoint(scene, ...args) {
     );
   };
 
-  const callParams = () => pointObjs.map(extractValue);
+  const callParams = () =>
+    pointObjs.map((p, i) =>
+      coerceByExpected(extractValue(p), expectedKinds[i] || "any")
+    );
 
   const rebuild = () => {
     let result;

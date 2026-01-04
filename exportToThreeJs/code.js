@@ -36,21 +36,12 @@ export function draw(scene) {
 
   dPoint(
     scene,
-    [10, 10],
-    point_6,
-    point_4,
-    (a, b) => a.clone().add(b).multiplyScalar(0.5),
-    { size: 10, color: "green", hidden: true }
-  );
-
-  dPoint(
-    scene,
     point_1,
-    point_4,
+    [10, 10],
     ([px, py], [dx, dy]) => {
       return [px + dx, py + dy];
     },
-    { hidden: true }
+    { hidden: false, color: "green" }
   );
 
   /* ----- CURVE ----- */
@@ -436,33 +427,18 @@ export function draw(scene) {
   // ✅ Automatikusan detektálni, hogy milyen fajta, ne kelljen a componentParams
   // 🆕 El kell fogadnia másféle paramétert is, pl. curve vagy circle. Ilyen esetekben a curve-nek a pont halmazát adja vissza, azzal tudunk számolni a paraméterben.
 
-  dPoint(
-    scene,
-    point_1,
-    point_2,
-    (a, { x, y }) => a.clone().add(new THREE.Vector2(x, y)).multiplyScalar(0.5),
-    { size: 8, color: "magenta" }
-  );
-
   // ✅🆕 Component params is still in use
 
-  // dPoint(
-  //   scene,
-  //   point_1,
-  //   [10, 10],
-  //   ([x, y], [xx, yy]) => [(x + xx) / 2, (y + yy) / 2],
-  //   { size: 8, color: "magenta" }
-  // );
-
   dPoint(
     scene,
     point_1,
     point_2,
-    ([xx, yy], [x, y]) => [(x + xx) / 2, (y + yy) / 2],
-    { size: 8, color: "magenta" }
+    [100, 10],
+    (a, [x, y], { xxx, yyy }) => [(x + a.x) / 2, (y + a.y) / 2 + xxx],
+    { size: 8, color: "yellow" }
   );
 
-  // 🆕 Ha point_2 és point_1 az input, callback oldalon kéne érzékelni, hogy mi történik
+  // ✅🆕 Ha point_2 és point_1 az input, callback oldalon kéne érzékelni, hogy mi történik
   //     A dPoint-ban ahogy írva van, ha [x,y] akkor csak a koordináta, de ha csak "b" akkor meg a pont legyen betéve
   //     Alternatíva a tömbbe megani, hogy mi az amiket unpack-elni kéne
   //     Minden paraméterre külön külön kell detektálni

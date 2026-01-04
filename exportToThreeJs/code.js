@@ -8,6 +8,7 @@ import {
 } from "./curve.js";
 import { circle } from "./circle.js";
 import { distance } from "./distance.js";
+import { dScalar } from "./dScalar.js";
 import { segment } from "./segment.js";
 import { pointSequence } from "./pointSequence.js";
 import { polygon } from "./polygon.js";
@@ -100,30 +101,23 @@ export function draw(scene) {
     hidden: true,
   });
 
-  /* ----- DISTANCE ----- */
+  /* ----- SCALAR ----- */
 
-  const dAB = distance(point_2, [10, 10], (d, aPos, bPos) => {
-    return d - aPos.distanceTo(bPos) + 20;
+  const dAB = dScalar(point_2, [10, 10], (a, b) => {
+    return a.x + b[0];
   });
 
   // dAB.onChange((v) => console.log("|AB| =", v));
 
-  const circ1 = circle(scene, point_1, dAB.getValue(), {
+  const circ1 = circle(scene, point_1, dAB, {
     color: 0x0066ff,
     hidden: false,
   });
 
-  const dA_to_many = distance(point_1, [point_4, point_5, [200, 10]]);
-  // dA_to_many.onChange((v) => console.log("min dist(A, seq) =", v));
+  /* ----- DISTANCE ----- */
 
-  const dA_to_circ = distance(point_1, circ1);
-  // dA_to_circ.onChange((v) => console.log("gap(A, circle) =", v));
-
-  const poly = createUniformCurve(scene, [point_1, point_2, point_3], {
-    hidden: true,
-  });
-  const dA_to_poly = distance(point_1, poly);
-  // dA_to_poly.onChange((v) => console.log("min dist(A, polyline) =", v));
+  const dA_to_circ = distance(point_1, point_2);
+  // dA_to_circ.onChange((v) => console.log("point 1 and 2 distance:", v));
 
   /* ----- SEGMENT ----- */
 
@@ -158,7 +152,8 @@ export function draw(scene) {
   const seq_points = pointSequence(scene, point_1, point_2, point_3, {
     hidden: true,
   });
-  const seq_poly = pointSequence(scene, [point_1, point_2, point_3], poly, {
+
+  const seq_poly = pointSequence(scene, [point_1, point_2, point_3], poly1, {
     color: 0x22aa22,
     markerSize: 1.5,
     hidden: true,
@@ -194,7 +189,7 @@ export function draw(scene) {
     { color: 0xdd5522, hidden: true }
   );
 
-  const seq3 = pointSequence(scene, seq1, poly, {
+  const seq3 = pointSequence(scene, seq1, poly1, {
     color: 0x22aa22,
     markerSize: 1.5,
     hidden: true,
@@ -469,7 +464,7 @@ export function draw(scene) {
   //     Minden paraméterre külön külön kell detektálni
   // 🆕 Valami verbose hiba jelentés, ha valamit rosszul ad meg a user és mondjuk nem renderelhető vagy nem ismert
 
-  // 🆕 Distance és dScalar külön vétele, dScalar-nak kell a callback, nem a distance-nak
+  // ✅🆕 Distance és dScalar külön vétele, dScalar-nak kell a callback, nem a distance-nak
   // 🆕 dPoint, dScalar-nál is működjön a callback mint itt: --> Distance-ra még meg kell csinálni
   // createCustomCurve(
   //   scene,

@@ -26,7 +26,6 @@ export function point(scene, x, y, opts = {}) {
   if (!(typeof x == "number") || !(typeof y == "number"))
     throw new Error("x and y should be number for point");
 
-  // Legacy support: point(scene, x, y, size, color)
   if (typeof opts === "number" || typeof opts === "string") {
     if (typeof opts === "number") size = opts;
     if (typeof opts === "string") color = opts;
@@ -95,24 +94,24 @@ export function dPoint(scene, ...args) {
   mesh.visible = !hidden;
   scene.add(mesh);
 
-  const toVec2 = (p) => {
+  const extractValue = (p) => {
     if (p && typeof p.__depValue !== "undefined") {
-      return toVec2(p.__depValue);
+      return extractValue(p.__depValue);
     }
     if (p && typeof p.__depSource === "object" && p.__depSource !== null) {
       const v = p.__depSource.getValue?.();
-      return toVec2(v);
+      if (typeof v !== "undefined") return extractValue(v);
     }
     if (p && typeof p.getValue === "function") {
-      return toVec2(p.getValue());
+      return extractValue(p.getValue());
     }
-    if (p && p.position && p.position.isVector3)
-      return new THREE.Vector2(p.position.x, p.position.y);
-    if (p && p.isVector2) return p.clone();
-    if (p && p.isVector3) return new THREE.Vector2(p.x, p.y);
-    if (Array.isArray(p)) return new THREE.Vector2(p[0] ?? 0, p[1] ?? 0);
-    if (p && typeof p === "object" && "x" in p && "y" in p)
-      return new THREE.Vector2(p.x ?? 0, p.y ?? 0);
+    if (p && "value" in p) return extractValue(p.value);
+    if (p && p.position && p.position.isVector3) {
+      return { x: p.position.x, y: p.position.y };
+    }
+    if (p && (p.isVector2 || p.isVector3)) return p;
+    if (Array.isArray(p)) return p;
+    if (p && typeof p === "object" && "x" in p && "y" in p) return p;
     throw new Error("dPoint: unsupported point input.");
   };
 
@@ -128,29 +127,15 @@ export function dPoint(scene, ...args) {
     );
   };
 
-  const toPlain = (p) => {
-    const v = toVec2(p);
-    return [v.x, v.y];
-  };
-
-  const callParams = (mode) =>
-    mode === "plain" ? pointObjs.map(toPlain) : pointObjs.map(toVec2);
+  const callParams = () => pointObjs.map(extractValue);
 
   const rebuild = () => {
     let result;
     try {
-      result = fn(...callParams("vector"));
-    } catch (eVec) {
-      try {
-        result = fn(...callParams("plain"));
-      } catch (ePlain) {
-        console.warn(
-          "dPoint: callback failed (vector and plain):",
-          eVec,
-          ePlain
-        );
-        return;
-      }
+      result = fn(...callParams());
+    } catch (e) {
+      console.warn("dPoint: callback failed:", e);
+      return;
     }
 
     mesh.position.copy(toVec3ForPosition(result));

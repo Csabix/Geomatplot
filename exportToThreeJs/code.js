@@ -32,6 +32,27 @@ export function draw(scene) {
   const point_5 = point(scene, 150, 50, { hidden: true });
   const point_6 = point(scene, -200, -100, { hidden: true });
 
+  /* ----- DEPENDENT POINT ----- */
+
+  dPoint(
+    scene,
+    [10, 10],
+    point_6,
+    point_4,
+    (a, b) => a.clone().add(b).multiplyScalar(0.5),
+    { size: 10, color: "green", hidden: true }
+  );
+
+  dPoint(
+    scene,
+    point_1,
+    point_4,
+    ([px, py], [dx, dy]) => {
+      return [px + dx, py + dy];
+    },
+    { hidden: true }
+  );
+
   /* ----- CURVE ----- */
 
   createUniformCurve(scene, [point_1, point_2, [10, 10], point_4], {
@@ -63,27 +84,6 @@ export function draw(scene) {
     { color: 0xdd5522, segments: 300, hidden: true }
   );
 
-  /* ----- DEPENDENT POINT ----- */
-
-  dPoint(
-    scene,
-    [10, 10],
-    point_6,
-    point_4,
-    (a, b) => a.clone().add(b).multiplyScalar(0.5),
-    { size: 10, color: "green", hidden: true }
-  );
-
-  dPoint(
-    scene,
-    point_1,
-    point_4,
-    ([px, py], [dx, dy]) => {
-      return [px + dx, py + dy];
-    },
-    { hidden: true }
-  );
-
   /* ----- CIRCLE ----- */
 
   circle(scene, point_1, point_2, point_3, {
@@ -105,6 +105,10 @@ export function draw(scene) {
 
   const dAB = dScalar(point_2, [10, 10], (a, b) => {
     return a.x + b[0];
+  });
+
+  const dABC = dScalar(point_2, [10, 10], point_1, (a, b, c) => {
+    return a.x + b[0] + c.y;
   });
 
   // dAB.onChange((v) => console.log("|AB| =", v));
@@ -414,7 +418,7 @@ export function draw(scene) {
       seq_poly.getArray().map(([x, y]) => new THREE.Vector2(x, y)),
     __depSource: seq_poly.group,
   };
-  // 🆕 Utána nézni, hogy miért Vector3-nél mardtunk végül Vector2 helyett
+  // ✅🆕 Utána nézni, hogy miért Vector3-nél mardtunk végül Vector2 helyett --> A threeJs-ben beépített motor mindenképp 3D-ben számol, azonban megkerülhető. Vector2-vel végezve a számításokat, majd a végén Vector3-ra konvertálva, a z-t 0-n hagyva
   // 🆕 Inputokat tömb ként átadni, és akkor lenne nekik neve pl.: {elso_pont: point_1} így lehetne rá hivatkozni a shader-ben
 
   // createFunctionImage2D(scene, {
@@ -465,7 +469,7 @@ export function draw(scene) {
   // 🆕 Valami verbose hiba jelentés, ha valamit rosszul ad meg a user és mondjuk nem renderelhető vagy nem ismert
 
   // ✅🆕 Distance és dScalar külön vétele, dScalar-nak kell a callback, nem a distance-nak
-  // 🆕 dPoint, dScalar-nál is működjön a callback mint itt: --> Distance-ra még meg kell csinálni
+  // ✅🆕 dPoint, dScalar-nál is működjön a callback mint itt: --> Distance-ra még meg kell csinálni
   // createCustomCurve(
   //   scene,
   //   point_1,

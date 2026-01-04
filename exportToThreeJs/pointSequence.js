@@ -86,6 +86,10 @@ export function pointSequence(...args) {
   function valueOfInput(inp) {
     if (isPointSequence(inp)) return inp.getArray();
 
+    if (isPolygon(inp)) {
+      return inp.getVertices();
+    }
+
     if (isLine(inp)) {
       return arrayFromLine(inp);
     }
@@ -160,6 +164,8 @@ export function pointSequence(...args) {
         addDependency(inp, group, recompute);
       } else if (isLine(inp)) {
         addDependency(inp, group, recompute);
+      } else if (isPolygon(inp)) {
+        addDependency(inp.group, group, recompute);
       } else if (isPointSequence(inp)) {
         addDependency(inp.group, group, recompute);
       } else if (Array.isArray(inp)) {
@@ -210,6 +216,9 @@ function isVec3(o) {
 }
 function isPointSequence(o) {
   return !!(o && o.isPointSequence && o.group && o.points);
+}
+function isPolygon(o) {
+  return !!(o && o.isPolygon && o.group && typeof o.getVertices === "function");
 }
 function isPointLike(o) {
   return (

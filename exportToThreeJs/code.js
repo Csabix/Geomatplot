@@ -51,14 +51,22 @@ export function draw(scene) {
     color: "green",
   });
 
-  const curve = createCustomCurve(
+  const curve = pointSequence(
     scene,
-    (t) => {
-      const x = t * 400 - 200;
-      const y = Math.sin(t * Math.PI * 4) * 50;
-      return [x, y];
+    point_1,
+    (p) => {
+      const [px, py] = p;
+      const out = [];
+      const steps = 120;
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const x = px + t * 400 - 200;
+        const y = py + Math.sin(t * Math.PI * 4) * 50;
+        out.push([x, y]);
+      }
+      return out;
     },
-    { color: 0x3366ff, segments: 400, hidden: true }
+    { color: 0x3366ff, markerSize: 1.5, hidden: false }
   );
 
   createCustomCurve(
@@ -106,7 +114,7 @@ export function draw(scene) {
 
   const circ1 = circle(scene, point_1, dAB, {
     color: 0x0066ff,
-    hidden: false,
+    hidden: true,
   });
 
   /* ----- DISTANCE ----- */
@@ -312,8 +320,6 @@ export function draw(scene) {
   //     - Beállítási lehetőség, bilinear/nearest neighbour mintavételezés (filtering), threeJs-ben benne lehet, csak cpu-nál számít
 
   const gpuFragmentShader = `
-    uniform vec3 uInputs[256];
-    uniform int uInputCount;
     uniform bool uIsPreview;
     varying vec2 vWorld;
 
@@ -338,8 +344,8 @@ export function draw(scene) {
 
     void main() {
       float minD = 1e9;
-      for (int i = 0; i < uInputCount; i++) {
-        vec2 p = uInputs[i].xy;
+      for (int i = 0; i < u_pointsCount; i++) {
+        vec2 p = u_points[i].xy;
         float d = distance(vWorld, p);
         if (d < minD) minD = d;
       }
@@ -350,22 +356,17 @@ export function draw(scene) {
     }
   `;
 
-  createFunctionImage2D(scene, {
-    inputs: [point_1, [10, 10], point_3],
-    corner0: [-150, -50],
-    corner1: [200, 250],
-    resolution: 512,
-    previewScale: 0.3,
-    filtering: "bilinear",
-    z: -0.1,
-    shader: gpuFragmentShader,
-  });
+  // createFunctionImage2D(scene, {
+  //   inputs: { points: [point_1, [10, 10], point_3] },
+  //   corner0: [-150, -50],
+  //   corner1: [200, 250],
+  //   resolution: 512,
+  //   filtering: "bilinear",
+  //   z: -0.1,
+  //   shader: gpuFragmentShader,
+  // });
 
-  // GPU-rendered image: min distance to sequence (uInputs auto-filled from inputs)
   const seqDistanceFragmentShader = `
-    uniform vec3 uInputs[256];
-    uniform int uInputCount;
-    uniform bool uIsPreview;
     varying vec2 vWorld;
 
     vec3 jet(float t) {
@@ -389,37 +390,90 @@ export function draw(scene) {
 
     void main() {
       float minD = 1e9;
-      for (int i = 0; i < uInputCount; i++) {
-        vec2 p = uInputs[i].xy;
+      for (int i = 0; i < u_seq_polyCount; i++) {
+        vec2 p = u_seq_poly[i].xy;
         float d = distance(vWorld, p);
         if (d < minD) minD = d;
       }
 
-      float t = clamp(minD / 200.0, 0.0, 1.0);
-      if (uIsPreview) {
-        t = mix(t, 0.0, 0.15); // slight darkening while previewing
-      }
+      float t = clamp(minD / 200.0, 0.0, 1.0);      
       vec3 color = jet(t);
       gl_FragColor = vec4(color, 0.9);
     }
   `;
 
-  const seqInput = {
-    getValue: () =>
-      seq_poly.getArray().map(([x, y]) => new THREE.Vector2(x, y)),
-    __depSource: seq_poly.group,
-  };
   // ✅🆕 Utána nézni, hogy miért Vector3-nél mardtunk végül Vector2 helyett --> A threeJs-ben beépített motor mindenképp 3D-ben számol, azonban megkerülhető. Vector2-vel végezve a számításokat, majd a végén Vector3-ra konvertálva, a z-t 0-n hagyva
   // 🆕 Inputokat tömb ként átadni, és akkor lenne nekik neve pl.: {elso_pont: point_1} így lehetne rá hivatkozni a shader-ben
 
   // createFunctionImage2D(scene, {
-  //   inputs: [seqInput],
+  //   inputs: { seq_poly },
   //   corner0: [-150, -50],
   //   corner1: [200, 250],
   //   filtering: "bilinear",
-
   //   z: -1,
   //   shader: seqDistanceFragmentShader,
+  // });
+
+  // Named inputs example:
+  // const namedPointsShader = `
+  //   varying vec2 vWorld;
+  //   void main() {
+  //     float d1 = distance(vWorld, u_point_1.xy);
+  //     float d2 = distance(vWorld, u_point_2.xy);
+  //     float d3 = distance(vWorld, u_point_3.xy);
+  //     float minD = min(d1, min(d2, d3));
+  //     float t = clamp(minD / 200.0, 0.0, 1.0);
+  //     gl_FragColor = vec4(vec3(t), 0.9);
+  //   }
+  // `;
+  // createFunctionImage2D(scene, {
+  //   inputs: { point_1, point_2, point_3 },
+  //   corner0: [-150, -50],
+  //   corner1: [200, 250],
+  //   filtering: "bilinear",
+  //   z: -1,
+  //   shader: namedPointsShader,
+  // });
+
+  // Curve points distance example:
+  const curveShader = `
+    varying vec2 vWorld;
+    void main() {
+      float minD = 1e9;
+      for (int i = 0; i < u_curveCount; i++) {
+        vec2 p = u_curve[i].xy;
+        float d = distance(vWorld, p);
+        if (d < minD) minD = d;
+      }
+      float t = clamp(minD / 200.0, 0.0, 1.0);
+      gl_FragColor = vec4(vec3(1.0 - t, 0.3, t), 0.9);
+    }
+  `;
+  createFunctionImage2D(scene, {
+    inputs: { curve },
+    corner0: [-150, -50],
+    corner1: [200, 250],
+    filtering: "bilinear",
+    z: -1,
+    shader: curveShader,
+  });
+
+  // Named mixed inputs example (point + scalar):
+  // const abShader = `
+  //   varying vec2 vWorld;
+  //   void main() {
+  //     float d = distance(vWorld, a.xy);
+  //     float t = clamp((d + b) / 200.0, 0.0, 1.0);
+  //     gl_FragColor = vec4(vec3(1.0 - t, 0.3, t), 0.9);
+  //   }
+  // `;
+  // createFunctionImage2D(scene, {
+  //   inputs: { a: point_1, b: 20.0 },
+  //   corner0: [-150, -50],
+  //   corner1: [200, 250],
+  //   filtering: "bilinear",
+  //   z: -1,
+  //   shader: abShader,
   // });
 
   // ✅ Opcionális argument-eknél legyen mindenhol egy hidden boolean, ami ha == true, akkor elrejti az objektumot

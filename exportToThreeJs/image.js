@@ -96,6 +96,70 @@ function normalizeRGB(value) {
   return null;
 }
 
+function isLine(o) {
+  return !!(
+    o &&
+    o.isLine &&
+    o.geometry &&
+    o.geometry.attributes &&
+    o.geometry.attributes.position
+  );
+}
+
+function isPointSequence(o) {
+  return !!(o && o.isPointSequence && o.group && o.points);
+}
+
+function isPolygon(o) {
+  return !!(o && o.isPolygon && o.group && typeof o.getVertices === "function");
+}
+
+function isCircleObj(o) {
+  return !!(
+    o &&
+    typeof o.getCenter === "function" &&
+    typeof o.getRadius === "function"
+  );
+}
+
+function arrayFromLine(line) {
+  const pos = line.geometry.getAttribute("position");
+  const out = [];
+  for (let i = 0; i < pos.count; i++) {
+    out.push([pos.getX(i), pos.getY(i)]);
+  }
+  return out;
+}
+
+function arrayFromPoints(points) {
+  const pos = points.geometry?.getAttribute?.("position");
+  if (!pos) return [];
+  const out = [];
+  for (let i = 0; i < pos.count; i++) {
+    out.push([pos.getX(i), pos.getY(i)]);
+  }
+  return out;
+}
+
+function arrayFromPolygon(poly) {
+  const verts = poly.getVertices?.();
+  return Array.isArray(verts) ? verts : [];
+}
+
+function arrayFromCircle(circleLike, segments = 128) {
+  if (circleLike && circleLike.line && isLine(circleLike.line)) {
+    return arrayFromLine(circleLike.line);
+  }
+  const c = circleLike.getCenter();
+  const r = circleLike.getRadius();
+  const out = [];
+  for (let i = 0; i <= segments; i++) {
+    const t = (i / segments) * Math.PI * 2;
+    out.push([c.x + Math.cos(t) * r, c.y + Math.sin(t) * r]);
+  }
+  return out;
+}
+
 function resolveInputValue(input) {
   if (input == null) return input;
   if (typeof input.__depValue !== "undefined") return input.__depValue;
@@ -109,11 +173,30 @@ function resolveInputValue(input) {
   if (typeof input.getValue === "function") {
     return input.getValue();
   }
+  if (isPointSequence(input) && typeof input.getArray === "function") {
+    const arr = input.getArray();
+    if (Array.isArray(arr) && arr.length) return arr;
+    if (input.points) return arrayFromPoints(input.points);
+    return arr;
+  }
+  if (isPolygon(input)) {
+    return arrayFromPolygon(input);
+  }
+  if (isCircleObj(input)) {
+    return arrayFromCircle(input);
+  }
+  if (isLine(input)) {
+    return arrayFromLine(input);
+  }
   return input;
 }
 
 function extractDependencySource(input) {
   if (!input) return null;
+  if (isPointSequence(input)) return input.group;
+  if (isPolygon(input)) return input.group;
+  if (isCircleObj(input) && input.line) return input.line;
+  if (isLine(input)) return input;
   if (typeof input.__depSource === "object" && input.__depSource !== null) {
     return input.__depSource;
   }
@@ -130,11 +213,110 @@ function extractDependencySource(input) {
 
 function collectDependencySources(input, out) {
   if (input == null) return;
+  if (isCircleObj(input)) {
+    if (input.line) out.add(input.line);
+    if (input.centerMarker) out.add(input.centerMarker);
+  }
   const maybeSrc = extractDependencySource(input);
   if (maybeSrc) out.add(maybeSrc);
   if (Array.isArray(input)) {
     for (const item of input) collectDependencySources(item, out);
   }
+}
+
+function isPlainObject(o) {
+  return !!o && typeof o === "object" && !Array.isArray(o);
+}
+
+function isInputMap(o) {
+  return (
+    isPlainObject(o) &&
+    !o.isObject3D &&
+    !o.isVector2 &&
+    !o.isVector3 &&
+    !("position" in o && o.position && o.position.isVector3) &&
+    typeof o.getValue !== "function"
+  );
+}
+
+function sanitizeUniformName(name) {
+  const safe = String(name).replace(/[^A-Za-z0-9_]/g, "_");
+  if (/^[A-Za-z_]/.test(safe)) return safe;
+  return `u_${safe}`;
+}
+
+function inferShaderInputSpec(name, value, rawInput, arrayCapacity) {
+  const uniformName = `u_${sanitizeUniformName(name)}`;
+  const looksLikePoint = (v) =>
+    !!(
+      v &&
+      (v.isVector2 ||
+        v.isVector3 ||
+        (v.position && v.position.isVector3) ||
+        (typeof v === "object" && "x" in v && "y" in v))
+    );
+  const isArrayOfPointsRaw =
+    Array.isArray(rawInput) &&
+    (rawInput.length === 0 ||
+      Array.isArray(rawInput[0]) ||
+      looksLikePoint(rawInput[0]));
+  let fallbackLength = 0;
+  if (isPointSequence(rawInput) && rawInput.points) {
+    fallbackLength = arrayFromPoints(rawInput.points).length;
+  } else if (isPolygon(rawInput)) {
+    fallbackLength = arrayFromPolygon(rawInput).length;
+  } else if (isLine(rawInput)) {
+    fallbackLength = arrayFromLine(rawInput).length;
+  } else if (isCircleObj(rawInput)) {
+    fallbackLength = arrayFromCircle(rawInput).length;
+  }
+
+  const isPointArray =
+    isPointSequence(rawInput) ||
+    isPolygon(rawInput) ||
+    isCircleObj(rawInput) ||
+    isLine(rawInput) ||
+    isArrayOfPointsRaw ||
+    (Array.isArray(value) &&
+      value.length &&
+      (Array.isArray(value[0]) ||
+        (value[0] && (value[0].isVector2 || value[0].isVector3)) ||
+        (value[0] && typeof value[0] === "object" && "x" in value[0])));
+  if (isPointArray) {
+    const len = Array.isArray(value) ? value.length : fallbackLength;
+    return {
+      name,
+      uniformName,
+      kind: "vec3Array",
+      countName: `${uniformName}Count`,
+      length: Math.max(1, len || 0, arrayCapacity || 0),
+    };
+  }
+  if (typeof value === "number") {
+    return { name, uniformName, kind: "float" };
+  }
+  return { name, uniformName, kind: "vec3" };
+}
+
+function buildAutoUniformDecls(specs) {
+  let out = "";
+  let defs = "";
+  for (const spec of specs) {
+    if (spec.kind === "vec3Array") {
+      out += `uniform vec3 ${spec.uniformName}[${Math.max(
+        1,
+        spec.length
+      )}];\n`;
+      out += `uniform int ${spec.countName};\n`;
+    } else if (spec.kind === "float") {
+      out += `uniform float ${spec.uniformName};\n`;
+    } else {
+      out += `uniform vec3 ${spec.uniformName};\n`;
+    }
+    const alias = sanitizeUniformName(spec.name);
+    defs += `#define ${alias} ${spec.uniformName}\n`;
+  }
+  return `${out}${defs}`;
 }
 
 /**
@@ -256,7 +438,9 @@ function scalarToColorJet(t) {
  *   - callback: (x, y, ...inputs) => number | [r,g,b]
  *         * x,y are in canvas coordinates (domain below)
  *         * "inputs" can be whatever you want — typically points, distances etc.
- *   - inputs?: any[]  (will be passed as-is to callback)
+ *   - inputs?: any[] | object
+ *       * array: passed to callback as positional args
+ *       * object: enables named shader uniforms (use `u_<key>` in GLSL; arrays add `u_<key>Count`)
  *   - corner0?: [x0,y0]  lower-left corner (default [0,0])
  *   - corner1?: [x1,y1]  upper-right corner (default [1,1])
  *   - resolution?: number  target total pixels ~ resolution^2 (default 512)
@@ -314,6 +498,10 @@ export function createFunctionImage2D(scene, options = {}) {
     shaderInputCapacity = 256,
     hidden = false,
   } = options || {};
+
+  const inputsIsMap = isInputMap(inputs);
+  const inputEntries = inputsIsMap ? Object.entries(inputs) : inputs.map((v, i) => [String(i), v]);
+  const inputValues = inputEntries.map(([, v]) => v);
 
   const shaderObj =
     typeof shader === "string" ? { fragmentShader: shader } : shader || null;
@@ -376,6 +564,24 @@ export function createFunctionImage2D(scene, options = {}) {
   );
   const initialShaderInputs = maxShaderInputs;
 
+  let autoSpecs = [];
+  if (hasShader && inputsIsMap) {
+    const resolved = inputValues.map(resolveInputValue);
+    autoSpecs = inputEntries.map(([name], i) =>
+      inferShaderInputSpec(name, resolved[i], inputValues[i], shaderInputCapacity)
+    );
+  }
+
+  const autoUniformsEnabled =
+    hasShader && inputsIsMap && (shaderObj.autoUniforms ?? true);
+  const autoUniformDecls = autoUniformsEnabled
+    ? buildAutoUniformDecls(autoSpecs)
+    : "";
+  const fragmentShaderSource =
+    hasShader && autoUniformsEnabled
+      ? `${autoUniformDecls}\n${shaderObj.fragmentShader || ""}`
+      : shaderObj?.fragmentShader;
+
   const shaderUniforms = hasShader
     ? {
         uTexture: { value: null },
@@ -384,20 +590,39 @@ export function createFunctionImage2D(scene, options = {}) {
         uIsPreview: { value: false },
         uPreviewLevel: { value: 1 },
         uResolution: { value: new THREE.Vector2() },
-        uInputs: {
-          value: Array.from({ length: initialShaderInputs }, () => new THREE.Vector3()),
-        },
-        uInputCount: { value: 0 },
+        ...(inputsIsMap
+          ? {}
+          : {
+              uInputs: {
+                value: Array.from({ length: initialShaderInputs }, () => new THREE.Vector3()),
+              },
+              uInputCount: { value: 0 },
+            }),
         ...(shaderObj.uniforms || {}),
       }
     : null;
+
+  if (shaderUniforms && inputsIsMap) {
+    for (const spec of autoSpecs) {
+      if (spec.kind === "vec3Array") {
+        shaderUniforms[spec.uniformName] = {
+          value: Array.from({ length: Math.max(1, spec.length) }, () => new THREE.Vector3()),
+        };
+        shaderUniforms[spec.countName] = { value: 0 };
+      } else if (spec.kind === "float") {
+        shaderUniforms[spec.uniformName] = { value: 0 };
+      } else {
+        shaderUniforms[spec.uniformName] = { value: new THREE.Vector3() };
+      }
+    }
+  }
 
   const material = hasShader
     ? new THREE.ShaderMaterial({
         uniforms: shaderUniforms,
         vertexShader: shaderObj.vertexShader || DEFAULT_IMAGE_VERTEX_SHADER,
         fragmentShader:
-          shaderObj.fragmentShader ||
+          fragmentShaderSource ||
           (useDataTexture ? DEFAULT_IMAGE_FRAGMENT_SHADER : null),
         transparent: shaderObj.transparent ?? false,
         side: shaderObj.side ?? THREE.DoubleSide,
@@ -546,7 +771,7 @@ export function createFunctionImage2D(scene, options = {}) {
   }
 
   function runUpdate(res, isPreview) {
-    const resolvedInputs = inputs.map(resolveInputValue);
+    const resolvedInputs = inputValues.map(resolveInputValue);
     computeTexture(resolvedInputs, res, isPreview);
 
     if (shaderUniforms) {
@@ -557,7 +782,7 @@ export function createFunctionImage2D(scene, options = {}) {
         const level = res ? res / targetResolution : 1;
         shaderUniforms.uPreviewLevel.value = level;
       }
-      if (shaderUniforms.uInputs && Array.isArray(shaderUniforms.uInputs.value)) {
+      if (!inputsIsMap && shaderUniforms.uInputs && Array.isArray(shaderUniforms.uInputs.value)) {
         const arr = shaderUniforms.uInputs.value;
         // Guarantee length >= maxShaderInputs and every slot is a Vector3
         while (arr.length < maxShaderInputs) arr.push(new THREE.Vector3());
@@ -620,6 +845,72 @@ export function createFunctionImage2D(scene, options = {}) {
           shaderUniforms.uInputCount.value = Math.min(writeIndex, maxShaderInputs);
         }
       }
+      if (inputsIsMap) {
+        const writeVec = (vec, v) => {
+          if (v && v.isVector3) {
+            vec.copy(v);
+          } else if (v && v.isVector2) {
+            vec.set(v.x, v.y, 0);
+          } else if (v && v.position && v.position.isVector3) {
+            vec.copy(v.position);
+          } else if (Array.isArray(v)) {
+            vec.set(v[0] ?? 0, v[1] ?? 0, v[2] ?? 0);
+          } else if (typeof v === "number") {
+            vec.set(v, 0, 0);
+          } else if (v && typeof v === "object" && "x" in v && "y" in v) {
+            vec.set(v.x ?? 0, v.y ?? 0, v.z ?? 0);
+          } else {
+            vec.set(0, 0, 0);
+          }
+        };
+
+        const resolveArrayInput = (raw, val) => {
+          if (Array.isArray(val) && val.length) return val;
+          if (isPointSequence(raw)) return resolveInputValue(raw) || [];
+          if (isPolygon(raw)) return arrayFromPolygon(raw);
+          if (isLine(raw)) return arrayFromLine(raw);
+          if (isCircleObj(raw)) return arrayFromCircle(raw);
+          return Array.isArray(val) ? val : [];
+        };
+
+        for (let i = 0; i < autoSpecs.length; i++) {
+          const spec = autoSpecs[i];
+          const rawInput = inputValues[i];
+          const val = resolvedInputs[i];
+          if (spec.kind === "vec3Array") {
+            const arr = shaderUniforms[spec.uniformName]?.value || [];
+            const seq = resolveArrayInput(rawInput, val);
+            const count = Array.isArray(seq) ? seq.length : 0;
+            while (arr.length < Math.max(1, spec.length)) {
+              arr.push(new THREE.Vector3());
+            }
+            for (let j = 0; j < arr.length; j++) {
+              if (j < count) {
+                writeVec(arr[j], seq[j]);
+              } else {
+                arr[j].set(0, 0, 0);
+              }
+            }
+            shaderUniforms[spec.uniformName].value = arr;
+            if (shaderUniforms[spec.countName]) {
+              shaderUniforms[spec.countName].value = Math.min(
+                count,
+                arr.length
+              );
+            }
+          } else if (spec.kind === "float") {
+            shaderUniforms[spec.uniformName].value = Number(val) || 0;
+          } else {
+            const vec = shaderUniforms[spec.uniformName]?.value;
+            if (vec && vec.isVector3) {
+              writeVec(vec, val);
+            } else {
+              shaderUniforms[spec.uniformName].value = new THREE.Vector3();
+              writeVec(shaderUniforms[spec.uniformName].value, val);
+            }
+          }
+        }
+      }
     }
 
     if (!hasShader && material.map) {
@@ -666,7 +957,7 @@ export function createFunctionImage2D(scene, options = {}) {
   }
 
   const depSources = new Set();
-  inputs.forEach((inp) => collectDependencySources(inp, depSources));
+  inputValues.forEach((inp) => collectDependencySources(inp, depSources));
   const attachDependency =
     typeof depSystem.addDependency === "function"
       ? depSystem.addDependency.bind(depSystem)

@@ -136,7 +136,7 @@ export function draw(scene) {
       const sx = Number(data.sulypont?.x ?? 0).toFixed(2);
       const sy = Number(data.sulypont?.y ?? 0).toFixed(2);
       const terulet = Number(data.terulet ?? 0).toFixed(2);
-      return `Élhossz: ${elhossz} | Súlypont: (${sx}, ${sy}) | Terület: ${terulet}`;
+      return `Elhossz: ${elhossz} u | Sulypont: (${sx} u, ${sy} u) | Terulet: ${terulet} u^2`;
     },
     {
       color: 0x0000ff,

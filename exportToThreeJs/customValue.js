@@ -44,16 +44,18 @@ export function customValue(inputs, userCallback, options = {}) {
   const inArray = Array.isArray(inputs) ? inputs : [inputs];
 
   // --- How to extract a "value" from each input ---------------------------
-  function extractValue(obj) {
-    if (obj == null) return obj;
+function extractValue(obj) {
+  if (obj == null) return obj;
 
-    // Three.js object (point) -> use its position (2D)
-    if (obj.isObject3D && obj.position && obj.position.isVector3) {
-      return new THREE.Vector2(obj.position.x, obj.position.y);
-    }
+  // Three.js object (point) -> use its position (2D)
+  if (obj.isObject3D && obj.position && obj.position.isVector3) {
+    return new THREE.Vector2(obj.position.x, obj.position.y);
+  }
 
-    if (obj.isVector2) return obj;
-    if (obj.isVector3) return new THREE.Vector2(obj.x, obj.y);
+  if (isPolygon(obj)) return obj;
+
+  if (obj.isVector2) return obj;
+  if (obj.isVector3) return new THREE.Vector2(obj.x, obj.y);
 
     // Objects with getValue() method (e.g. distance, scalar, etc.)
     if (typeof obj.getValue === "function") {
@@ -141,7 +143,13 @@ export function customValue(inputs, userCallback, options = {}) {
   for (const src of inArray) {
     // Only things that can change need to be wired (points, other dependents)
     if (src && (src.isObject3D || typeof src === "object")) {
-      if (depSys) {
+      if (isPolygon(src) && src.group) {
+        if (depSys) {
+          depSys.addDependency(src.group, self, rebuild);
+        } else {
+          addDependency(src.group, self, rebuild);
+        }
+      } else if (depSys) {
         depSys.addDependency(src, self, rebuild);
       } else {
         addDependency(src, self, rebuild);
@@ -162,4 +170,8 @@ function wrapValue(v, sourceRef) {
     __depSource: sourceRef,
     __depValue: v,
   };
+}
+
+function isPolygon(o) {
+  return !!(o && o.isPolygon && o.group && typeof o.getVertices === "function");
 }

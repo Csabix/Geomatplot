@@ -1,18 +1,39 @@
-This folder hosts the static export for the Three.js-based viewer. Treat it as a small, self-contained web app and keep it easy to serve locally for development.
+## Three.js Export
 
-Development workflow:
-- Serve this directory with Node when working on the viewer: `npx serve .`
+This folder is a static export of the Three.js viewer. Think of it as a compact, self-contained web app that you can serve locally without a build step.
+
+### Quick start
+
+```sh
+npx serve .
+```
+
+### Development notes
+
 - Keep dependencies minimal; prefer vanilla JS modules and static assets.
 - Update assets and build outputs in-place so the static server can reload them.
 - If you add new entry points, document them here and keep paths relative to this folder.
 
-Key files and systems:
-- `index.html` is the entry point; it defines the import map for Three.js and loads the modules.
-- `initialization.js` sets up the renderer, orthographic camera, scene, and resize handling, then wires in the drag controls.
-- `code.js` is the main scene script; it builds demo geometry and shows how to compose primitives.
-- `dependency.js` provides the dependency system (graph + updates) used to recompute dependent geometry when inputs change.
-- `dragging.js` wraps Three.js `DragControls` and triggers dependency updates while objects are moved.
+### Key files
 
-Dependency and dragging notes:
-- When a draggable object moves, `dragging.js` calls `updateDependencies` so dependent objects stay in sync.
-- If you add new geometry types, register dependencies where values are derived from other objects.
+- `index.html`: entry point; defines the import map for Three.js and loads modules.
+- `initialization.js`: renderer, orthographic camera, scene, resize handling, and drag controls.
+- `code.js`: main scene script; demo geometry and composition patterns.
+- `dependency.js`: dependency graph and update propagation for derived geometry.
+- `dragging.js`: wraps Three.js `DragControls` and triggers dependency updates.
+
+### Dependency + dragging
+
+- Dragging calls `updateDependencies` so dependent objects stay in sync.
+- When adding new geometry, wire dependency updates wherever values are derived.
+
+### Further development
+
+- Images should accept additional input types such as curves and circles; for curves, expose their point sets so they can be used in image parameters.
+- Unwrap `depValue` by default where dependent values are consumed. Example where it should work:
+  ```ts
+  const customVal2 = customValue([dAB], (d) => {
+    return d / 2;
+  });
+  ```
+- Separate Three.js-specific dependencies from core dependency logic so the system can be swapped to another rendering technology later.

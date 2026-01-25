@@ -18,21 +18,8 @@ import { addImagePlane, createFunctionImage2D } from "./image.js";
 import { customValue } from "./customValue.js";
 
 export function draw(scene) {
-  /* ----- LOCAL DEPENDENCY ------ */
-
-  const localDeps = createDependencySystem();
-  const localDeps2 = createDependencySystem();
-
-  /* ----- POINT ----- */
-
   const point_1 = point(scene, 50, 50);
-  const point_2 = point(scene, 20, 160);
-  const point_3 = point(scene, -20, 50);
-  const point_4 = point(scene, -50, -100, { hidden: true });
-  const point_5 = point(scene, 150, 50, { hidden: true });
-  const point_6 = point(scene, -200, -100, { hidden: true });
-
-  /* ----- DEPENDENT POINT ----- */
+  const point_2 = point(scene, 150, 80);
 
   dPoint(
     scene,
@@ -41,38 +28,13 @@ export function draw(scene) {
     ([px, py], [dx, dy]) => {
       return [px + dx, py + dy];
     },
-    { hidden: false, color: "green" }
+    { hidden: false, color: "green" },
   );
 
-  /* ----- CURVE ----- */
-
-  createUniformCurve(scene, [point_1, point_2, [10, 10], point_4], {
-    hidden: true,
-    color: "green",
-  });
-
-  const curve = pointSequence(
+  const curve = createCustomCurve(
     scene,
     point_1,
-    (p) => {
-      const [px, py] = p;
-      const out = [];
-      const steps = 120;
-      for (let i = 0; i <= steps; i++) {
-        const t = i / steps;
-        const x = px + t * 400 - 200;
-        const y = py + Math.sin(t * Math.PI * 4) * 50;
-        out.push([x, y]);
-      }
-      return out;
-    },
-    { color: 0x3366ff, markerSize: 1.5, hidden: false }
-  );
-
-  createCustomCurve(
-    scene,
-    point_1,
-    [10, 10],
+    [10, 10], // Menjen inkább a pont egy és pont 2  között
     (t, aPos, bPos) => {
       const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
       const y =
@@ -80,465 +42,96 @@ export function draw(scene) {
         Math.sin(t * Math.PI * 3) * 40;
       return new THREE.Vector2(x, y);
     },
-    { color: 0xdd5522, segments: 300, hidden: true }
+    { color: 0xdd5522, segments: 300, hidden: false },
   );
 
-  /* ----- CIRCLE ----- */
-
-  circle(scene, point_1, point_2, point_3, {
-    color: 0x0066ff,
-    hidden: true,
-  });
-
-  const circ2 = circle(scene, point_1, point_2, {
-    color: 0x22aa22,
-    hidden: true,
-  });
-
-  const circ3 = circle(scene, [300, -150], 120, {
-    color: 0xaa2222,
-    hidden: true,
-  });
-
-  /* ----- SCALAR ----- */
-
-  const dAB = dScalar(point_2, [10, 10], (a, b) => {
+  const d_ab = dScalar(point_2, [10, 10], (a, b) => {
     return a.x + b[0];
   });
 
-  const dABC = dScalar(point_2, [10, 10], point_1, (a, b, c) => {
-    return a.x + b[0] + c.y;
+  const d_a_b = distance(point_1, point_2);
+  d_a_b.onChange(() => {
+    console.log(d_a_b.getValue());
   });
 
-  // dAB.onChange((v) => console.log("|AB| =", v));
-
-  const circ1 = circle(scene, point_1, dAB, {
+  const circ1 = circle(scene, point_1, d_ab, {
     color: 0x0066ff,
-    hidden: true,
+    hidden: false,
   });
-
-  /* ----- DISTANCE ----- */
-
-  const dA_to_circ = distance(point_1, point_2);
-  // dA_to_circ.onChange((v) => console.log("point 1 and 2 distance:", v));
-
-  /* ----- SEGMENT ----- */
 
   const s1 = segment(scene, point_1, point_2, {
     color: 0x333333,
     linewidth: 2,
-    hidden: true,
+    hidden: false,
   });
 
-  const s2 = segment(scene, point_1, point_2, point_3, point_4, {
-    color: 0x555555,
-    linewidth: 1.5,
-    hidden: true,
-  });
-
-  const s3 = segment(scene, point_1, [80, -40], { dashed: true, hidden: true });
-
-  /* ----- POLYGON ----- */
-
-  const poly1 = polygon(scene, [point_1, [0, 0], point_4, [30, 10]], {
+  const poly_1 = polygon(scene, [point_1, [0, 0], point_2, [30, 10]], {
     color: 0x0088ff,
-    faceAlpha: 0.2,
+    faceAlpha: 0.5,
+    hidden: false,
+  });
+
+  const seq_1 = pointSequence(scene, point_1, point_2, {
+    color: 0x3366ff,
+    markerSize: 2,
     hidden: true,
   });
 
-  const poly2 = polygon(scene, point_1, point_2, point_3, {
-    color: 0xdd5522,
-    faceAlpha: 0.15,
-    hidden: true,
-  });
-
-  const seq_points = pointSequence(scene, point_1, point_2, point_3, {
-    hidden: true,
-  });
-
-  const seq_poly = pointSequence(scene, [point_1, point_2, point_3], poly1, {
+  const curve_seq = pointSequence(scene, curve, {
     color: 0x22aa22,
     markerSize: 1.5,
-    hidden: true,
+    hidden: false,
   });
 
-  const poly3 = polygon(scene, seq_poly, curve, {
-    color: 0x22aa22,
-    faceAlpha: 0.1,
-    hidden: true,
-  });
-
-  /* ----- POINT SEQUENCE ----- */
-
-  const seq1 = pointSequence(
-    scene,
-    point_1,
-    point_2,
-    [
-      [0, 0],
-      [100, 100],
-    ],
-    { color: 0x3366ff, markerSize: 2, hidden: true }
-  );
-
-  const seq2 = pointSequence(
-    scene,
-    point_1,
-    point_2,
-    point_3,
-    (a, b, c) => {
-      return [a, b, c].map(([x, y]) => [x, -y]);
-    },
-    { color: 0xdd5522, hidden: true }
-  );
-
-  const seq3 = pointSequence(scene, seq1, poly1, {
-    color: 0x22aa22,
-    markerSize: 1.5,
-    hidden: true,
-  });
-
-  /* ----- TEXT ------ */
-
-  const labelPoint1 = text(scene, point_1, "point_1", {
+  const label_1 = text(scene, point_1, "point_1", {
     color: 0x0000ff,
     fontSize: 200,
     offset: { x: 10, y: 10 },
-    hidden: true,
+    hidden: false,
   });
 
-  const dLabel = text(scene, point_1, [dAB], (B) => B.toFixed(2), {
-    color: 0x008800,
-    fontSize: 200,
-    offset: { x: 10, y: -10 },
-    hidden: true,
-  });
-
-  const dAC = distance(point_1, point_3);
-  const dLabel2 = text(scene, point_3, dAC, (B) => B.toFixed(1), {
-    color: 0xaa0000,
-    fontSize: 200,
-    offset: { x: 10, y: 10 },
-    hidden: true,
-  });
-
-  /* ----- IMAGE ----- */
-
-  // const vertexShader = `
-  //   varying vec2 vUv;
-  //   void main() {
-  //     vUv = uv;
-  //     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  //   }
-  // `;
-
-  // const fragmentShader = `
-  //   uniform sampler2D uTexture;
-  //   varying vec2 vUv;
-  //   void main() {
-  //     vec4 color = texture2D(uTexture, vUv);
-  //     float g = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-  //     gl_FragColor = vec4(vec3(g), color.a);
-  //   }
-  // `;
-
-  // createFunctionImage2D(scene, {
-  //   callback: (x, y) => {
-  //     let minD = Infinity;
-  //     for (const p of [point_1, point_2, point_3]) {
-  //       const px = p.position.x;
-  //       const py = p.position.y;
-  //       const dx = x - px;
-  //       const dy = y - py;
-  //       const d = Math.sqrt(dx * dx + dy * dy);
-  //       if (d < minD) minD = d;
-  //     }
-  //     return minD;
-  //   },
-  //   corner0: [-150, -50], // lower-left of domain
-  //   corner1: [200, 250], // upper-right of domain
-  //   resolution: 512,
-  //   colormap: "grayscale",
-  //   z: -0.01,
-  // });
-
-  // const poly = createUniformCurve(scene, [point_1, point_2, point_3]);
-  // const seq = pointSequence(scene, [point_1, point_2, point_3], poly, {
-  //   color: 0x22aa22,
-  //   markerSize: 1.5,
-  //   visible: false,
-  // });
-
-  // createFunctionImage2D(scene, {
-  //   callback: (x, y) => {
-  //     let minD2 = Infinity;
-
-  //     for (const [sx, sy] of seq.getArray()) {
-  //       const dx = x - sx;
-  //       const dy = y - sy;
-  //       const d2 = dx * dx + dy * dy;
-  //       if (d2 < minD2) minD2 = d2;
-  //     }
-
-  //     return Math.sqrt(minD2);
-  //   },
-
-  //   corner0: [-150, -50], // lower-left of domain
-  //   corner1: [200, 250], // upper-right of domain
-  //   resolution: 512,
-  //   colormap: "jet",
-  //   z: -1,
-  // });
-
-  // addImagePlane(scene, "../examples/bez.png", {
-  //   width: 200,
-  //   position: { x: 100, y: 50, z: 0 },
-  // });
-
-  // addImagePlane(scene, "../examples/triangle.png", {
-  //   position: { x: -100, y: -250, z: 0 },
-  //   shader: {
-  //     vertexShader,
-  //     fragmentShader,
-  //   },
-  // });
-
-  /* ----- CUSTOM VALUE ----- */
-
-  const customVal = customValue([dAB], (d) => {
-    return d / 2;
-  });
-
-  /* ----- TODOs ----- */
-
-  //   ✅- Image: Frissülnie kell a képnek, kell bele a dependency rendszer
-  //     (trükk: Amíg mozgatunk valamit, addig a felbontás kisebb legyen)
-  //     - CPU-n számítás költséges, kell a GPU-s shader alapú megoldás is (WebGL shader) ->
-  //         A shader-nek kell számolnia a heatmap-et (a színt számolja a shader)
-  //           - Akár csak string-esen megadni és elődefiniált funkciókat használni
-  //     - Legyen resolution paraméter
-  //     - Beállítási lehetőség, bilinear/nearest neighbour mintavételezés (filtering), threeJs-ben benne lehet, csak cpu-nál számít
-
-  const gpuFragmentShader = `
-    uniform bool uIsPreview;
-    varying vec2 vWorld;
-
-    vec3 jet(float t) {
-      t = clamp(t, 0.0, 1.0);
-      float r = 0.0, g = 0.0, b = 0.0;
-      if (t < 0.25) {
-        float u = t / 0.25;
-        r = 0.0; g = u; b = 1.0;
-      } else if (t < 0.5) {
-        float u = (t - 0.25) / 0.25;
-        r = 0.0; g = 1.0; b = 1.0 - u;
-      } else if (t < 0.75) {
-        float u = (t - 0.5) / 0.25;
-        r = u; g = 1.0; b = 0.0;
-      } else {
-        float u = (t - 0.75) / 0.25;
-        r = 1.0; g = 1.0 - u; b = 0.0;
-      }
-      return vec3(r, g, b);
+  const shader = `
+  varying vec2 vWorld;
+  void main() {
+    float minD = 1e9;
+    for (int i = 0; i < u_curve_seqCount; i++) {
+      vec2 p = u_curve_seq[i].xy;
+      float d = distance(vWorld, p);
+      if (d < minD) minD = d;
     }
+    float t = clamp(minD / 200.0, 0.0, 1.0);
+    gl_FragColor = vec4(vec3(1.0 - t, 0.3, t), 0.9);
+  }
+`;
 
-    void main() {
-      float minD = 1e9;
-      for (int i = 0; i < u_pointsCount; i++) {
-        vec2 p = u_points[i].xy;
-        float d = distance(vWorld, p);
-        if (d < minD) minD = d;
-      }
-
-      float t = clamp(minD / 200.0, 0.0, 1.0);      
-      vec3 color = jet(t);
-      gl_FragColor = vec4(color, 0.9);
-    }
-  `;
-
-  // createFunctionImage2D(scene, {
-  //   inputs: { points: [point_1, [10, 10], point_3] },
-  //   corner0: [-150, -50],
-  //   corner1: [200, 250],
-  //   resolution: 512,
-  //   filtering: "bilinear",
-  //   z: -0.1,
-  //   shader: gpuFragmentShader,
-  // });
-
-  const seqDistanceFragmentShader = `
-    varying vec2 vWorld;
-
-    vec3 jet(float t) {
-      t = clamp(t, 0.0, 1.0);
-      float r = 0.0, g = 0.0, b = 0.0;
-      if (t < 0.25) {
-        float u = t / 0.25;
-        r = 0.0; g = u; b = 1.0;
-      } else if (t < 0.5) {
-        float u = (t - 0.25) / 0.25;
-        r = 0.0; g = 1.0; b = 1.0 - u;
-      } else if (t < 0.75) {
-        float u = (t - 0.5) / 0.25;
-        r = u; g = 1.0; b = 0.0;
-      } else {
-        float u = (t - 0.75) / 0.25;
-        r = 1.0; g = 1.0 - u; b = 0.0;
-      }
-      return vec3(r, g, b);
-    }
-
-    void main() {
-      float minD = 1e9;
-      for (int i = 0; i < u_seq_polyCount; i++) {
-        vec2 p = u_seq_poly[i].xy;
-        float d = distance(vWorld, p);
-        if (d < minD) minD = d;
-      }
-
-      float t = clamp(minD / 200.0, 0.0, 1.0);      
-      vec3 color = jet(t);
-      gl_FragColor = vec4(color, 0.9);
-    }
-  `;
-
-  // ✅🆕 Utána nézni, hogy miért Vector3-nél mardtunk végül Vector2 helyett --> A threeJs-ben beépített motor mindenképp 3D-ben számol, azonban megkerülhető. Vector2-vel végezve a számításokat, majd a végén Vector3-ra konvertálva, a z-t 0-n hagyva
-  // 🆕 Inputokat tömb ként átadni, és akkor lenne nekik neve pl.: {elso_pont: point_1} így lehetne rá hivatkozni a shader-ben
-
-  // createFunctionImage2D(scene, {
-  //   inputs: { seq_poly },
-  //   corner0: [-150, -50],
-  //   corner1: [200, 250],
-  //   filtering: "bilinear",
-  //   z: -1,
-  //   shader: seqDistanceFragmentShader,
-  // });
-
-  // Named inputs example:
-  // const namedPointsShader = `
-  //   varying vec2 vWorld;
-  //   void main() {
-  //     float d1 = distance(vWorld, u_point_1.xy);
-  //     float d2 = distance(vWorld, u_point_2.xy);
-  //     float d3 = distance(vWorld, u_point_3.xy);
-  //     float minD = min(d1, min(d2, d3));
-  //     float t = clamp(minD / 200.0, 0.0, 1.0);
-  //     gl_FragColor = vec4(vec3(t), 0.9);
-  //   }
-  // `;
-  // createFunctionImage2D(scene, {
-  //   inputs: { point_1, point_2, point_3 },
-  //   corner0: [-150, -50],
-  //   corner1: [200, 250],
-  //   filtering: "bilinear",
-  //   z: -1,
-  //   shader: namedPointsShader,
-  // });
-
-  // Curve points distance example:
-  const curveShader = `
-    varying vec2 vWorld;
-    void main() {
-      float minD = 1e9;
-      for (int i = 0; i < u_curveCount; i++) {
-        vec2 p = u_curve[i].xy;
-        float d = distance(vWorld, p);
-        if (d < minD) minD = d;
-      }
-      float t = clamp(minD / 200.0, 0.0, 1.0);
-      gl_FragColor = vec4(vec3(1.0 - t, 0.3, t), 0.9);
-    }
-  `;
-  createFunctionImage2D(scene, {
-    inputs: { curve },
+  const img_1 = createFunctionImage2D(scene, {
+    inputs: { curve_seq },
     corner0: [-150, -50],
     corner1: [200, 250],
     filtering: "bilinear",
     z: -1,
-    shader: curveShader,
+    shader,
   });
-
-  // Named mixed inputs example (point + scalar):
-  // const abShader = `
-  //   varying vec2 vWorld;
-  //   void main() {
-  //     float d = distance(vWorld, a.xy);
-  //     float t = clamp((d + b) / 200.0, 0.0, 1.0);
-  //     gl_FragColor = vec4(vec3(1.0 - t, 0.3, t), 0.9);
-  //   }
-  // `;
-  // createFunctionImage2D(scene, {
-  //   inputs: { a: point_1, b: 20.0 },
-  //   corner0: [-150, -50],
-  //   corner1: [200, 250],
-  //   filtering: "bilinear",
-  //   z: -1,
-  //   shader: abShader,
-  // });
-
-  // ✅ Opcionális argument-eknél legyen mindenhol egy hidden boolean, ami ha == true, akkor elrejti az objektumot
-  // ✅ Bekerülni az utolsó arhument-be, mint opcionális paraméterek (átnézni mindet)
-  // ✅ Automatikusan detektálni, hogy milyen fajta, ne kelljen a componentParams
-  // 🆕 El kell fogadnia másféle paramétert is, pl. curve vagy circle. Ilyen esetekben a curve-nek a pont halmazát adja vissza, azzal tudunk számolni a paraméterben.
-
-  // ✅🆕 Component params is still in use
-
-  dPoint(
-    scene,
-    point_1,
-    point_2,
-    [100, 10],
-    (a, [x, y], { xxx, yyy }) => [(x + a.x) / 2, (y + a.y) / 2 + xxx],
-    { size: 8, color: "yellow" }
-  );
-
-  // ✅🆕 Ha point_2 és point_1 az input, callback oldalon kéne érzékelni, hogy mi történik
-  //     A dPoint-ban ahogy írva van, ha [x,y] akkor csak a koordináta, de ha csak "b" akkor meg a pont legyen betéve
-  //     Alternatíva a tömbbe megani, hogy mi az amiket unpack-elni kéne
-  //     Minden paraméterre külön külön kell detektálni
-  // 🆕 Valami verbose hiba jelentés, ha valamit rosszul ad meg a user és mondjuk nem renderelhető vagy nem ismert
-
-  // ✅🆕 Distance és dScalar külön vétele, dScalar-nak kell a callback, nem a distance-nak
-  // ✅🆕 dPoint, dScalar-nál is működjön a callback mint itt: --> Distance-ra még meg kell csinálni
-  // createCustomCurve(
-  //   scene,
-  //   point_1,
-  //   point_2,
-  //   customVal,
-  //   (t, aPos, bPos, cval) => {
-  //     const mid = aPos.clone().add(bPos).multiplyScalar(0.5);
-  //     const dir = bPos.clone().sub(aPos);
-  //     const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
-  //     const y =
-  //       THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
-  //       Math.sin(t * Math.PI) * dir.length() * 0.25;
-  //     return new THREE.Vector2(x + cval, y);
-  //   },
-  //   { color: 0xdd5522 }
-  // );
-
-  // 🆕 depValue-t ki kell csomagolni alapból, így akkor a dependency system-et is át kell nézni
-  // const customVal2 = customValue([dAB], (d) => {
-  //   // return d / 2;
-  //   return [10, 10];
-  // });
-  // createCustomCurve(
-  //   scene,
-  //   point_1,
-  //   point_2,
-  //   customVal2,
-  //   (t, aPos, bPos, cusVal) => {
-  //     console.log(cusVal["__depValue"]); --> !!!!!!!!!!!!
-  //     const x = THREE.MathUtils.lerp(aPos.x, bPos.x, t);
-  //     const y =
-  //       THREE.MathUtils.lerp(aPos.y, bPos.y, t) +
-  //       Math.sin(t * Math.PI * 3) * 40;
-  //     return new THREE.Vector2(x, y);
-  //   },
-  //   { color: 0xdd5522, segments: 300 }
-  // );
-
-  // 🆕 Elkülöníteni a ThreeJS dependenciákat. Ne legyenek össze vissza a dependenciák, hogy később akár
-  //    le lehessen cserélni valami más technológiára
-  // ✅🆕 Legyen egy doksi arról (README), hogy hogyan kell lokálisan fejleszteni a projektet
 }
+
+// Prezire:
+// - Több bevezetés
+// - Egy picit gyorsabb
+
+// Plusz:
+// - Pontokat mutatva mutassam, hogy mozgatható (de a dPoint nem!)
+// - Indexet nem kell feltétlen megmutatni, kód nem olyan fontos (inkább a látvány)
+// - dPoint --> Kihangsúlyozni hogy callback alapján számolódik, elmondani mik a paraméterek és mit ad vissza
+// - curve --> Parametrikus görbét ábrázol, a callback a parametrikus görbének a függvénye
+// - customValue --> Nincs benne a bemutatóban, úgy kéne, hogy egyedi értéket adjon vissza, majd azt használja valami (pl. poligon az input, élhossz, súlypont, terület kiszámolása majd ezt egy struktúrában adja vissza, eyg szöveg kiírja terület: ..., élhossz: ... stb.)
+// - @TODO curve --> tMin és tMax állíthatósága 0 és 1 helyett
+// - @TODO pointSequence --> Inkább ebben lehessen állítani, hogy hány részre osztja fel pl. a curve-öt, mint sem curve segment
+// - Shader példába átírni, hogy a színezés legyen (https://www.shadertoy.com/view/wtVyDz) 73-77
+// - @TODO image --> Legyen megadható akár több curve is
+// - @TODO Dependency egységesítése (Tulajdonképpen csak annyi különbözik, hogy mit ad vissza)
+// - @TODO Callback-nél ellenőrzés, hogy ha hívható függvényt adunk át, akkor fusson le
+// - @TODO Point sequence és poligno callback-el generáltatni (jelenleg a customValue-val helyettesíthető)
+
+// - @TODO CustomValue lehessen input-ja az image-nek (feltételesen, pl. struktúrát ad vissza)
+// - @TODO HTML beviteli mezőket hazsnálni a dependency rendszerbe (pl. egy numINput field aminek az értékét pl. egy dPoint megkapja)
+// - @TODO Valamelyik callback hibával tér vissza, akkor objektum ne jelenjen meg és a tőle függő dolgok se jelenjenek meg

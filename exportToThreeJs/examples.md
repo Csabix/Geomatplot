@@ -247,6 +247,9 @@ It creates a point sequence from any mix of:
 
 With multiple points it also accepts a mapping function as well.
 
+> With the optional parameter `step`, you can tell which points to take into account.
+> (1 = every point, 2 = every second, etc.)
+
 #### Usage example
 
 ```ts
@@ -275,7 +278,8 @@ const curve_seq = pointSequence(scene, curve_1, {
   visible: boolean,
   color: number | string,
   markerSize: number,
-  sizeAttenuation: boolean
+  sizeAttenuation: boolean,
+  step: number
 }
 ```
 

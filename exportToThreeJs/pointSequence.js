@@ -23,7 +23,8 @@ import { addDependency } from "./dependency.js";
  *    markerSize?: number,         // default 2 (matlab scaled ~ 32px)
  *    visible?: boolean,           // default true
  *    hidden?: boolean,            // default false (alias for visible=false)
- *    sizeAttenuation?: boolean    // default false (pixel-sized points)
+ *    sizeAttenuation?: boolean,   // default false (pixel-sized points)
+ *    step?: number                // default 1 (1 = every point, 2 = every 2nd...)
  *  }
  *
  * Returns:
@@ -67,6 +68,7 @@ export function pointSequence(...args) {
   const markerSize = opts.markerSize ?? 2;
   const visible = opts.hidden ? false : opts.visible ?? true;
   const sizeAttenuation = opts.sizeAttenuation ?? false;
+  const step = Math.max(1, Math.floor(opts.step ?? 1));
 
   const group = new THREE.Group();
   const geom = new THREE.BufferGeometry();
@@ -140,11 +142,12 @@ export function pointSequence(...args) {
       return;
     }
 
-    const n = xy.length | 0;
+    const sampled = step > 1 ? xy.filter((_, i) => i % step === 0) : xy;
+    const n = sampled.length | 0;
     const arr = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) {
-      const xi = +xy[i][0] || 0;
-      const yi = +xy[i][1] || 0;
+      const xi = +sampled[i][0] || 0;
+      const yi = +sampled[i][1] || 0;
       arr[i * 3 + 0] = xi;
       arr[i * 3 + 1] = yi;
       arr[i * 3 + 2] = 0;
@@ -155,7 +158,7 @@ export function pointSequence(...args) {
     geom.computeBoundingSphere?.();
 
     group.visible = visible;
-    _currentArray = xy;
+    _currentArray = sampled;
   }
 
   function wireDependencies() {

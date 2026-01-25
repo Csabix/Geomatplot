@@ -81,16 +81,16 @@ export function draw(scene) {
     color: 0x22aa22,
     markerSize: 1.5,
     hidden: true,
+    step: 1,
   });
 
   const poly_metrics = customValue(poly_1, (poly) => {
     const verts = poly?.getVertices?.() ?? [];
     const n = verts.length;
     if (n < 3) {
-      return { elhossz: 0, sulypont: { x: 0, y: 0 }, terulet: 0 };
+      return { sulypont: { x: 0, y: 0 }, terulet: 0 };
     }
 
-    let perimeter = 0;
     let area2 = 0;
     let cx = 0;
     let cy = 0;
@@ -98,9 +98,6 @@ export function draw(scene) {
     for (let i = 0; i < n; i++) {
       const [x0, y0] = verts[i];
       const [x1, y1] = verts[(i + 1) % n];
-      const dx = x1 - x0;
-      const dy = y1 - y0;
-      perimeter += Math.hypot(dx, dy);
 
       const cross = x0 * y1 - x1 * y0;
       area2 += cross;
@@ -122,7 +119,7 @@ export function draw(scene) {
       centroid = { x: sx / n, y: sy / n };
     }
 
-    return { elhossz: perimeter, sulypont: centroid, terulet: Math.abs(area) };
+    return { sulypont: centroid, terulet: Math.abs(area) };
   });
 
   const label_1 = text(
@@ -132,11 +129,10 @@ export function draw(scene) {
     (metrics) => {
       const data = metrics?.__depValue ?? metrics;
       if (!data) return "";
-      const elhossz = Number(data.elhossz ?? 0).toFixed(2);
       const sx = Number(data.sulypont?.x ?? 0).toFixed(2);
       const sy = Number(data.sulypont?.y ?? 0).toFixed(2);
       const terulet = Number(data.terulet ?? 0).toFixed(2);
-      return `Elhossz: ${elhossz} u | Sulypont: (${sx} u, ${sy} u) | Terulet: ${terulet} u^2`;
+      return `Súlypont: (${sx} u, ${sy} u) | Terület: ${terulet} u^2`;
     },
     {
       color: 0x0000ff,
@@ -185,10 +181,10 @@ export function draw(scene) {
 // - Indexet nem kell feltétlen megmutatni, kód nem olyan fontos (inkább a látvány)
 // - dPoint --> Kihangsúlyozni hogy callback alapján számolódik, elmondani mik a paraméterek és mit ad vissza
 // - curve --> Parametrikus görbét ábrázol, a callback a parametrikus görbének a függvénye
-// - customValue --> Nincs benne a bemutatóban, úgy kéne, hogy egyedi értéket adjon vissza, majd azt használja valami (pl. poligon az input, élhossz, súlypont, terület kiszámolása majd ezt egy struktúrában adja vissza, eyg szöveg kiírja terület: ..., élhossz: ... stb.)
+// ✅ - customValue --> Nincs benne a bemutatóban, úgy kéne, hogy egyedi értéket adjon vissza, majd azt használja valami (pl. poligon az input, élhossz, súlypont, terület kiszámolása majd ezt egy struktúrában adja vissza, eyg szöveg kiírja terület: ..., élhossz: ... stb.)
 
 // - @TODO curve --> tMin és tMax állíthatósága 0 és 1 helyett
-// - @TODO pointSequence --> Inkább ebben lehessen állítani, hogy hány részre osztja fel pl. a curve-öt, mint sem curve segment
+// ✅ - @TODO pointSequence --> Inkább ebben lehessen állítani, hogy hány részre osztja fel pl. a curve-öt, mint sem curve segment
 // ✅ - @TODO Shader példába átírni, hogy a színezés legyen (https://www.shadertoy.com/view/wtVyDz) 73-77
 // - @TODO image --> Legyen megadható akár több curve is
 // - @TODO Dependency egységesítése (Tulajdonképpen csak annyi különbözik, hogy mit ad vissza)

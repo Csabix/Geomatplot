@@ -80,7 +80,7 @@ export function draw(scene) {
   const curve_seq = pointSequence(scene, curve, {
     color: 0x22aa22,
     markerSize: 1.5,
-    hidden: true,
+    hidden: false,
     step: 1,
   });
 
@@ -122,25 +122,21 @@ export function draw(scene) {
     return { sulypont: centroid, terulet: Math.abs(area) };
   });
 
-  const label_1 = text(
-    scene,
-    point_1,
-    poly_metrics,
-    (metrics) => {
-      const data = metrics?.__depValue ?? metrics;
-      if (!data) return "";
-      const sx = Number(data.sulypont?.x ?? 0).toFixed(2);
-      const sy = Number(data.sulypont?.y ?? 0).toFixed(2);
-      const terulet = Number(data.terulet ?? 0).toFixed(2);
-      return `Súlypont: (${sx} u, ${sy} u) | Terület: ${terulet} u^2`;
-    },
-    {
-      color: 0x0000ff,
-      fontSize: 200,
-      offset: { x: 10, y: 10 },
-      hidden: false,
-    },
-  );
+  function textFun(metrics) {
+    const data = metrics?.__depValue ?? metrics;
+    if (!data) return "";
+    const sx = Number(data.sulypont?.x ?? 0).toFixed(2);
+    const sy = Number(data.sulypont?.y ?? 0).toFixed(2);
+    const terulet = Number(data.terulet ?? 0).toFixed(2);
+    return `Súlypont: (${sx} u, ${sy} u) | Terület: ${terulet} u^2`;
+  }
+
+  const label_1 = text(scene, point_1, poly_metrics, textFun, {
+    color: 0x0000ff,
+    fontSize: 200,
+    offset: { x: 10, y: 10 },
+    hidden: false,
+  });
 
   const shader = `
   varying vec2 vWorld;
@@ -162,14 +158,14 @@ export function draw(scene) {
   }
 `;
 
-  // const img_1 = createFunctionImage2D(scene, {
-  //   inputs: { curve_seq },
-  //   corner0: [-150, -50],
-  //   corner1: [200, 250],
-  //   filtering: "bilinear",
-  //   z: -1,
-  //   shader,
-  // });
+  const img_1 = createFunctionImage2D(scene, {
+    inputs: { curve_seq },
+    corner0: [-150, -50],
+    corner1: [200, 250],
+    filtering: "bilinear",
+    z: -1,
+    shader,
+  });
 }
 
 // Prezire:
@@ -188,7 +184,7 @@ export function draw(scene) {
 // ✅ - @TODO Shader példába átírni, hogy a színezés legyen (https://www.shadertoy.com/view/wtVyDz) 73-77
 // - @TODO image --> Legyen megadható akár több curve is
 // - @TODO Dependency egységesítése (Tulajdonképpen csak annyi különbözik, hogy mit ad vissza)
-// - @TODO Callback-nél ellenőrzés, hogy ha hívható függvényt adunk át, akkor fusson le
+// ✅ - @TODO Callback-nél ellenőrzés, hogy ha hívható függvényt adunk át, akkor fusson le
 // - @TODO Point sequence és poligno callback-el generáltatni (jelenleg a customValue-val helyettesíthető)
 
 // - @TODO CustomValue lehessen input-ja az image-nek (feltételesen, pl. struktúrát ad vissza)

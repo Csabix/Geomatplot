@@ -91,7 +91,7 @@ function extractValue(obj) {
      * Get the current value (may be undefined if callback failed).
      */
     getValue() {
-      return wrapValue(currentValue, self);
+      return currentValue;
     },
 
     /**
@@ -132,7 +132,6 @@ function extractValue(obj) {
       currentValue = undefined;
       notify(undefined);
     }
-    wrapValue.sourceRef = self;
     const updater = depSys
       ? depSys.updateDependencies.bind(depSys)
       : updateDependencies;
@@ -162,14 +161,6 @@ function extractValue(obj) {
 
   // --- Public API ---------------------------------------------------------
   return self;
-}
-
-function wrapValue(v, sourceRef) {
-  // Always return a wrapper object so consumers can find the source and unwrap safely.
-  return {
-    __depSource: sourceRef,
-    __depValue: v,
-  };
 }
 
 function isPolygon(o) {

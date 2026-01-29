@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl - geometry - catmull spline editor</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <style>
+      html {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        background-color: #f0f0f0;
+        color: #444;
+        height: 100%;
+        margin: 0;
+      }
+
+      canvas {
+        display: block;
+      }
+
+      #container {
+        overflow: hidden;
+        max-width: 100vw;
+        max-height: 100vh;
+        position: fixed;
+        inset: 0;
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        background: repeating-linear-gradient(
+            0deg,
+            #e6e6e6 0,
+            #e6e6e6 1px,
+            transparent 1px,
+            transparent 20px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            #e6e6e6 0,
+            #e6e6e6 1px,
+            transparent 1px,
+            transparent 20px
+          ),
+          #ffffff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+
+    <!-- TODO: Should check if it works without imports here -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.168.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.168.0/examples/jsm/",
+          "./initialization.js": "./initialization.js",
+          "./draw.js": "./draw.js",
+          "./point.js": "./point.js",
+          "./curve.js": "./curve.js",
+          "./circle.js": "./circle.js",
+          "./dragging.js": "./dragging.js",
+          "./distance.js": "./distance.js",
+          "./segment.js": "./segment.js",
+          "./pointSequence.js": "./pointSequence.js",
+          "./polygon.js": "./polygon.js",
+          "./text.js": "./text.js",
+          "./image.js": "./image.js",
+          "./customValue.js": "./customValue.js"
+        }
+      }
+    </script>
+
+    <script type="module">
+      import { init } from "./initialization.js";
+      import { draw } from "./code.js";
+
+      let { container, camera, scene, renderer } = init();
+
+      draw(scene);
+
+      // @TODO: Globális scene, ehhez kell egy globális SceneObject wrapper (új osztály)
+      // A dependency rendszer példányosíthatónak kell lennie
+      // Egy dependency rendszerhez több megjelenítő is tartozhat
+
+      renderer.render(scene, camera);
+    </script>
+  </body>
+</html>

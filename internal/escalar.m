@@ -24,12 +24,16 @@ methods
     end
     function c = mtimes(a,b)
         arguments
-            a   (1,1) {mustBeA(a,["escalar","dscalar","numeric"])}
-            b   (1,1) {mustBeA(b,["escalar","dscalar","numeric"])}
+            a   (1,1) {mustBeA(a,["escalar","dscalar","evector","dvector","numeric"])}
+            b   (1,1) {mustBeA(b,["escalar","dscalar","evector","dvector","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
         [parent,inputs,constants,expression] = expression_base.assembleExpression(a,b,'*',[1 1]);
-        c = escalar(parent,inputs,constants,expression);
+        if isa(a,'evector') || isa(b,'evector') ||isa(a,'dvector') || isa(b,'dvector')
+            c = evector(parent,inputs,constants,expression);
+        else
+            c = escalar(parent,inputs,constants,expression);
+        end
     end
     function c = mrdivide(a,b)
         arguments

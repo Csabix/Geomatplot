@@ -25,8 +25,8 @@ methods
     end
     function c = mtimes(a,b)
         arguments
-            a   (1,1) {mustBeA(a,["escalar","dscalar","numeric"])}
-            b   (1,1) {mustBeA(b,["escalar","dscalar","numeric"])}
+            a   (1,1) {mustBeA(a,["escalar","dscalar","evector","dvector","numeric"])}
+            b   (1,1) {mustBeA(b,["escalar","dscalar","evector","dvector","numeric"])}
         end
         expression_base.warning_if_unused(nargout);
         if isa(a,'dscalar'); a = escalar.fromDrawing(a);
